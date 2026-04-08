@@ -1,34 +1,43 @@
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+/* App-level animations and transitions */
+.page-enter {
+  animation: slide-up 0.4s ease-out forwards;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Recording pulse */
+@keyframes rec-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+  50% { box-shadow: 0 0 0 12px rgba(255, 59, 48, 0); }
 }
 
-.App-header {
-    background-color: #0f0f10;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+.animate-rec-pulse {
+  animation: rec-pulse 1.5s ease-in-out infinite;
 }
 
-.App-link {
-    color: #61dafb;
+/* Slider track colors */
+.slider-vocals [data-orientation="vertical"] > span:first-child {
+  background: #00E5FF !important;
+}
+.slider-guitar [data-orientation="vertical"] > span:first-child {
+  background: #8A2BE2 !important;
+}
+.slider-bass [data-orientation="vertical"] > span:first-child {
+  background: #FF3B30 !important;
+}
+.slider-drums [data-orientation="vertical"] > span:first-child {
+  background: #FFD60A !important;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
+/* Waveform bars */
+.waveform-bar {
+  transition: height 0.15s ease;
+}
+
+/* Bottom nav safe area */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+/* Video overlay */
+.video-overlay {
+  background: linear-gradient(to top, rgba(5, 5, 10, 0.9) 0%, transparent 50%);
 }
