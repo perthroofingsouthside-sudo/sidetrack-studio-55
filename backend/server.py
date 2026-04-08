@@ -36,11 +36,45 @@ RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY', '')
 RAPIDAPI_HOST = os.environ.get('RAPIDAPI_HOST', 'shazam.p.rapidapi.com')
 REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '')
 
+# Spotify
+SPOTIFY_CLIENT_ID = os.environ.get('SPOTIFY_CLIENT_ID', '')
+SPOTIFY_CLIENT_SECRET = os.environ.get('SPOTIFY_CLIENT_SECRET', '')
+SPOTIFY_REDIRECT_URI = os.environ.get('SPOTIFY_REDIRECT_URI', '')
+
 # Set Replicate API token in environment for the library
 if REPLICATE_API_TOKEN:
     os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
 
 DEMUCS_MODEL = "cjwbw/demucs:25a173108cff36ef9f80f854c162d01df9e6528be175794b81158fa03836d953"
+
+# Spotify client credentials token (for search/browse without user login)
+_spotify_cc_token = {"token": None, "expires": 0}
+
+def get_spotify_client_token():
+    """Get a client credentials token for non-user Spotify API calls."""
+    import time
+    now = time.time()
+    if _spotify_cc_token["token"] and now < _spotify_cc_token["expires"]:
+        return _spotify_cc_token["token"]
+
+    if not SPOTIFY_CLIENT_ID or not SPOTIFY_CLIENT_SECRET:
+        return None
+
+    try:
+        resp = requests.post(
+            "https://accounts.spotify.com/api/token",
+            data={"grant_type": "client_credentials"},
+            auth=(SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET),
+            timeout=10
+        )
+        if resp.status_code == 200:
+            data = resp.json()
+            _spotify_cc_token["token"] = data["access_token"]
+            _spotify_cc_token["expires"] = now + data.get("expires_in", 3600) - 60
+            return data["access_token"]
+    except Exception as e:
+        logger.error(f"Spotify client credentials error: {e}")
+    return None
 
 # --- Models ---
 class SongResult(BaseModel):
@@ -402,6 +436,242 @@ async def save_recording_audio(recording_id: str, file: UploadFile = File(...)):
 async def list_songs():
     songs = await db.songs.find({}, {"_id": 0}).sort("created_at", -1).to_list(50)
     return {"success": True, "songs": songs}
+
+# --- Spotify Streaming Endpoints ---
+
+# Spotify OAuth
+@api_router.get("/spotify/login")
+async def spotify_login():
+    if not SPOTIFY_CLIENT_ID:
+        raise HTTPException(status_code=503, detail="Spotify Client ID not configured")
+    scopes = "user-read-playback-state user-modify-playback-state user-read-private streaming user-read-email"
+    auth_url = (
+        f"https://accounts.spotify.com/authorize"
+        f"?client_id={SPOTIFY_CLIENT_ID}"
+        f"&response_type=code"
+        f"&redirect_uri={SPOTIFY_REDIRECT_URI}"
+        f"&scope={scopes}"
+    )
+    return {"auth_url": auth_url}
+
+@api_router.post("/spotify/callback")
+async def spotify_callback(code: str = Form(...)):
+    try:
+        resp = requests.post(
+            "https://accounts.spotify.com/api/token",
+            data={
+                "grant_type": "authorization_code",
+                "code": code,
+                "redirect_uri": SPOTIFY_REDIRECT_URI,
+                "client_id": SPOTIFY_CLIENT_ID,
+                "client_secret": SPOTIFY_CLIENT_SECRET,
+            },
+            timeout=10
+        )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=400, detail="Token exchange failed")
+        data = resp.json()
+        return {
+            "access_token": data["access_token"],
+            "refresh_token": data.get("refresh_token", ""),
+            "expires_in": data.get("expires_in", 3600)
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/spotify/refresh")
+async def spotify_refresh(refresh_token: str = Form(...)):
+    try:
+        resp = requests.post(
+            "https://accounts.spotify.com/api/token",
+            data={
+                "grant_type": "refresh_token",
+                "refresh_token": refresh_token,
+                "client_id": SPOTIFY_CLIENT_ID,
+                "client_secret": SPOTIFY_CLIENT_SECRET,
+            },
+            timeout=10
+        )
+        if resp.status_code != 200:
+            raise HTTPException(status_code=400, detail="Token refresh failed")
+        data = resp.json()
+        return {"access_token": data["access_token"], "expires_in": data.get("expires_in", 3600)}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.get("/spotify/me")
+async def spotify_me(token: str):
+    resp = requests.get(
+        "https://api.spotify.com/v1/me",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to get profile")
+    return resp.json()
+
+# Search (works with client credentials or user token)
+@api_router.get("/spotify/search")
+async def spotify_search(q: str, type: str = "track", limit: int = 20, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured. Add Client ID and Secret.")
+    resp = requests.get(
+        "https://api.spotify.com/v1/search",
+        params={"q": q, "type": type, "limit": limit},
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Search failed")
+    return resp.json()
+
+# Browse - New Releases
+@api_router.get("/spotify/new-releases")
+async def spotify_new_releases(limit: int = 20, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        "https://api.spotify.com/v1/browse/new-releases",
+        params={"limit": limit},
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch new releases")
+    return resp.json()
+
+# Browse - Featured Playlists
+@api_router.get("/spotify/featured-playlists")
+async def spotify_featured(limit: int = 20, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        "https://api.spotify.com/v1/browse/featured-playlists",
+        params={"limit": limit},
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch playlists")
+    return resp.json()
+
+# Browse - Categories
+@api_router.get("/spotify/categories")
+async def spotify_categories(limit: int = 20, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        "https://api.spotify.com/v1/browse/categories",
+        params={"limit": limit},
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch categories")
+    return resp.json()
+
+# Get playlist tracks
+@api_router.get("/spotify/playlists/{playlist_id}")
+async def spotify_playlist(playlist_id: str, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        f"https://api.spotify.com/v1/playlists/{playlist_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch playlist")
+    return resp.json()
+
+# Get album
+@api_router.get("/spotify/albums/{album_id}")
+async def spotify_album(album_id: str, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        f"https://api.spotify.com/v1/albums/{album_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch album")
+    return resp.json()
+
+# Get artist
+@api_router.get("/spotify/artists/{artist_id}")
+async def spotify_artist(artist_id: str, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        f"https://api.spotify.com/v1/artists/{artist_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch artist")
+    return resp.json()
+
+# Get artist top tracks
+@api_router.get("/spotify/artists/{artist_id}/top-tracks")
+async def spotify_artist_top(artist_id: str, token: str = ""):
+    access_token = token or get_spotify_client_token()
+    if not access_token:
+        raise HTTPException(status_code=503, detail="Spotify not configured")
+    resp = requests.get(
+        f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks",
+        params={"market": "US"},
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch top tracks")
+    return resp.json()
+
+# Playback control - play
+@api_router.post("/spotify/play")
+async def spotify_play(token: str = Form(...), track_uri: str = Form(...), device_id: str = Form(""), position_ms: int = Form(0)):
+    data = {"uris": [track_uri], "position_ms": position_ms}
+    params = {}
+    if device_id:
+        params["device_id"] = device_id
+    resp = requests.put(
+        "https://api.spotify.com/v1/me/player/play",
+        json=data,
+        params=params,
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=10
+    )
+    if resp.status_code not in (200, 204):
+        raise HTTPException(status_code=resp.status_code, detail=f"Play failed: {resp.text}")
+    return {"status": "playing"}
+
+# Playback control - pause
+@api_router.post("/spotify/pause")
+async def spotify_pause(token: str = Form(...), device_id: str = Form("")):
+    params = {}
+    if device_id:
+        params["device_id"] = device_id
+    resp = requests.put(
+        "https://api.spotify.com/v1/me/player/pause",
+        params=params,
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=10
+    )
+    if resp.status_code not in (200, 204):
+        raise HTTPException(status_code=resp.status_code, detail="Pause failed")
+    return {"status": "paused"}
 
 # Include router
 app.include_router(api_router)

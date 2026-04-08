@@ -1,8 +1,9 @@
-import { Home, Music2, Mic2, Share2 } from "lucide-react";
+import { Home, Music2, Mic2, Share2, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
-  { key: "home", icon: Home, label: "Discover" },
+  { key: "stream", icon: Radio, label: "Stream", alwaysEnabled: true },
+  { key: "home", icon: Home, label: "Discover", alwaysEnabled: true },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
   { key: "edit", icon: Share2, label: "Share" },
@@ -17,7 +18,7 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
       <div className="flex items-center justify-around max-w-lg mx-auto h-16">
         {NAV_ITEMS.map((item) => {
           const isActive = currentView === item.key;
-          const isDisabled = item.key !== "home" && !hasSong;
+          const isDisabled = !item.alwaysEnabled && item.key !== "home" && !hasSong;
 
           return (
             <Button
