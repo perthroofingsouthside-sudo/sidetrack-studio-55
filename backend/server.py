@@ -318,13 +318,14 @@ async def separate_stems(song_id: str, file: UploadFile = File(None)):
 
             logger.info(f"Demucs output: {output}")
 
-            # Output is a dict with bass, drums, other, vocals URLs
+            # Output is a dict with bass, drums, other, vocals, piano URLs
             update_data = {
                 "status": "completed",
-                "vocals_url": str(output.get("vocals", "")),
-                "bass_url": str(output.get("bass", "")),
-                "drums_url": str(output.get("drums", "")),
-                "guitar_url": str(output.get("other", "")),
+                "vocals_url": str(output.get("vocals", "") or ""),
+                "bass_url": str(output.get("bass", "") or ""),
+                "drums_url": str(output.get("drums", "") or ""),
+                "guitar_url": str(output.get("other", "") or output.get("guitar", "") or ""),
+                "piano_url": str(output.get("piano", "") or ""),
                 "original_url": ""
             }
 
