@@ -71,7 +71,7 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
       if (!window.Spotify) return;
       try {
         const player = new window.Spotify.Player({
-          name: "AuraSplit Player",
+          name: "SIDETRACK Studios Player",
           getOAuthToken: (cb) => cb(spotifyToken),
           volume: 0.5,
         });
@@ -177,10 +177,10 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
       {/* Header */}
       <div className="px-4 pt-6 pb-2">
         <h1 className="font-['Outfit'] text-2xl font-extrabold tracking-tight">
-          <span className="text-white">Aura</span>
-          <span className="text-[#8A2BE2]">Stream</span>
+          <span className="text-white">SIDE</span>
+          <span className="text-[#8A2BE2]">TRACK</span>
         </h1>
-        <p className="text-[#606070] text-xs mt-1">Discover, play, and create</p>
+        <p className="text-[#606070] text-xs mt-1">studios | Discover, play, and create</p>
       </div>
 
       {/* Search Bar */}

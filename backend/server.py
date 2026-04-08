@@ -220,7 +220,7 @@ def get_mock_lyrics(title: str, artist: str) -> dict:
 # --- Routes ---
 @api_router.get("/")
 async def root():
-    return {"message": "AuraSplit API"}
+    return {"message": "SIDETRACK Studios API"}
 
 @api_router.get("/health")
 async def health():

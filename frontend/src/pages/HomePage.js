@@ -96,15 +96,23 @@ export default function HomePage({ onSongRecognized }) {
 
       {/* Logo */}
       <div className="relative z-10 mb-12 animate-fade-in">
-        <img
-          src="https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/9ff3f03723ec3dfaef56eca4f3f8c86df3e36e5553a4527f807c0cbe78f4fb7a.png"
-          alt="AuraSplit"
-          className="w-16 h-16 mx-auto mb-4"
-        />
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#8A2BE2]/10 border border-[#8A2BE2]/30 flex items-center justify-center glow-violet">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <path d="M8 30V10L16 6V34L8 30Z" fill="#8A2BE2"/>
+            <path d="M18 28V12L26 8V32L18 28Z" fill="#00E5FF" opacity="0.8"/>
+            <path d="M28 26V14L34 11V29L28 26Z" fill="#8A2BE2" opacity="0.6"/>
+            <circle cx="12" cy="32" r="2" fill="#8A2BE2"/>
+            <circle cx="22" cy="30" r="2" fill="#00E5FF"/>
+            <circle cx="31" cy="28" r="2" fill="#8A2BE2" opacity="0.6"/>
+          </svg>
+        </div>
         <h1 className="font-['Outfit'] text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-center">
-          <span className="text-white">Aura</span>
-          <span className="text-[#8A2BE2] glow-text-violet">Split</span>
+          <span className="text-white">SIDE</span>
+          <span className="text-[#8A2BE2] glow-text-violet">TRACK</span>
         </h1>
+        <p className="text-[#606070] text-[10px] mt-1 text-center font-['Manrope'] uppercase tracking-[0.3em]">
+          studios
+        </p>
         <p className="text-[#A0A0B0] text-sm mt-2 text-center font-['Manrope']">
           Recognize. Separate. Create.
         </p>

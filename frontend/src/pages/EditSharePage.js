@@ -48,7 +48,7 @@ export default function EditSharePage({ recording, song, onBack }) {
     if (!recording?.url) return;
     const a = document.createElement("a");
     a.href = recording.url;
-    a.download = `aurasplit-${recording.type}-${Date.now()}.${recording.type === "video" ? "webm" : "webm"}`;
+    a.download = `sidetrack-${recording.type}-${Date.now()}.${recording.type === "video" ? "webm" : "webm"}`;
     a.click();
     toast.success("Download started!");
   };
@@ -60,8 +60,8 @@ export default function EditSharePage({ recording, song, onBack }) {
           type: recording.blob.type,
         });
         await navigator.share({
-          title: `My cover of ${song?.title || "a song"}`,
-          text: `Check out my cover on AuraSplit!`,
+          title: `My cover of ${song?.title || "a song"} | SIDETRACK Studios`,
+          text: `Check out my cover on SIDETRACK Studios!`,
           files: [file],
         });
         toast.success("Shared successfully!");
