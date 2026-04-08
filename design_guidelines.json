@@ -1,0 +1,126 @@
+{
+  "project_name": "AuraSplit",
+  "app_type": "mobile_web_app",
+  "theme": "dark",
+  "archetype": "Archetype 7: Electric & Neon (Sophisticated Variant)",
+  "design_philosophy": {
+    "core_principles": [
+      "Frictionless, familiar, brand-distinct experience",
+      "Slick and sharp design with black, indigo, and violet trims",
+      "High visual hierarchy focusing on the recording and mixing experience",
+      "Responsive grids, mobile-first, clear navigation hierarchy"
+    ],
+    "emotion": "Creative, modern, focused, and professional."
+  },
+  "typography": {
+    "headings": {
+      "family": "Outfit, sans-serif",
+      "weight": "800",
+      "tracking": "tracking-tighter",
+      "sizes": {
+        "h1": "text-4xl sm:text-5xl lg:text-6xl",
+        "h2": "text-2xl sm:text-3xl lg:text-4xl",
+        "h3": "text-xl sm:text-2xl"
+      }
+    },
+    "body": {
+      "family": "Manrope, sans-serif",
+      "weight": "400",
+      "sizes": {
+        "base": "text-base",
+        "small": "text-sm",
+        "tiny": "text-xs"
+      }
+    },
+    "labels": {
+      "style": "uppercase tracking-[0.2em] text-xs font-bold"
+    }
+  },
+  "colors": {
+    "background": "#05050A",
+    "surface": "#12121A",
+    "surface_glass": "rgba(18, 18, 26, 0.6)",
+    "primary": "#8A2BE2",
+    "primary_hover": "#9D4CDD",
+    "secondary": "#4B0082",
+    "accent": "#00E5FF",
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A0A0B0",
+      "muted": "#606070"
+    },
+    "stems": {
+      "vocals": "#00E5FF",
+      "guitar": "#8A2BE2",
+      "bass": "#FF3B30",
+      "drums": "#FFD60A"
+    },
+    "borders": "rgba(255, 255, 255, 0.1)"
+  },
+  "layout_and_spacing": {
+    "scale": "Generous (p-4 to p-8 for containers)",
+    "grid_system": "Control Room Grid for mixers, Tetris Grid for libraries.",
+    "radius": "rounded-2xl for main cards, rounded-full for action buttons, sharp edges for inner elements.",
+    "borders": "1px solid border-white/10 to define surfaces against the dark background."
+  },
+  "surfaces": {
+    "glassmorphism": {
+      "usage": ["Sticky Headers", "Floating Player", "Stem Mixer Overlay"],
+      "classes": "backdrop-blur-xl bg-[#12121A]/60 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    },
+    "solid": {
+      "usage": ["Main Background", "Cards"],
+      "classes": "bg-[#12121A] border border-white/5"
+    }
+  },
+  "components_strategy": {
+    "navigation": "Bottom tab bar for mobile with glassmorphic background, Top header with glassmorphism for settings/profile.",
+    "buttons": "Primary CTA (Record/Recognize) is a massive rounded-full button with layered neon drop-shadows. Secondary buttons have 1px solid borders with subtle hover lifts.",
+    "stem_mixer": "Vertical sliders utilizing Shadcn Slider primitive, custom-colored tracks mapped to stem colors (Cyan, Violet, Red, Yellow). Circular mute/solo toggles.",
+    "split_screen": "Flex container splitting view equally. Left: Guitar chords (large font, primary colored chords). Right: Lyrics (scrolling, active line highlighted).",
+    "waveform_editor": "Interactive visualizer/waveform with draggable trim handles (left and right), custom SVGs or recharts.",
+    "video_player": "Takes up upper half of screen or full background (with overlay), ensuring camera feed is visible while recording."
+  },
+  "media": {
+    "images": [
+      {
+        "category": "app_logo",
+        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/9ff3f03723ec3dfaef56eca4f3f8c86df3e36e5553a4527f807c0cbe78f4fb7a.png",
+        "description": "Aura music app logo. Sharp geometric abstract soundwave."
+      },
+      {
+        "category": "background_abstract",
+        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/010bdac35ab588a481a8fe0ff8a878dcb02d63ab3eebc1beef99b03a1a559b25.png",
+        "description": "Abstract deep space or dark studio background with neon violet soundwaves."
+      },
+      {
+        "category": "audio_recording_bg",
+        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/36d41a6d21a45c93db59557cddf90c290588be4535923e962573bd1b1c411668.png",
+        "description": "High-end vintage microphone illuminated by moody neon violet and cyan lights."
+      },
+      {
+        "category": "user_video_placeholder",
+        "url": "https://images.unsplash.com/photo-1748357641562-057e48a8ebd5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBwbGF5aW5nJTIwZWxlY3RyaWMlMjBndWl0YXIlMjBkYXJrJTIwc3R1ZGlvfGVufDB8fHx8MTc3NTYzOTYzNXww&ixlib=rb-4.1.0&q=85",
+        "description": "Person playing electric guitar in dark studio - to be used as placeholder for the camera video feed."
+      }
+    ],
+    "icons_library": "lucide-react for standard UI (play, pause, mic, video, share, trim, settings). Use react-icons (FaGuitar, FaDrum, FaMicrophone) for specific instrument icons if needed."
+  },
+  "interactions_and_motion": {
+    "hover_states": "Buttons use `-translate-y-1` and intense box-shadow glows on hover.",
+    "transitions": "Smooth transitions on all interactive elements: `transition-all duration-300 ease-in-out`.",
+    "visualizer": "Pulsing animations for recognizing songs. Scrolling animations for lyrics and chords.",
+    "accessibility": "respect prefers-reduced-motion. High contrast on focus states."
+  },
+  "testing": {
+    "attributes": [
+      "All interactive elements MUST include data-testid attribute.",
+      "e.g., data-testid='shazam-button', data-testid='stem-vocal-mute', data-testid='record-video-toggle'"
+    ]
+  },
+  "views_breakdown": {
+    "home": "Center big 'Tap to Recognize' button with animated radar rings.",
+    "player_studio": "Top: Camera feed / Abstract bg. Middle: Stem Mixer (4 vertical sliders). Bottom: Split-screen (Chords | Lyrics). Floating Action Button: Record.",
+    "edit_share": "Waveform view. Trim handles. Social media share buttons."
+  }
+}
