@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Play, Pause, SkipBack, Mic, Video } from "lucide-react";
+import { Play, Pause, SkipBack, Mic, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API } from "@/App";
@@ -11,29 +11,41 @@ export default function PlayerStudio({ song, onRecord }) {
   const [lyrics, setLyrics] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
+  const [stems, setStems] = useState(null);
+  const [separating, setSeparating] = useState(false);
   const [stemVolumes, setStemVolumes] = useState({
-    vocals: 80,
-    guitar: 80,
-    bass: 80,
-    drums: 80,
+    vocals: 80, guitar: 80, bass: 80, drums: 80,
   });
   const [mutedStems, setMutedStems] = useState({
-    vocals: false,
-    guitar: false,
-    bass: false,
-    drums: false,
+    vocals: false, guitar: false, bass: false, drums: false,
   });
   const intervalRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const audioRefs = useRef({ vocals: null, guitar: null, bass: null, drums: null });
+  const pollRef = useRef(null);
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (song?.id) {
       fetchLyrics();
-      fetchStems();
+      checkExistingStems();
     }
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+      Object.values(audioRefs.current).forEach((a) => { if (a) { a.pause(); a.src = ""; } });
     };
   }, [song?.id]);
+
+  // Apply volume/mute changes to audio elements
+  useEffect(() => {
+    Object.keys(audioRefs.current).forEach((stem) => {
+      const el = audioRefs.current[stem];
+      if (el) {
+        el.volume = mutedStems[stem] ? 0 : stemVolumes[stem] / 100;
+      }
+    });
+  }, [stemVolumes, mutedStems]);
 
   const fetchLyrics = async () => {
     try {
@@ -44,24 +56,105 @@ export default function PlayerStudio({ song, onRecord }) {
     }
   };
 
-  const fetchStems = async () => {
+  const checkExistingStems = async () => {
     try {
-      await axios.post(`${API}/songs/${song.id}/separate`);
+      const res = await axios.get(`${API}/songs/${song.id}/stems`);
+      if (res.data.success && res.data.stems?.status === "completed" && res.data.stems.vocals_url?.startsWith("http")) {
+        setStems(res.data.stems);
+        initAudioPlayers(res.data.stems);
+      }
     } catch (err) {
-      // Stems separation may fail silently - mixer still works as UI
+      // No existing stems
+    }
+  };
+
+  const initAudioPlayers = (stemData) => {
+    const mapping = { vocals: "vocals_url", guitar: "guitar_url", bass: "bass_url", drums: "drums_url" };
+    Object.entries(mapping).forEach(([key, urlKey]) => {
+      if (stemData[urlKey] && stemData[urlKey].startsWith("http")) {
+        const audio = new Audio(stemData[urlKey]);
+        audio.crossOrigin = "anonymous";
+        audio.volume = mutedStems[key] ? 0 : stemVolumes[key] / 100;
+        audioRefs.current[key] = audio;
+      }
+    });
+  };
+
+  const handleUploadForSeparation = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      toast.error("File too large. Max 50MB.");
+      return;
+    }
+
+    setSeparating(true);
+    toast.info("Uploading audio for stem separation...");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await axios.post(`${API}/songs/${song.id}/separate`, formData);
+
+      if (res.data.success) {
+        if (res.data.cached) {
+          setStems(res.data.stems);
+          initAudioPlayers(res.data.stems);
+          toast.success("Stems loaded from cache!");
+          setSeparating(false);
+        } else {
+          toast.info("Separation in progress... This may take 1-3 minutes.");
+          // Poll for completion
+          pollRef.current = setInterval(async () => {
+            try {
+              const pollRes = await axios.get(`${API}/songs/${song.id}/stems`);
+              if (pollRes.data.success && pollRes.data.stems?.status === "completed") {
+                clearInterval(pollRef.current);
+                setStems(pollRes.data.stems);
+                initAudioPlayers(pollRes.data.stems);
+                setSeparating(false);
+                toast.success("Stems separated successfully!");
+              } else if (pollRes.data.stems?.status === "failed") {
+                clearInterval(pollRef.current);
+                setSeparating(false);
+                toast.error("Separation failed: " + (pollRes.data.stems?.error || "Unknown error"));
+              }
+            } catch (err) { /* keep polling */ }
+          }, 5000);
+        }
+      }
+    } catch (err) {
+      setSeparating(false);
+      const detail = err.response?.data?.detail || "Separation failed";
+      toast.error(detail);
     }
   };
 
   const togglePlay = useCallback(() => {
+    const hasRealStems = stems && stems.vocals_url?.startsWith("http");
+
     if (isPlaying) {
       clearInterval(intervalRef.current);
+      if (hasRealStems) {
+        Object.values(audioRefs.current).forEach((a) => a?.pause());
+      }
       setIsPlaying(false);
     } else {
       setIsPlaying(true);
+      if (hasRealStems) {
+        Object.values(audioRefs.current).forEach((a) => {
+          if (a) { a.currentTime = currentTime; a.play().catch(() => {}); }
+        });
+      }
       intervalRef.current = setInterval(() => {
         setCurrentTime((prev) => {
-          if (prev >= 92) {
+          const dur = hasRealStems ? (audioRefs.current.vocals?.duration || 92) : 92;
+          if (prev >= dur) {
             clearInterval(intervalRef.current);
+            if (hasRealStems) Object.values(audioRefs.current).forEach((a) => a?.pause());
             setIsPlaying(false);
             return 0;
           }
@@ -69,16 +162,25 @@ export default function PlayerStudio({ song, onRecord }) {
         });
       }, 500);
     }
-  }, [isPlaying]);
+  }, [isPlaying, stems, currentTime]);
 
   const handleRestart = useCallback(() => {
     setCurrentTime(0);
+    const hasRealStems = stems && stems.vocals_url?.startsWith("http");
+    if (hasRealStems) {
+      Object.values(audioRefs.current).forEach((a) => { if (a) a.currentTime = 0; });
+    }
     if (!isPlaying) {
       setIsPlaying(true);
+      if (hasRealStems) {
+        Object.values(audioRefs.current).forEach((a) => { if (a) a.play().catch(() => {}); });
+      }
       intervalRef.current = setInterval(() => {
         setCurrentTime((prev) => {
-          if (prev >= 92) {
+          const dur = hasRealStems ? (audioRefs.current.vocals?.duration || 92) : 92;
+          if (prev >= dur) {
             clearInterval(intervalRef.current);
+            if (hasRealStems) Object.values(audioRefs.current).forEach((a) => a?.pause());
             setIsPlaying(false);
             return 0;
           }
@@ -86,7 +188,7 @@ export default function PlayerStudio({ song, onRecord }) {
         });
       }, 500);
     }
-  }, [isPlaying]);
+  }, [isPlaying, stems]);
 
   const handleVolumeChange = useCallback((stem, value) => {
     setStemVolumes((prev) => ({ ...prev, [stem]: value }));
@@ -98,7 +200,9 @@ export default function PlayerStudio({ song, onRecord }) {
 
   if (!song) return null;
 
-  const progress = (currentTime / 92) * 100;
+  const hasRealStems = stems && stems.vocals_url?.startsWith("http");
+  const duration = hasRealStems ? (audioRefs.current.vocals?.duration || 92) : 92;
+  const progress = (currentTime / duration) * 100;
 
   return (
     <div className="min-h-screen bg-[#05050A] pb-4" data-testid="player-studio">
@@ -190,9 +294,38 @@ export default function PlayerStudio({ song, onRecord }) {
 
       {/* Stem Mixer */}
       <div className="px-4 py-3">
-        <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3">
-          Stem Mixer
-        </h3>
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0]">
+            Stem Mixer
+          </h3>
+          {!hasRealStems && (
+            <div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="audio/*"
+                className="hidden"
+                onChange={handleUploadForSeparation}
+                data-testid="stem-upload-input"
+              />
+              <Button
+                data-testid="upload-for-separation-btn"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={separating}
+                className="h-8 px-3 text-xs rounded-xl bg-[#8A2BE2] hover:bg-[#9D4CDD] text-white gap-1.5 transition-all"
+              >
+                {separating ? (
+                  <><Loader2 className="w-3 h-3 animate-spin" /> Separating...</>
+                ) : (
+                  <><Upload className="w-3 h-3" /> Upload Song</>
+                )}
+              </Button>
+            </div>
+          )}
+          {hasRealStems && (
+            <span className="text-[10px] text-[#00E5FF] uppercase tracking-widest font-bold">Live Stems</span>
+          )}
+        </div>
         <StemMixer
           volumes={stemVolumes}
           muted={mutedStems}

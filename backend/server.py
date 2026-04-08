@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -7,6 +7,9 @@ import logging
 import base64
 import requests
 import json
+import tempfile
+import asyncio
+import replicate
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
@@ -32,6 +35,12 @@ logger = logging.getLogger(__name__)
 RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY', '')
 RAPIDAPI_HOST = os.environ.get('RAPIDAPI_HOST', 'shazam.p.rapidapi.com')
 REPLICATE_API_TOKEN = os.environ.get('REPLICATE_API_TOKEN', '')
+
+# Set Replicate API token in environment for the library
+if REPLICATE_API_TOKEN:
+    os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
+
+DEMUCS_MODEL = "cjwbw/demucs:25a173108cff36ef9f80f854c162d01df9e6528be175794b81158fa03836d953"
 
 # --- Models ---
 class SongResult(BaseModel):
@@ -223,32 +232,94 @@ async def get_song(song_id: str):
         raise HTTPException(status_code=404, detail="Song not found")
     return song
 
-# Stem Separation
+# Stem Separation - Real Replicate Demucs Integration
 @api_router.post("/songs/{song_id}/separate")
-async def separate_stems(song_id: str):
-    """Start stem separation for a song (MOCKED - needs Replicate API key)."""
+async def separate_stems(song_id: str, file: UploadFile = File(None)):
+    """Start stem separation using Replicate Demucs model.
+    Accepts an audio file upload for separation."""
     song = await db.songs.find_one({"id": song_id}, {"_id": 0})
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
 
-    stem = StemStatus(
-        song_id=song_id,
-        status="completed",
-        vocals_url="mock://vocals",
-        guitar_url="mock://guitar",
-        bass_url="mock://bass",
-        drums_url="mock://drums",
-        original_url="mock://original"
-    )
+    # Check if stems already exist for this song
+    existing = await db.stems.find_one({"song_id": song_id, "status": "completed"}, {"_id": 0})
+    if existing and existing.get("vocals_url", "").startswith("http"):
+        return {"success": True, "stems": existing, "cached": True}
+
+    if not REPLICATE_API_TOKEN:
+        raise HTTPException(status_code=503, detail="Replicate API token not configured")
+
+    if not file:
+        raise HTTPException(status_code=400, detail="Audio file required for stem separation")
+
+    # Save uploaded file temporarily
+    audio_bytes = await file.read()
+    if len(audio_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Empty audio file")
+
+    # Create stem record with processing status
+    stem = StemStatus(song_id=song_id, status="processing")
     doc = stem.model_dump()
     await db.stems.insert_one(doc)
-    stored = await db.stems.find_one({"id": stem.id}, {"_id": 0})
-    return {"success": True, "stems": stored, "mocked": True, "message": "Stem separation is MOCKED. Provide REPLICATE_API_TOKEN for real separation."}
+    stem_id = stem.id
+
+    # Run separation in background
+    async def run_separation():
+        try:
+            # Write to temp file
+            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+                tmp.write(audio_bytes)
+                tmp_path = tmp.name
+
+            logger.info(f"Starting Demucs separation for song {song_id}, stem {stem_id}")
+
+            # Run Replicate Demucs
+            output = replicate.run(
+                DEMUCS_MODEL,
+                input={"audio": open(tmp_path, "rb")}
+            )
+
+            logger.info(f"Demucs output: {output}")
+
+            # Output is a dict with bass, drums, other, vocals URLs
+            update_data = {
+                "status": "completed",
+                "vocals_url": output.get("vocals", ""),
+                "bass_url": output.get("bass", ""),
+                "drums_url": output.get("drums", ""),
+                "guitar_url": output.get("other", ""),
+                "original_url": ""
+            }
+
+            await db.stems.update_one(
+                {"id": stem_id},
+                {"$set": update_data}
+            )
+            logger.info(f"Stem separation completed for song {song_id}")
+
+            # Cleanup temp file
+            os.unlink(tmp_path)
+
+        except Exception as e:
+            error_msg = str(e)
+            if "402" in error_msg or "credit" in error_msg.lower() or "billing" in error_msg.lower():
+                error_msg = "Insufficient Replicate credit. Add billing at replicate.com/account/billing"
+            logger.error(f"Stem separation failed: {e}")
+            await db.stems.update_one(
+                {"id": stem_id},
+                {"$set": {"status": "failed", "error": error_msg}}
+            )
+
+    # Run in background
+    asyncio.get_event_loop().run_in_executor(None, lambda: asyncio.run(run_separation()))
+
+    stored = await db.stems.find_one({"id": stem_id}, {"_id": 0})
+    return {"success": True, "stems": stored, "message": "Stem separation started. Poll /api/songs/{song_id}/stems for results."}
 
 # Get stems for a song
 @api_router.get("/songs/{song_id}/stems")
 async def get_stems(song_id: str):
-    stems = await db.stems.find_one({"song_id": song_id}, {"_id": 0})
+    stems = await db.stems.find_one({"song_id": song_id}, {"_id": 0}, sort=[("created_at", -1)])
     if not stems:
         return {"success": False, "message": "No stems found. Run separation first."}
     return {"success": True, "stems": stems}
