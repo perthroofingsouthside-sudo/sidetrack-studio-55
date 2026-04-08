@@ -263,17 +263,20 @@ async def separate_stems(song_id: str, file: UploadFile = File(None)):
     await db.stems.insert_one(doc)
     stem_id = stem.id
 
-    # Run separation in background
-    async def run_separation():
+    # Run separation in background using thread with sync MongoDB
+    import threading
+    import pymongo
+
+    def run_separation_sync():
         try:
             # Write to temp file
-            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as tmp:
+            with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
                 tmp.write(audio_bytes)
                 tmp_path = tmp.name
 
             logger.info(f"Starting Demucs separation for song {song_id}, stem {stem_id}")
 
-            # Run Replicate Demucs
+            # Run Replicate Demucs (blocking call)
             output = replicate.run(
                 DEMUCS_MODEL,
                 input={"audio": open(tmp_path, "rb")}
@@ -284,17 +287,21 @@ async def separate_stems(song_id: str, file: UploadFile = File(None)):
             # Output is a dict with bass, drums, other, vocals URLs
             update_data = {
                 "status": "completed",
-                "vocals_url": output.get("vocals", ""),
-                "bass_url": output.get("bass", ""),
-                "drums_url": output.get("drums", ""),
-                "guitar_url": output.get("other", ""),
+                "vocals_url": str(output.get("vocals", "")),
+                "bass_url": str(output.get("bass", "")),
+                "drums_url": str(output.get("drums", "")),
+                "guitar_url": str(output.get("other", "")),
                 "original_url": ""
             }
 
-            await db.stems.update_one(
+            # Use sync pymongo for background thread
+            sync_client = pymongo.MongoClient(mongo_url)
+            sync_db = sync_client[os.environ['DB_NAME']]
+            sync_db.stems.update_one(
                 {"id": stem_id},
                 {"$set": update_data}
             )
+            sync_client.close()
             logger.info(f"Stem separation completed for song {song_id}")
 
             # Cleanup temp file
@@ -305,13 +312,20 @@ async def separate_stems(song_id: str, file: UploadFile = File(None)):
             if "402" in error_msg or "credit" in error_msg.lower() or "billing" in error_msg.lower():
                 error_msg = "Insufficient Replicate credit. Add billing at replicate.com/account/billing"
             logger.error(f"Stem separation failed: {e}")
-            await db.stems.update_one(
-                {"id": stem_id},
-                {"$set": {"status": "failed", "error": error_msg}}
-            )
+            try:
+                sync_client = pymongo.MongoClient(mongo_url)
+                sync_db = sync_client[os.environ['DB_NAME']]
+                sync_db.stems.update_one(
+                    {"id": stem_id},
+                    {"$set": {"status": "failed", "error": error_msg}}
+                )
+                sync_client.close()
+            except Exception as db_err:
+                logger.error(f"Failed to update stem status: {db_err}")
 
-    # Run in background
-    asyncio.get_event_loop().run_in_executor(None, lambda: asyncio.run(run_separation()))
+    # Run in background thread
+    thread = threading.Thread(target=run_separation_sync, daemon=True)
+    thread.start()
 
     stored = await db.stems.find_one({"id": stem_id}, {"_id": 0})
     return {"success": True, "stems": stored, "message": "Stem separation started. Poll /api/songs/{song_id}/stems for results."}
