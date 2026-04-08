@@ -24,12 +24,15 @@ Build a music app like Shazam that can find songs. After identification, allow u
 ## What's Been Implemented (2026-04-08)
 - [x] Home page with "Tap to Recognize" button and animated radar rings
 - [x] Shazam API integration for song recognition (with demo fallback)
+- [x] **NEW: Spotify Streaming page (AuraStream)** with search, browse, and playback
+- [x] **NEW: 15+ Spotify API endpoints** (search, browse, OAuth, playback controls)
+- [x] **NEW: Spotify Web Playback SDK** integration for in-browser streaming (Premium)
+- [x] **NEW: 5-tab bottom navigation** (Stream, Discover, Studio, Record, Share)
 - [x] Player Studio with song info display
 - [x] Stem Mixer with 4 vertical sliders (vocals, guitar, bass, drums) + mute toggles
-- [x] **REAL Replicate Demucs integration** for stem separation (vocals, bass, drums, other/guitar)
-- [x] Upload Song button in Player Studio for file-based stem separation
+- [x] Real Replicate Demucs integration for stem separation
+- [x] Upload Song button for file-based stem separation
 - [x] Audio playback of separated stems with volume/mute control
-- [x] Background processing with status polling for stem separation
 - [x] Split Screen: Guitar chords panel + Lyrics panel with synchronized scrolling
 - [x] Chord diagram visualizations
 - [x] Audio-only recording mode (MediaRecorder API)
@@ -37,14 +40,14 @@ Build a music app like Shazam that can find songs. After identification, allow u
 - [x] Waveform editor with trim controls
 - [x] Social media share buttons (Instagram, TikTok, Twitter/X, YouTube)
 - [x] Download recording functionality
-- [x] Bottom navigation bar (Discover, Studio, Record, Share)
 - [x] Dark neon theme (black, indigo, violet)
 - [x] MongoDB storage for songs, stems, and recordings
-- [x] Full CRUD API for songs and recordings
 
 ## Integration Status
 - **Shazam API**: Configured (key may be truncated - using demo fallback)
 - **Replicate Demucs**: FULLY INTEGRATED - needs billing credit at replicate.com/account/billing
+- **Spotify Web API**: Endpoints ready - needs valid Client ID + Secret from developer.spotify.com/dashboard
+- **Spotify Web Playback SDK**: Loaded and ready for Premium streaming
 - **Lyrics/Chords**: MOCKED (needs Genius/Musixmatch API keys)
 
 ## Prioritized Backlog
