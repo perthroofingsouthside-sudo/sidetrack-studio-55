@@ -26,6 +26,10 @@ Build a music app like Shazam that can find songs. After identification, allow u
 - [x] Shazam API integration for song recognition (with demo fallback)
 - [x] Player Studio with song info display
 - [x] Stem Mixer with 4 vertical sliders (vocals, guitar, bass, drums) + mute toggles
+- [x] **REAL Replicate Demucs integration** for stem separation (vocals, bass, drums, other/guitar)
+- [x] Upload Song button in Player Studio for file-based stem separation
+- [x] Audio playback of separated stems with volume/mute control
+- [x] Background processing with status polling for stem separation
 - [x] Split Screen: Guitar chords panel + Lyrics panel with synchronized scrolling
 - [x] Chord diagram visualizations
 - [x] Audio-only recording mode (MediaRecorder API)
@@ -35,13 +39,13 @@ Build a music app like Shazam that can find songs. After identification, allow u
 - [x] Download recording functionality
 - [x] Bottom navigation bar (Discover, Studio, Record, Share)
 - [x] Dark neon theme (black, indigo, violet)
-- [x] MongoDB storage for songs and recordings
+- [x] MongoDB storage for songs, stems, and recordings
 - [x] Full CRUD API for songs and recordings
 
-## MOCKED Features
-- **Stem Separation**: Returns mock URLs (needs REPLICATE_API_TOKEN)
-- **Lyrics/Chords**: Returns mock data (needs Genius/Musixmatch API keys)
-- **Playback**: Simulated playback timer (no actual audio playback of stems)
+## Integration Status
+- **Shazam API**: Configured (key may be truncated - using demo fallback)
+- **Replicate Demucs**: FULLY INTEGRATED - needs billing credit at replicate.com/account/billing
+- **Lyrics/Chords**: MOCKED (needs Genius/Musixmatch API keys)
 
 ## Prioritized Backlog
 ### P0 (Critical)
