@@ -7,6 +7,24 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 
+const DEMO_ALBUMS = [
+  { id: "d1", name: "Midnight Frequencies", artists: [{ name: "The Neon Waves" }], images: [{ url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300" }] },
+  { id: "d2", name: "Electric Dreams", artists: [{ name: "Synth Horizon" }], images: [{ url: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300" }] },
+  { id: "d3", name: "Bass Culture", artists: [{ name: "Deep Current" }], images: [{ url: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300" }] },
+  { id: "d4", name: "Violet Hour", artists: [{ name: "Aurora Skies" }], images: [{ url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300" }] },
+  { id: "d5", name: "Rhythm & Code", artists: [{ name: "Digital Pulse" }], images: [{ url: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300" }] },
+  { id: "d6", name: "Soundscape", artists: [{ name: "Aether" }], images: [{ url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=300" }] },
+];
+
+const DEMO_PLAYLISTS = [
+  { id: "p1", name: "Chill Vibes", description: "Relax and unwind", images: [{ url: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=300" }] },
+  { id: "p2", name: "Workout Energy", description: "Push your limits", images: [{ url: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=300" }] },
+  { id: "p3", name: "Late Night Jazz", description: "Smooth and mellow", images: [{ url: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=300" }] },
+  { id: "p4", name: "Indie Discoveries", description: "Fresh new sounds", images: [{ url: "https://images.unsplash.com/photo-1446057032654-9d8885db76c6?w=300" }] },
+  { id: "p5", name: "Electronic Beats", description: "Dance the night away", images: [{ url: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=300" }] },
+  { id: "p6", name: "Acoustic Sessions", description: "Raw and authentic", images: [{ url: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=300" }] },
+];
+
 export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStudio }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
@@ -35,7 +53,14 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
       if (releasesRes?.data?.albums?.items) setNewReleases(releasesRes.data.albums.items);
       if (playlistsRes?.data?.playlists?.items) setFeaturedPlaylists(playlistsRes.data.playlists.items);
     } catch (err) {
-      // Browse may fail if Spotify not fully configured
+      // Use curated demo data when Spotify not configured
+    }
+    // If no data loaded, show curated demo content
+    if (newReleases.length === 0) {
+      setNewReleases(DEMO_ALBUMS);
+    }
+    if (featuredPlaylists.length === 0) {
+      setFeaturedPlaylists(DEMO_PLAYLISTS);
     }
   };
 
@@ -266,16 +291,12 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
               </section>
             )}
 
-            {/* Empty state when Spotify not configured */}
-            {newReleases.length === 0 && featuredPlaylists.length === 0 && (
-              <div className="text-center py-16" data-testid="spotify-not-configured">
-                <Disc3 className="w-16 h-16 text-[#8A2BE2]/30 mx-auto mb-4" />
-                <h3 className="font-['Outfit'] text-lg font-bold text-white mb-2">Connect Spotify</h3>
-                <p className="text-sm text-[#606070] max-w-xs mx-auto mb-4">
-                  Add your Spotify Client ID and Secret in the backend to browse and stream music.
-                </p>
-                <p className="text-xs text-[#8A2BE2]">
-                  Use the search bar to find songs by name
+            {/* Spotify connection hint */}
+            {!spotifyToken && (
+              <div className="surface-card p-4 text-center" data-testid="spotify-connect-hint">
+                <p className="text-xs text-[#606070]">
+                  Connect Spotify Premium for full streaming.
+                  <span className="text-[#8A2BE2] ml-1">Showing curated picks.</span>
                 </p>
               </div>
             )}
