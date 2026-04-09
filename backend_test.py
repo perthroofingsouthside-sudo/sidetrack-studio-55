@@ -4,16 +4,15 @@ import tempfile
 import os
 from datetime import datetime
 
-class AuraSplitAPITester:
+class SidetrackAPITester:
     def __init__(self, base_url="https://vocal-studio-55.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
         self.song_id = None
-        self.expected_503_endpoints = []  # Track endpoints expected to return 503
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, files=None, allow_503=False):
+    def run_test(self, name, method, endpoint, expected_status, data=None, files=None):
         """Run a single API test"""
         url = f"{self.api_url}/{endpoint}"
         headers = {}
@@ -33,13 +32,6 @@ class AuraSplitAPITester:
                     response = requests.post(url, json=data, headers=headers)
             elif method == 'DELETE':
                 response = requests.delete(url, headers=headers)
-
-            # Handle expected 503 for Spotify endpoints
-            if allow_503 and response.status_code == 503:
-                self.tests_passed += 1
-                print(f"✅ Passed - Status: 503 (Expected - Spotify not fully configured)")
-                self.expected_503_endpoints.append(endpoint)
-                return True, {"expected_503": True}
             
             success = response.status_code == expected_status
             if success:
@@ -234,52 +226,82 @@ class AuraSplitAPITester:
             return True
         return False
 
-    def test_spotify_endpoints(self):
-        """Test new Spotify streaming endpoints - NEW IN ITERATION 3"""
-        print("\n🎵 Testing Spotify Streaming Endpoints (NEW)")
+    def test_itunes_endpoints(self):
+        """Test iTunes Music API endpoints - NEW IN ITERATION 4"""
+        print("\n🎵 Testing iTunes Music API Endpoints (NEW)")
         
-        # Test Spotify login endpoint
+        # Test music search
         success, response = self.run_test(
-            "Spotify Login",
-            "GET", 
-            "spotify/login",
-            200,
-            allow_503=True
-        )
-        
-        # Test Spotify search (expected to work or return 503)
-        success, response = self.run_test(
-            "Spotify Search",
+            "iTunes Music Search",
             "GET",
-            "spotify/search",
+            "music/search",
             200,
-            data={"q": "test"},
-            allow_503=True
+            data={"q": "beyonce", "limit": 10}
         )
         
-        # Test Spotify browse endpoints (expected 503 due to incomplete credentials)
-        browse_endpoints = [
-            ("Spotify New Releases", "spotify/new-releases"),
-            ("Spotify Featured Playlists", "spotify/featured-playlists"),
-            ("Spotify Categories", "spotify/categories")
-        ]
+        if success:
+            tracks = response.get('tracks', [])
+            print(f"   Found {len(tracks)} tracks")
+            if tracks:
+                track = tracks[0]
+                print(f"   Sample track: {track.get('title', '')} by {track.get('artist', '')}")
+                if track.get('preview_url'):
+                    print(f"   ✅ Preview URL available")
+                else:
+                    print(f"   ⚠️ No preview URL")
         
-        for name, endpoint in browse_endpoints:
-            self.run_test(
-                name,
-                "GET",
-                endpoint,
-                200,
-                allow_503=True
-            )
+        # Test top songs
+        success, response = self.run_test(
+            "iTunes Top Songs",
+            "GET",
+            "music/top-songs",
+            200,
+            data={"limit": 10}
+        )
+        
+        if success:
+            tracks = response.get('tracks', [])
+            print(f"   Found {len(tracks)} top songs")
+        
+        # Test top albums
+        success, response = self.run_test(
+            "iTunes Top Albums",
+            "GET",
+            "music/top-albums",
+            200,
+            data={"limit": 10}
+        )
+        
+        if success:
+            albums = response.get('albums', [])
+            print(f"   Found {len(albums)} top albums")
+            if albums:
+                album = albums[0]
+                print(f"   Sample album: {album.get('name', '')} by {album.get('artist', '')}")
+                if album.get('cover_url'):
+                    print(f"   ✅ Cover art URL available")
+        
+        # Test artist lookup (using a known artist ID)
+        success, response = self.run_test(
+            "iTunes Artist Lookup",
+            "GET",
+            "music/artist/909253",  # Taylor Swift's artist ID
+            200
+        )
+        
+        if success:
+            artist = response.get('artist', {})
+            songs = response.get('songs', [])
+            print(f"   Artist: {artist.get('name', '')}")
+            print(f"   Found {len(songs)} songs")
         
         return True
 
 def main():
-    print("🎵 AuraSplit API Testing - Iteration 3 (Spotify Streaming Integration)")
+    print("🎵 SIDETRACK Studios API Testing - Iteration 4 (iTunes Music Integration)")
     print("=" * 70)
     
-    tester = AuraSplitAPITester()
+    tester = SidetrackAPITester()
 
     # Test basic functionality
     if not tester.test_health():
@@ -305,20 +327,17 @@ def main():
     tester.test_recordings_crud()
     tester.test_list_songs()
     
-    # Test NEW Spotify streaming endpoints
-    tester.test_spotify_endpoints()
+    # Test NEW iTunes music endpoints
+    tester.test_itunes_endpoints()
 
     # Print results
     print(f"\n📊 Test Results: {tester.tests_passed}/{tester.tests_run} passed")
     print(f"Success rate: {(tester.tests_passed/tester.tests_run)*100:.1f}%")
     
-    if len(tester.expected_503_endpoints) > 0:
-        print(f"🔧 Expected 503 responses (Spotify not fully configured): {len(tester.expected_503_endpoints)} endpoints")
-    
-    # Allow failures for stem separation (billing) and some Spotify endpoints (incomplete config)
+    # Allow failures for stem separation (billing) 
     expected_failures = 2  # stem separation + potential other issues
     if tester.tests_passed >= tester.tests_run - expected_failures:
-        print("✅ Overall: PASS (Some failures expected due to incomplete Spotify config and billing)")
+        print("✅ Overall: PASS (Some failures expected due to Replicate billing)")
         return 0
     else:
         print("❌ Overall: FAIL")

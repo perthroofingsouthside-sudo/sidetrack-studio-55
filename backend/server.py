@@ -438,241 +438,164 @@ async def list_songs():
     songs = await db.songs.find({}, {"_id": 0}).sort("created_at", -1).to_list(50)
     return {"success": True, "songs": songs}
 
-# --- Spotify Streaming Endpoints ---
+# --- iTunes Music Streaming Endpoints (No API Key Required) ---
 
-# Spotify OAuth
-@api_router.get("/spotify/login")
-async def spotify_login():
-    if not SPOTIFY_CLIENT_ID:
-        raise HTTPException(status_code=503, detail="Spotify Client ID not configured")
-    scopes = "user-read-playback-state user-modify-playback-state user-read-private streaming user-read-email"
-    auth_url = (
-        f"https://accounts.spotify.com/authorize"
-        f"?client_id={SPOTIFY_CLIENT_ID}"
-        f"&response_type=code"
-        f"&redirect_uri={SPOTIFY_REDIRECT_URI}"
-        f"&scope={scopes}"
-    )
-    return {"auth_url": auth_url}
-
-@api_router.post("/spotify/callback")
-async def spotify_callback(code: str = Form(...)):
-    try:
-        resp = requests.post(
-            "https://accounts.spotify.com/api/token",
-            data={
-                "grant_type": "authorization_code",
-                "code": code,
-                "redirect_uri": SPOTIFY_REDIRECT_URI,
-                "client_id": SPOTIFY_CLIENT_ID,
-                "client_secret": SPOTIFY_CLIENT_SECRET,
-            },
-            timeout=10
-        )
-        if resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Token exchange failed")
-        data = resp.json()
-        return {
-            "access_token": data["access_token"],
-            "refresh_token": data.get("refresh_token", ""),
-            "expires_in": data.get("expires_in", 3600)
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.post("/spotify/refresh")
-async def spotify_refresh(refresh_token: str = Form(...)):
-    try:
-        resp = requests.post(
-            "https://accounts.spotify.com/api/token",
-            data={
-                "grant_type": "refresh_token",
-                "refresh_token": refresh_token,
-                "client_id": SPOTIFY_CLIENT_ID,
-                "client_secret": SPOTIFY_CLIENT_SECRET,
-            },
-            timeout=10
-        )
-        if resp.status_code != 200:
-            raise HTTPException(status_code=400, detail="Token refresh failed")
-        data = resp.json()
-        return {"access_token": data["access_token"], "expires_in": data.get("expires_in", 3600)}
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@api_router.get("/spotify/me")
-async def spotify_me(token: str):
+@api_router.get("/music/search")
+async def music_search(q: str, limit: int = 20):
+    """Search for songs using iTunes Search API - no API key needed."""
     resp = requests.get(
-        "https://api.spotify.com/v1/me",
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=10
-    )
-    if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to get profile")
-    return resp.json()
-
-# Search (works with client credentials or user token)
-@api_router.get("/spotify/search")
-async def spotify_search(q: str, type: str = "track", limit: int = 20, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured. Add Client ID and Secret.")
-    resp = requests.get(
-        "https://api.spotify.com/v1/search",
-        params={"q": q, "type": type, "limit": limit},
-        headers={"Authorization": f"Bearer {access_token}"},
+        "https://itunes.apple.com/search",
+        params={"term": q, "media": "music", "entity": "song", "limit": limit},
         timeout=10
     )
     if resp.status_code != 200:
         raise HTTPException(status_code=resp.status_code, detail="Search failed")
-    return resp.json()
+    data = resp.json()
+    tracks = []
+    for item in data.get("results", []):
+        tracks.append({
+            "id": str(item.get("trackId", "")),
+            "title": item.get("trackName", ""),
+            "artist": item.get("artistName", ""),
+            "album": item.get("collectionName", ""),
+            "cover_url": item.get("artworkUrl100", "").replace("100x100", "600x600"),
+            "cover_thumb": item.get("artworkUrl60", ""),
+            "preview_url": item.get("previewUrl", ""),
+            "duration_ms": item.get("trackTimeMillis", 0),
+            "genre": item.get("primaryGenreName", ""),
+            "release_date": item.get("releaseDate", ""),
+            "artist_id": str(item.get("artistId", "")),
+            "album_id": str(item.get("collectionId", "")),
+        })
+    return {"success": True, "tracks": tracks, "count": len(tracks)}
 
-# Browse - New Releases
-@api_router.get("/spotify/new-releases")
-async def spotify_new_releases(limit: int = 20, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
+@api_router.get("/music/top-songs")
+async def music_top_songs(genre: str = "", limit: int = 20):
+    """Get top songs from iTunes RSS feeds - no API key needed."""
+    url = f"https://itunes.apple.com/us/rss/topsongs/limit={limit}"
+    if genre:
+        url += f"/genre={genre}"
+    url += "/json"
+    resp = requests.get(url, timeout=10)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch top songs")
+    data = resp.json()
+    entries = data.get("feed", {}).get("entry", [])
+    tracks = []
+    for item in entries:
+        img_list = item.get("im:image", [])
+        cover = img_list[-1].get("label", "") if img_list else ""
+        tracks.append({
+            "id": item.get("id", {}).get("attributes", {}).get("im:id", ""),
+            "title": item.get("im:name", {}).get("label", ""),
+            "artist": item.get("im:artist", {}).get("label", ""),
+            "album": item.get("im:collection", {}).get("im:name", {}).get("label", "") if item.get("im:collection") else "",
+            "cover_url": cover.replace("170x170", "600x600"),
+            "cover_thumb": cover,
+            "preview_url": "",
+            "genre": item.get("category", {}).get("attributes", {}).get("label", ""),
+            "release_date": item.get("im:releaseDate", {}).get("label", ""),
+        })
+    return {"success": True, "tracks": tracks, "count": len(tracks)}
+
+@api_router.get("/music/top-albums")
+async def music_top_albums(limit: int = 20):
+    """Get top albums from iTunes RSS feeds."""
     resp = requests.get(
-        "https://api.spotify.com/v1/browse/new-releases",
-        params={"limit": limit},
-        headers={"Authorization": f"Bearer {access_token}"},
+        f"https://itunes.apple.com/us/rss/topalbums/limit={limit}/json",
         timeout=10
     )
     if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch new releases")
-    return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch top albums")
+    data = resp.json()
+    entries = data.get("feed", {}).get("entry", [])
+    albums = []
+    for item in entries:
+        img_list = item.get("im:image", [])
+        cover = img_list[-1].get("label", "") if img_list else ""
+        albums.append({
+            "id": item.get("id", {}).get("attributes", {}).get("im:id", ""),
+            "name": item.get("im:name", {}).get("label", ""),
+            "artist": item.get("im:artist", {}).get("label", ""),
+            "cover_url": cover.replace("170x170", "600x600"),
+            "cover_thumb": cover,
+            "genre": item.get("category", {}).get("attributes", {}).get("label", ""),
+            "release_date": item.get("im:releaseDate", {}).get("label", ""),
+            "link": item.get("link", {}).get("attributes", {}).get("href", ""),
+        })
+    return {"success": True, "albums": albums, "count": len(albums)}
 
-# Browse - Featured Playlists
-@api_router.get("/spotify/featured-playlists")
-async def spotify_featured(limit: int = 20, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
+@api_router.get("/music/artist/{artist_id}")
+async def music_artist(artist_id: str, limit: int = 10):
+    """Lookup artist and their top songs."""
     resp = requests.get(
-        "https://api.spotify.com/v1/browse/featured-playlists",
-        params={"limit": limit},
-        headers={"Authorization": f"Bearer {access_token}"},
+        "https://itunes.apple.com/lookup",
+        params={"id": artist_id, "entity": "song", "limit": limit},
         timeout=10
     )
     if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch playlists")
-    return resp.json()
+        raise HTTPException(status_code=resp.status_code, detail="Artist lookup failed")
+    data = resp.json()
+    results = data.get("results", [])
+    artist_info = results[0] if results else {}
+    songs = []
+    for item in results[1:]:
+        if item.get("wrapperType") == "track":
+            songs.append({
+                "id": str(item.get("trackId", "")),
+                "title": item.get("trackName", ""),
+                "artist": item.get("artistName", ""),
+                "album": item.get("collectionName", ""),
+                "cover_url": item.get("artworkUrl100", "").replace("100x100", "600x600"),
+                "preview_url": item.get("previewUrl", ""),
+                "duration_ms": item.get("trackTimeMillis", 0),
+            })
+    return {
+        "success": True,
+        "artist": {
+            "id": str(artist_info.get("artistId", "")),
+            "name": artist_info.get("artistName", ""),
+            "genre": artist_info.get("primaryGenreName", ""),
+        },
+        "songs": songs,
+    }
 
-# Browse - Categories
-@api_router.get("/spotify/categories")
-async def spotify_categories(limit: int = 20, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
+@api_router.get("/music/album/{album_id}")
+async def music_album(album_id: str):
+    """Lookup album tracks."""
     resp = requests.get(
-        "https://api.spotify.com/v1/browse/categories",
-        params={"limit": limit},
-        headers={"Authorization": f"Bearer {access_token}"},
+        "https://itunes.apple.com/lookup",
+        params={"id": album_id, "entity": "song"},
         timeout=10
     )
     if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch categories")
-    return resp.json()
-
-# Get playlist tracks
-@api_router.get("/spotify/playlists/{playlist_id}")
-async def spotify_playlist(playlist_id: str, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
-    resp = requests.get(
-        f"https://api.spotify.com/v1/playlists/{playlist_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10
-    )
-    if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch playlist")
-    return resp.json()
-
-# Get album
-@api_router.get("/spotify/albums/{album_id}")
-async def spotify_album(album_id: str, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
-    resp = requests.get(
-        f"https://api.spotify.com/v1/albums/{album_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10
-    )
-    if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch album")
-    return resp.json()
-
-# Get artist
-@api_router.get("/spotify/artists/{artist_id}")
-async def spotify_artist(artist_id: str, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
-    resp = requests.get(
-        f"https://api.spotify.com/v1/artists/{artist_id}",
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10
-    )
-    if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch artist")
-    return resp.json()
-
-# Get artist top tracks
-@api_router.get("/spotify/artists/{artist_id}/top-tracks")
-async def spotify_artist_top(artist_id: str, token: str = ""):
-    access_token = token or get_spotify_client_token()
-    if not access_token:
-        raise HTTPException(status_code=503, detail="Spotify not configured")
-    resp = requests.get(
-        f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks",
-        params={"market": "US"},
-        headers={"Authorization": f"Bearer {access_token}"},
-        timeout=10
-    )
-    if resp.status_code != 200:
-        raise HTTPException(status_code=resp.status_code, detail="Failed to fetch top tracks")
-    return resp.json()
-
-# Playback control - play
-@api_router.post("/spotify/play")
-async def spotify_play(token: str = Form(...), track_uri: str = Form(...), device_id: str = Form(""), position_ms: int = Form(0)):
-    data = {"uris": [track_uri], "position_ms": position_ms}
-    params = {}
-    if device_id:
-        params["device_id"] = device_id
-    resp = requests.put(
-        "https://api.spotify.com/v1/me/player/play",
-        json=data,
-        params=params,
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=10
-    )
-    if resp.status_code not in (200, 204):
-        raise HTTPException(status_code=resp.status_code, detail=f"Play failed: {resp.text}")
-    return {"status": "playing"}
-
-# Playback control - pause
-@api_router.post("/spotify/pause")
-async def spotify_pause(token: str = Form(...), device_id: str = Form("")):
-    params = {}
-    if device_id:
-        params["device_id"] = device_id
-    resp = requests.put(
-        "https://api.spotify.com/v1/me/player/pause",
-        params=params,
-        headers={"Authorization": f"Bearer {token}"},
-        timeout=10
-    )
-    if resp.status_code not in (200, 204):
-        raise HTTPException(status_code=resp.status_code, detail="Pause failed")
-    return {"status": "paused"}
+        raise HTTPException(status_code=resp.status_code, detail="Album lookup failed")
+    data = resp.json()
+    results = data.get("results", [])
+    album_info = results[0] if results else {}
+    tracks = []
+    for item in results[1:]:
+        if item.get("wrapperType") == "track":
+            tracks.append({
+                "id": str(item.get("trackId", "")),
+                "title": item.get("trackName", ""),
+                "artist": item.get("artistName", ""),
+                "preview_url": item.get("previewUrl", ""),
+                "duration_ms": item.get("trackTimeMillis", 0),
+                "track_number": item.get("trackNumber", 0),
+            })
+    return {
+        "success": True,
+        "album": {
+            "id": str(album_info.get("collectionId", "")),
+            "name": album_info.get("collectionName", ""),
+            "artist": album_info.get("artistName", ""),
+            "cover_url": album_info.get("artworkUrl100", "").replace("100x100", "600x600"),
+            "genre": album_info.get("primaryGenreName", ""),
+            "track_count": album_info.get("trackCount", 0),
+        },
+        "tracks": tracks,
+    }
 
 # Include router
 app.include_router(api_router)

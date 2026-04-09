@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Play, Pause, Music2, Disc3, ChevronRight, Clock, Heart } from "lucide-react";
+import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,95 +7,33 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 
-const DEMO_ALBUMS = [
-  { id: "d1", name: "Midnight Frequencies", artists: [{ name: "The Neon Waves" }], images: [{ url: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300" }] },
-  { id: "d2", name: "Electric Dreams", artists: [{ name: "Synth Horizon" }], images: [{ url: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=300" }] },
-  { id: "d3", name: "Bass Culture", artists: [{ name: "Deep Current" }], images: [{ url: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=300" }] },
-  { id: "d4", name: "Violet Hour", artists: [{ name: "Aurora Skies" }], images: [{ url: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300" }] },
-  { id: "d5", name: "Rhythm & Code", artists: [{ name: "Digital Pulse" }], images: [{ url: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=300" }] },
-  { id: "d6", name: "Soundscape", artists: [{ name: "Aether" }], images: [{ url: "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=300" }] },
-];
-
-const DEMO_PLAYLISTS = [
-  { id: "p1", name: "Chill Vibes", description: "Relax and unwind", images: [{ url: "https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=300" }] },
-  { id: "p2", name: "Workout Energy", description: "Push your limits", images: [{ url: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=300" }] },
-  { id: "p3", name: "Late Night Jazz", description: "Smooth and mellow", images: [{ url: "https://images.unsplash.com/photo-1415201364774-f6f0bb35f28f?w=300" }] },
-  { id: "p4", name: "Indie Discoveries", description: "Fresh new sounds", images: [{ url: "https://images.unsplash.com/photo-1446057032654-9d8885db76c6?w=300" }] },
-  { id: "p5", name: "Electronic Beats", description: "Dance the night away", images: [{ url: "https://images.unsplash.com/photo-1571330735066-03aaa9429d89?w=300" }] },
-  { id: "p6", name: "Acoustic Sessions", description: "Raw and authentic", images: [{ url: "https://images.unsplash.com/photo-1510915361894-db8b60106cb1?w=300" }] },
-];
-
-export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStudio }) {
+export default function StreamPage({ onTrackSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [newReleases, setNewReleases] = useState([]);
-  const [featuredPlaylists, setFeaturedPlaylists] = useState([]);
+  const [topSongs, setTopSongs] = useState([]);
+  const [topAlbums, setTopAlbums] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [activeTab, setActiveTab] = useState("browse"); // browse | search
+  const [activeTab, setActiveTab] = useState("browse");
   const [nowPlaying, setNowPlaying] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [deviceId, setDeviceId] = useState(null);
-  const playerRef = useRef(null);
+  const audioRef = useRef(null);
 
   useEffect(() => {
     loadBrowseData();
-    if (spotifyToken) initSpotifyPlayer();
-    return () => { if (playerRef.current) playerRef.current.disconnect(); };
-  }, [spotifyToken]);
+    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
+  }, []);
 
   const loadBrowseData = async () => {
     try {
-      const tokenParam = spotifyToken ? `&token=${spotifyToken}` : "";
-      const [releasesRes, playlistsRes] = await Promise.all([
-        axios.get(`${API}/spotify/new-releases?limit=10${tokenParam}`).catch(() => null),
-        axios.get(`${API}/spotify/featured-playlists?limit=10${tokenParam}`).catch(() => null),
+      const [songsRes, albumsRes] = await Promise.all([
+        axios.get(`${API}/music/top-songs?limit=20`).catch(() => null),
+        axios.get(`${API}/music/top-albums?limit=12`).catch(() => null),
       ]);
-      if (releasesRes?.data?.albums?.items) setNewReleases(releasesRes.data.albums.items);
-      if (playlistsRes?.data?.playlists?.items) setFeaturedPlaylists(playlistsRes.data.playlists.items);
+      if (songsRes?.data?.success) setTopSongs(songsRes.data.tracks);
+      if (albumsRes?.data?.success) setTopAlbums(albumsRes.data.albums);
     } catch (err) {
-      // Use curated demo data when Spotify not configured
+      // Will show empty state
     }
-    // If no data loaded, show curated demo content
-    if (newReleases.length === 0) {
-      setNewReleases(DEMO_ALBUMS);
-    }
-    if (featuredPlaylists.length === 0) {
-      setFeaturedPlaylists(DEMO_PLAYLISTS);
-    }
-  };
-
-  const initSpotifyPlayer = () => {
-    if (!spotifyToken) return;
-    // Wait for SDK to be ready
-    const initPlayer = () => {
-      if (!window.Spotify) return;
-      try {
-        const player = new window.Spotify.Player({
-          name: "SIDETRACK Studios Player",
-          getOAuthToken: (cb) => cb(spotifyToken),
-          volume: 0.5,
-        });
-        player.addListener("ready", ({ device_id }) => {
-          setDeviceId(device_id);
-        });
-        player.addListener("player_state_changed", (state) => {
-          if (!state) return;
-          setIsPlaying(!state.paused);
-          if (state.track_window?.current_track) {
-            setNowPlaying(state.track_window.current_track);
-          }
-        });
-        player.addListener("initialization_error", ({ message }) => {
-          console.log("Spotify init error:", message);
-        });
-        player.connect();
-        playerRef.current = player;
-      } catch (err) {
-        console.log("Spotify player init failed:", err);
-      }
-    };
-    window.onSpotifyWebPlaybackSDKReady = initPlayer;
-    if (window.Spotify) initPlayer();
   };
 
   const handleSearch = useCallback(async () => {
@@ -103,70 +41,61 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
     setSearching(true);
     setActiveTab("search");
     try {
-      const tokenParam = spotifyToken ? `&token=${spotifyToken}` : "";
-      const res = await axios.get(`${API}/spotify/search?q=${encodeURIComponent(searchQuery)}&type=track${tokenParam}`);
-      setSearchResults(res.data?.tracks?.items || []);
+      const res = await axios.get(`${API}/music/search?q=${encodeURIComponent(searchQuery)}&limit=25`);
+      if (res.data?.success) {
+        setSearchResults(res.data.tracks);
+        if (res.data.tracks.length === 0) toast.info("No results found");
+      }
     } catch (err) {
-      toast.error("Search failed. Check Spotify credentials.");
+      toast.error("Search failed. Try again.");
     } finally {
       setSearching(false);
     }
-  }, [searchQuery, spotifyToken]);
+  }, [searchQuery]);
 
-  const playTrack = async (track) => {
-    if (spotifyToken && deviceId) {
-      try {
-        const formData = new FormData();
-        formData.append("token", spotifyToken);
-        formData.append("track_uri", track.uri);
-        formData.append("device_id", deviceId);
-        await axios.post(`${API}/spotify/play`, formData);
-        setNowPlaying(track);
-        setIsPlaying(true);
-      } catch (err) {
-        toast.error("Playback failed. Make sure Spotify Premium is active.");
-      }
-    } else {
-      // Preview mode - use 30s preview URL
-      if (track.preview_url) {
-        const audio = new Audio(track.preview_url);
-        audio.play();
-        setNowPlaying(track);
-        setIsPlaying(true);
-        audio.onended = () => setIsPlaying(false);
-      } else {
-        toast.info("No preview available. Connect Spotify Premium for full playback.");
-      }
+  const playTrack = (track) => {
+    if (!track.preview_url) {
+      toast.info("No preview available for this track");
+      return;
     }
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    const audio = new Audio(track.preview_url);
+    audio.volume = 0.8;
+    audio.play().catch(() => toast.error("Playback failed"));
+    audioRef.current = audio;
+    setNowPlaying(track);
+    setIsPlaying(true);
+    audio.onended = () => { setIsPlaying(false); };
   };
 
-  const pauseTrack = async () => {
-    if (spotifyToken && deviceId) {
-      try {
-        const formData = new FormData();
-        formData.append("token", spotifyToken);
-        formData.append("device_id", deviceId);
-        await axios.post(`${API}/spotify/pause`, formData);
-        setIsPlaying(false);
-      } catch (err) { /* ignore */ }
+  const togglePlayPause = () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
     }
   };
 
   const handleSelectForStudio = (track) => {
     const song = {
-      id: track.id,
-      title: track.name,
-      artist: track.artists?.map((a) => a.name).join(", ") || "Unknown",
-      album: track.album?.name || "",
-      cover_url: track.album?.images?.[0]?.url || "",
-      genre: "",
-      spotify_uri: track.uri,
-      preview_url: track.preview_url,
+      id: track.id || crypto.randomUUID(),
+      title: track.title,
+      artist: track.artist,
+      album: track.album || "",
+      cover_url: track.cover_url || "",
+      genre: track.genre || "",
+      preview_url: track.preview_url || "",
     };
     onTrackSelect(song);
   };
 
   const formatMs = (ms) => {
+    if (!ms) return "--:--";
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
     return `${m}:${s.toString().padStart(2, "0")}`;
@@ -210,18 +139,22 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
 
       {/* Tab Toggle */}
       <div className="px-4 flex gap-2 mb-4">
-        {["browse", "search"].map((tab) => (
+        {[
+          { key: "browse", label: "Browse", icon: TrendingUp },
+          { key: "search", label: "Search", icon: Search },
+        ].map((tab) => (
           <Button
-            key={tab}
-            data-testid={`tab-${tab}`}
-            onClick={() => setActiveTab(tab)}
-            className={`h-8 px-4 rounded-full text-xs capitalize transition-all ${
-              activeTab === tab
+            key={tab.key}
+            data-testid={`tab-${tab.key}`}
+            onClick={() => setActiveTab(tab.key)}
+            className={`h-8 px-4 rounded-full text-xs gap-1.5 transition-all ${
+              activeTab === tab.key
                 ? "bg-[#8A2BE2] text-white"
                 : "bg-[#12121A] text-[#A0A0B0] border border-white/10"
             }`}
           >
-            {tab}
+            <tab.icon className="w-3 h-3" />
+            {tab.label}
           </Button>
         ))}
       </div>
@@ -230,74 +163,60 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
       <ScrollArea className="h-[calc(100vh-280px)]">
         {activeTab === "browse" ? (
           <div className="px-4 space-y-6 pb-32">
-            {/* New Releases */}
-            {newReleases.length > 0 && (
-              <section data-testid="new-releases">
-                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3">
-                  New Releases
+            {/* Top Albums */}
+            {topAlbums.length > 0 && (
+              <section data-testid="top-albums">
+                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
+                  <Album className="w-4 h-4 text-[#8A2BE2]" />
+                  Top Albums
                 </h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                  {newReleases.map((album) => (
-                    <div
-                      key={album.id}
-                      className="flex-shrink-0 w-36 group cursor-pointer"
-                      onClick={() => {
-                        if (album.tracks?.items?.[0]) playTrack(album.tracks.items[0]);
-                      }}
-                    >
+                  {topAlbums.map((album) => (
+                    <div key={album.id} className="flex-shrink-0 w-36 group cursor-pointer">
                       <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#8A2BE2]/40 transition-all">
                         <img
-                          src={album.images?.[0]?.url || ""}
+                          src={album.cover_url || album.cover_thumb}
                           alt={album.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          loading="lazy"
                         />
                       </div>
                       <p className="text-xs font-medium text-white truncate">{album.name}</p>
-                      <p className="text-[10px] text-[#606070] truncate">
-                        {album.artists?.map((a) => a.name).join(", ")}
-                      </p>
+                      <p className="text-[10px] text-[#606070] truncate">{album.artist}</p>
                     </div>
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Featured Playlists */}
-            {featuredPlaylists.length > 0 && (
-              <section data-testid="featured-playlists">
-                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3">
-                  Featured Playlists
+            {/* Top Songs */}
+            {topSongs.length > 0 && (
+              <section data-testid="top-songs">
+                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-[#00E5FF]" />
+                  Top Songs
                 </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {featuredPlaylists.slice(0, 6).map((pl) => (
-                    <div
-                      key={pl.id}
-                      className="surface-card p-3 flex gap-3 items-center cursor-pointer hover:border-[#8A2BE2]/30 transition-all group"
-                    >
-                      <div className="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
-                        <img
-                          src={pl.images?.[0]?.url || ""}
-                          alt={pl.name}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-medium text-white truncate">{pl.name}</p>
-                        <p className="text-[10px] text-[#606070] truncate">{pl.description}</p>
-                      </div>
-                    </div>
+                <div className="space-y-1">
+                  {topSongs.slice(0, 15).map((track, idx) => (
+                    <TrackRow
+                      key={track.id || idx}
+                      track={track}
+                      idx={idx}
+                      nowPlaying={nowPlaying}
+                      isPlaying={isPlaying}
+                      onPlay={playTrack}
+                      onStudio={handleSelectForStudio}
+                      formatMs={formatMs}
+                    />
                   ))}
                 </div>
               </section>
             )}
 
-            {/* Spotify connection hint */}
-            {!spotifyToken && (
-              <div className="surface-card p-4 text-center" data-testid="spotify-connect-hint">
-                <p className="text-xs text-[#606070]">
-                  Connect Spotify Premium for full streaming.
-                  <span className="text-[#8A2BE2] ml-1">Showing curated picks.</span>
-                </p>
+            {topSongs.length === 0 && topAlbums.length === 0 && (
+              <div className="text-center py-16" data-testid="loading-browse">
+                <Disc3 className="w-12 h-12 text-[#8A2BE2]/30 mx-auto mb-4 animate-spin" />
+                <p className="text-sm text-[#606070]">Loading music...</p>
               </div>
             )}
           </div>
@@ -310,51 +229,16 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
               </p>
             )}
             {searchResults.map((track, idx) => (
-              <div
-                key={track.id}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all group"
-                data-testid={`search-result-${idx}`}
-              >
-                {/* Album art */}
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 relative">
-                  <img
-                    src={track.album?.images?.[2]?.url || track.album?.images?.[0]?.url || ""}
-                    alt={track.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <button
-                    onClick={() => playTrack(track)}
-                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-                  >
-                    <Play className="w-5 h-5 text-white" fill="white" />
-                  </button>
-                </div>
-
-                {/* Track info */}
-                <div className="flex-1 min-w-0" onClick={() => playTrack(track)}>
-                  <p className="text-sm font-medium text-white truncate">{track.name}</p>
-                  <p className="text-xs text-[#606070] truncate">
-                    {track.artists?.map((a) => a.name).join(", ")}
-                  </p>
-                </div>
-
-                {/* Duration */}
-                <span className="text-xs text-[#606070] flex-shrink-0">
-                  {formatMs(track.duration_ms)}
-                </span>
-
-                {/* Studio button */}
-                <Button
-                  data-testid={`studio-btn-${idx}`}
-                  onClick={() => handleSelectForStudio(track)}
-                  variant="ghost"
-                  size="icon"
-                  className="text-[#8A2BE2] hover:text-[#00E5FF] hover:bg-[#8A2BE2]/10 rounded-full flex-shrink-0"
-                  title="Open in Studio"
-                >
-                  <Music2 className="w-4 h-4" />
-                </Button>
-              </div>
+              <TrackRow
+                key={track.id || idx}
+                track={track}
+                idx={idx}
+                nowPlaying={nowPlaying}
+                isPlaying={isPlaying}
+                onPlay={playTrack}
+                onStudio={handleSelectForStudio}
+                formatMs={formatMs}
+              />
             ))}
           </div>
         )}
@@ -369,29 +253,102 @@ export default function StreamPage({ spotifyToken, onTrackSelect, onNavigateStud
           <div className="flex items-center gap-3 max-w-lg mx-auto">
             <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
               <img
-                src={nowPlaying.album?.images?.[2]?.url || nowPlaying.cover_url || ""}
+                src={nowPlaying.cover_url || nowPlaying.cover_thumb || ""}
                 alt=""
                 className="w-full h-full object-cover"
               />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-white truncate">{nowPlaying.name || nowPlaying.title}</p>
-              <p className="text-[10px] text-[#606070] truncate">
-                {nowPlaying.artists?.map((a) => a.name).join(", ") || nowPlaying.artist}
-              </p>
+              <p className="text-xs font-medium text-white truncate">{nowPlaying.title}</p>
+              <p className="text-[10px] text-[#606070] truncate">{nowPlaying.artist}</p>
             </div>
             <Button
               data-testid="mini-play-pause"
               variant="ghost"
               size="icon"
-              onClick={() => isPlaying ? pauseTrack() : playTrack(nowPlaying)}
-              className="text-white"
+              onClick={togglePlayPause}
+              className="text-white rounded-full"
             >
               {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="white" />}
+            </Button>
+            <Button
+              data-testid="mini-studio-btn"
+              variant="ghost"
+              size="icon"
+              onClick={() => handleSelectForStudio(nowPlaying)}
+              className="text-[#8A2BE2] hover:text-[#00E5FF] rounded-full"
+              title="Open in Studio"
+            >
+              <Music2 className="w-4 h-4" />
             </Button>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, formatMs }) {
+  const isActive = nowPlaying?.id === track.id;
+  return (
+    <div
+      className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${
+        isActive ? "bg-[#8A2BE2]/10 border border-[#8A2BE2]/20" : "hover:bg-white/5"
+      }`}
+      data-testid={`track-row-${idx}`}
+    >
+      {/* Number / Play button */}
+      <div className="w-8 text-center flex-shrink-0">
+        <span className="text-xs text-[#606070] group-hover:hidden">{idx + 1}</span>
+        <button
+          onClick={() => onPlay(track)}
+          className="hidden group-hover:block"
+          data-testid={`play-btn-${idx}`}
+        >
+          <Play className="w-4 h-4 text-[#8A2BE2]" fill="#8A2BE2" />
+        </button>
+      </div>
+
+      {/* Cover art */}
+      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+        {track.cover_url || track.cover_thumb ? (
+          <img
+            src={track.cover_thumb || track.cover_url}
+            alt={track.title}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
+            <Disc3 className="w-5 h-5 text-[#606070]" />
+          </div>
+        )}
+      </div>
+
+      {/* Track info */}
+      <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onPlay(track)}>
+        <p className={`text-sm font-medium truncate ${isActive ? "text-[#8A2BE2]" : "text-white"}`}>
+          {track.title}
+        </p>
+        <p className="text-xs text-[#606070] truncate">{track.artist}</p>
+      </div>
+
+      {/* Duration */}
+      <span className="text-xs text-[#606070] flex-shrink-0 hidden sm:block">
+        {formatMs(track.duration_ms)}
+      </span>
+
+      {/* Studio button */}
+      <Button
+        data-testid={`studio-btn-${idx}`}
+        onClick={() => onStudio(track)}
+        variant="ghost"
+        size="icon"
+        className="text-[#8A2BE2]/50 hover:text-[#00E5FF] hover:bg-[#8A2BE2]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Open in Studio"
+      >
+        <Music2 className="w-4 h-4" />
+      </Button>
     </div>
   );
 }
