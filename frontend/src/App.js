@@ -8,6 +8,7 @@ import EditSharePage from "@/pages/EditSharePage";
 import StreamPage from "@/pages/StreamPage";
 import BattleArena from "@/pages/BattleArena";
 import PlaylistsPage from "@/pages/PlaylistsPage";
+import DuetStudio from "@/pages/DuetStudio";
 import BottomNav from "@/components/BottomNav";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -17,6 +18,7 @@ function App() {
   const [currentSong, setCurrentSong] = useState(null);
   const [currentView, setCurrentView] = useState("stream");
   const [editingRecording, setEditingRecording] = useState(null);
+  const [duetData, setDuetData] = useState(null);
 
   const handleSongRecognized = useCallback((song) => {
     setCurrentSong(song);
@@ -37,6 +39,11 @@ function App() {
     setCurrentView(view);
   }, []);
 
+  const handleStartDuet = useCallback((battle, cover) => {
+    setDuetData({ battle, cover });
+    setCurrentView("duet");
+  }, []);
+
   const renderView = () => {
     switch (currentView) {
       case "home":
@@ -44,9 +51,21 @@ function App() {
       case "stream":
         return <StreamPage onTrackSelect={handleTrackSelect} />;
       case "battle":
-        return <BattleArena currentSong={currentSong} />;
+        return <BattleArena currentSong={currentSong} onStartDuet={handleStartDuet} />;
       case "playlists":
         return <PlaylistsPage onTrackSelect={handleTrackSelect} />;
+      case "duet":
+        return (
+          <DuetStudio
+            battle={duetData?.battle}
+            cover={duetData?.cover}
+            onRecordingComplete={(rec) => {
+              setEditingRecording(rec);
+              setCurrentView("edit");
+            }}
+            onBack={() => setCurrentView("battle")}
+          />
+        );
       case "studio":
         return (
           <PlayerStudio

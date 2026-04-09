@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 
-export default function BattleArena({ currentSong }) {
+export default function BattleArena({ currentSong, onStartDuet }) {
   const [view, setView] = useState("list"); // list | detail | submit | leaderboard
   const [battles, setBattles] = useState([]);
   const [selectedBattle, setSelectedBattle] = useState(null);
@@ -258,10 +258,13 @@ export default function BattleArena({ currentSong }) {
                   <p className="text-sm font-medium text-white truncate">{cover.title}</p>
                   <p className="text-xs text-[#606070]">by {cover.username}</p>
                 </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-1 flex-shrink-0">
                   <span className="text-sm font-bold text-[#00E5FF]">{cover.votes}</span>
                   <Button data-testid={`vote-cover-${idx}`} onClick={() => voteCover(cover.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#00E5FF] hover:bg-[#00E5FF]/10 rounded-full">
                     <ThumbsUp className="w-4 h-4" />
+                  </Button>
+                  <Button data-testid={`duet-cover-${idx}`} onClick={() => onStartDuet && onStartDuet(selectedBattle, cover)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#8A2BE2] hover:bg-[#8A2BE2]/10 rounded-full" title="Duet with this cover">
+                    <Users className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

@@ -824,6 +824,84 @@ async def delete_playlist(playlist_id: str):
         raise HTTPException(status_code=404, detail="Playlist not found")
     return {"success": True, "message": "Playlist deleted"}
 
+# --- Duet Endpoints ---
+
+class DuetCreate(BaseModel):
+    battle_id: str
+    cover_id: str
+    username: str
+    partner_username: str = ""
+    title: str = ""
+
+class DuetRecord(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    battle_id: str
+    cover_id: str
+    username: str
+    partner_username: str = ""
+    title: str = ""
+    audio_data: str = ""
+    song_title: str = ""
+    song_artist: str = ""
+    song_cover_url: str = ""
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+@api_router.post("/duets")
+async def create_duet(username: str = Form(...), battle_id: str = Form(...), cover_id: str = Form(...), title: str = Form(""), file: UploadFile = File(...)):
+    """Save a duet recording."""
+    battle = await db.battles.find_one({"id": battle_id}, {"_id": 0})
+    if not battle:
+        raise HTTPException(status_code=404, detail="Battle not found")
+
+    cover = await db.covers.find_one({"id": cover_id, "battle_id": battle_id}, {"_id": 0, "audio_data": 0})
+    if not cover:
+        raise HTTPException(status_code=404, detail="Cover not found")
+
+    audio_bytes = await file.read()
+    audio_b64 = base64.b64encode(audio_bytes).decode('utf-8')
+
+    duet = DuetRecord(
+        battle_id=battle_id,
+        cover_id=cover_id,
+        username=username,
+        partner_username=cover.get("username", ""),
+        title=title or f"{username} x {cover.get('username', 'Unknown')} Duet",
+        audio_data=audio_b64,
+        song_title=battle.get("song_title", ""),
+        song_artist=battle.get("song_artist", ""),
+        song_cover_url=battle.get("song_cover_url", ""),
+    )
+    doc = duet.model_dump()
+    await db.duets.insert_one(doc)
+    stored = await db.duets.find_one({"id": duet.id}, {"_id": 0, "audio_data": 0})
+    return {"success": True, "duet": stored}
+
+@api_router.get("/duets")
+async def list_duets(username: str = "", limit: int = 20):
+    """List duets, optionally filtered by username."""
+    query = {}
+    if username:
+        query["username"] = username
+    duets = await db.duets.find(query, {"_id": 0, "audio_data": 0}).sort("created_at", -1).to_list(limit)
+    return {"success": True, "duets": duets}
+
+@api_router.get("/duets/{duet_id}")
+async def get_duet(duet_id: str):
+    """Get a duet by ID (without audio data)."""
+    duet = await db.duets.find_one({"id": duet_id}, {"_id": 0, "audio_data": 0})
+    if not duet:
+        raise HTTPException(status_code=404, detail="Duet not found")
+    return {"success": True, "duet": duet}
+
+@api_router.get("/duets/{duet_id}/audio")
+async def get_duet_audio(duet_id: str):
+    """Get the audio data for a duet."""
+    duet = await db.duets.find_one({"id": duet_id}, {"_id": 0})
+    if not duet:
+        raise HTTPException(status_code=404, detail="Duet not found")
+    return {"success": True, "audio_data": duet.get("audio_data", "")}
+
 # Include router
 app.include_router(api_router)
 
