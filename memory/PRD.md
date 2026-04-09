@@ -1,76 +1,39 @@
-# AuraSplit - Music Recognition & Creation App
+# SIDETRACK Studios - Music Recognition, Streaming & Creation App
 
 ## Original Problem Statement
-Build a music app like Shazam that can find songs. After identification, allow users to separate vocals and instruments (stems). Users can mute specific stems and record themselves over the backing track. Features include lyrics display with chord progressions (default split screen: guitar + lyrics), audio-only and video recording modes, cut/editing features, and social media sharing.
+Build a music app like Shazam + Tidal called SIDETRACK Studios. Features: song recognition, music streaming (search/browse/play), stem separation (vocals/guitar/bass/drums), stem mixer, split screen guitar chords + lyrics, audio/video recording with editing, social media sharing, and shared listening (two phones synced).
 
 ## Architecture
-- **Frontend**: React 19 + Tailwind CSS + Shadcn/UI
-- **Backend**: FastAPI + MongoDB (Motor async driver)
-- **APIs**: Shazam (RapidAPI), Replicate (Demucs), Genius, Musixmatch
+- **Frontend**: React + Tailwind CSS + Shadcn/UI
+- **Backend**: FastAPI + MongoDB + Replicate (Demucs)
+- **Music API**: iTunes Search API (no keys needed)
+- **Stem Separation**: Replicate Demucs (WORKING)
+- **Song Recognition**: Shazam via RapidAPI
 
-## User Personas
-1. **Musicians** - Want to learn songs, see chords, and practice along
-2. **Content Creators** - Want to create covers and share on social media
-3. **Music Enthusiasts** - Want to identify songs and explore their components
-
-## Core Requirements (Static)
-- Song recognition via audio capture
-- Multi-track stem separation (vocals, guitar, bass, drums)
-- Split-screen chord + lyrics view
-- Audio and video recording over backing tracks
-- Recording editing (trim/cut)
-- Social media sharing
-
-## What's Been Implemented (2026-04-08)
-- [x] Home page with "Tap to Recognize" button and animated radar rings
-- [x] Shazam API integration for song recognition (with demo fallback)
-- [x] **NEW: Spotify Streaming page (AuraStream)** with search, browse, and playback
-- [x] **NEW: 15+ Spotify API endpoints** (search, browse, OAuth, playback controls)
-- [x] **NEW: Spotify Web Playback SDK** integration for in-browser streaming (Premium)
-- [x] **NEW: 5-tab bottom navigation** (Stream, Discover, Studio, Record, Share)
-- [x] Player Studio with song info display
-- [x] Stem Mixer with 4 vertical sliders (vocals, guitar, bass, drums) + mute toggles
-- [x] Real Replicate Demucs integration for stem separation
-- [x] Upload Song button for file-based stem separation
-- [x] Audio playback of separated stems with volume/mute control
-- [x] Split Screen: Guitar chords panel + Lyrics panel with synchronized scrolling
-- [x] Chord diagram visualizations
-- [x] Audio-only recording mode (MediaRecorder API)
-- [x] Video recording mode (camera + audio)
-- [x] Waveform editor with trim controls
-- [x] Social media share buttons (Instagram, TikTok, Twitter/X, YouTube)
-- [x] Download recording functionality
-- [x] Dark neon theme (black, indigo, violet)
-- [x] MongoDB storage for songs, stems, and recordings
-
-## Integration Status
-- **Shazam API**: Configured (key may be truncated - using demo fallback)
-- **Replicate Demucs**: FULLY INTEGRATED - needs billing credit at replicate.com/account/billing
-- **Spotify Web API**: Endpoints ready - needs valid Client ID + Secret from developer.spotify.com/dashboard
-- **Spotify Web Playback SDK**: Loaded and ready for Premium streaming
-- **Lyrics/Chords**: MOCKED (needs Genius/Musixmatch API keys)
+## What's Been Implemented
+- [x] Music streaming page with real iTunes Top Albums and Top Songs
+- [x] Song search returning real tracks with 30-second previews
+- [x] Audio playback with now-playing mini bar
+- [x] Song recognition (Shazam with demo fallback)
+- [x] Replicate Demucs stem separation (WORKING - billing active)
+- [x] Stem Mixer (4-track: vocals/guitar/bass/drums) with mute/solo
+- [x] Split Screen: Guitar chords + Lyrics (mock data)
+- [x] Audio recording mode + Video recording mode
+- [x] Waveform trim editor
+- [x] Social media sharing (Instagram, TikTok, Twitter/X, YouTube)
+- [x] 5-tab navigation (Stream, Discover, Studio, Record, Share)
+- [x] SIDETRACK Studios branding with dark neon theme
 
 ## Prioritized Backlog
-### P0 (Critical)
-- [ ] Real Shazam API key (current one may be truncated)
-- [ ] Replicate API integration for actual stem separation
-- [ ] Real lyrics fetching via Genius/Musixmatch APIs
+### P0
+- [ ] Shared listening feature (Listen Together rooms)
+- [ ] Real lyrics via Genius/Musixmatch APIs
 
-### P1 (High)
-- [ ] Audio playback with actual stem mixing (Web Audio API)
-- [ ] Actual audio/video mixing (merge recording with backing track)
-- [ ] Backend video processing with FFmpeg
+### P1
+- [ ] Full Spotify integration (when user gets Client ID/Secret)
+- [ ] Audio mixing: merge user recording with stems for export
 
-### P2 (Medium)
-- [ ] Song history/library page
-- [ ] More chord diagrams for all common chords
-- [ ] Better waveform visualization
-- [ ] Export in different formats (MP4, MP3)
-- [ ] User accounts and saved recordings
-
-## Next Tasks
-1. Get full API keys from user and integrate real Shazam recognition
-2. Integrate Replicate Demucs for actual stem separation
-3. Add Web Audio API for real-time stem mixing and playback
-4. Integrate Genius/Musixmatch for real lyrics + chords
-5. Add FFmpeg backend processing for audio/video mixing
+### P2
+- [ ] User accounts
+- [ ] Saved recordings library
+- [ ] Playlist creation
