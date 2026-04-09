@@ -6,6 +6,7 @@ import PlayerStudio from "@/pages/PlayerStudio";
 import RecordingStudio from "@/pages/RecordingStudio";
 import EditSharePage from "@/pages/EditSharePage";
 import StreamPage from "@/pages/StreamPage";
+import BattleArena from "@/pages/BattleArena";
 import BottomNav from "@/components/BottomNav";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -41,6 +42,8 @@ function App() {
         return <HomePage onSongRecognized={handleSongRecognized} />;
       case "stream":
         return <StreamPage onTrackSelect={handleTrackSelect} />;
+      case "battle":
+        return <BattleArena currentSong={currentSong} />;
       case "studio":
         return (
           <PlayerStudio

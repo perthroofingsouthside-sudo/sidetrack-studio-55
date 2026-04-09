@@ -1,12 +1,12 @@
-import { Home, Music2, Mic2, Share2, Radio } from "lucide-react";
+import { Home, Music2, Mic2, Share2, Radio, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { key: "stream", icon: Radio, label: "Stream", alwaysEnabled: true },
   { key: "home", icon: Home, label: "Discover", alwaysEnabled: true },
+  { key: "battle", icon: Swords, label: "Battle", alwaysEnabled: true },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
-  { key: "edit", icon: Share2, label: "Share" },
 ];
 
 export default function BottomNav({ currentView, onNavigate, hasSong }) {

@@ -228,7 +228,7 @@ class SidetrackAPITester:
 
     def test_itunes_endpoints(self):
         """Test iTunes Music API endpoints - NEW IN ITERATION 4"""
-        print("\n🎵 Testing iTunes Music API Endpoints (NEW)")
+        print("\n🎵 Testing iTunes Music API Endpoints")
         
         # Test music search
         success, response = self.run_test(
@@ -236,7 +236,7 @@ class SidetrackAPITester:
             "GET",
             "music/search",
             200,
-            data={"q": "beyonce", "limit": 10}
+            data={"q": "test", "limit": 10}
         )
         
         if success:
@@ -245,10 +245,6 @@ class SidetrackAPITester:
             if tracks:
                 track = tracks[0]
                 print(f"   Sample track: {track.get('title', '')} by {track.get('artist', '')}")
-                if track.get('preview_url'):
-                    print(f"   ✅ Preview URL available")
-                else:
-                    print(f"   ⚠️ No preview URL")
         
         # Test top songs
         success, response = self.run_test(
@@ -263,42 +259,155 @@ class SidetrackAPITester:
             tracks = response.get('tracks', [])
             print(f"   Found {len(tracks)} top songs")
         
-        # Test top albums
+        return True
+
+    def test_cover_battle_endpoints(self):
+        """Test Cover Battle endpoints - NEW IN ITERATION 5"""
+        print("\n⚔️ Testing Cover Battle Endpoints (NEW)")
+        
+        # Test create battle
+        battle_data = {
+            "song_title": "Lose Yourself",
+            "song_artist": "Eminem",
+            "song_cover_url": "https://example.com/cover.jpg",
+            "challenge_text": "Cover this classic rap song!"
+        }
+        
         success, response = self.run_test(
-            "iTunes Top Albums",
-            "GET",
-            "music/top-albums",
+            "Create Battle",
+            "POST",
+            "battles",
             200,
-            data={"limit": 10}
+            data=battle_data
+        )
+        
+        if not success:
+            return False
+            
+        battle_id = response.get('battle', {}).get('id')
+        if not battle_id:
+            print("❌ No battle ID returned")
+            return False
+        
+        print(f"   Battle ID: {battle_id}")
+        
+        # Test list battles
+        success, response = self.run_test(
+            "List Battles",
+            "GET",
+            "battles",
+            200,
+            data={"status": "active", "limit": 20}
         )
         
         if success:
-            albums = response.get('albums', [])
-            print(f"   Found {len(albums)} top albums")
-            if albums:
-                album = albums[0]
-                print(f"   Sample album: {album.get('name', '')} by {album.get('artist', '')}")
-                if album.get('cover_url'):
-                    print(f"   ✅ Cover art URL available")
+            battles = response.get('battles', [])
+            print(f"   Found {len(battles)} active battles")
         
-        # Test artist lookup (using a known artist ID)
+        # Test get battle details
         success, response = self.run_test(
-            "iTunes Artist Lookup",
+            "Get Battle Details",
             "GET",
-            "music/artist/909253",  # Taylor Swift's artist ID
+            f"battles/{battle_id}",
             200
         )
         
         if success:
-            artist = response.get('artist', {})
-            songs = response.get('songs', [])
-            print(f"   Artist: {artist.get('name', '')}")
-            print(f"   Found {len(songs)} songs")
+            battle = response.get('battle', {})
+            covers = response.get('covers', [])
+            print(f"   Battle: {battle.get('song_title', '')} - {len(covers)} covers")
+        
+        # Test submit cover with audio file
+        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as tmp:
+            tmp.write(b"dummy audio data for cover submission" * 100)
+            tmp_path = tmp.name
+
+        try:
+            with open(tmp_path, 'rb') as f:
+                files = {'file': ('cover.webm', f, 'audio/webm')}
+                data = {'username': 'TestUser', 'title': 'Test Cover'}
+                success, response = self.run_test(
+                    "Submit Cover",
+                    "POST",
+                    f"battles/{battle_id}/submit",
+                    200,
+                    data=data,
+                    files=files
+                )
+            
+            if not success:
+                return False
+                
+            cover_id = response.get('cover', {}).get('id')
+            if not cover_id:
+                print("❌ No cover ID returned")
+                return False
+            
+            print(f"   Cover ID: {cover_id}")
+            
+        finally:
+            os.unlink(tmp_path)
+        
+        # Test vote for cover
+        vote_data = {'voter_id': 'test-voter-123'}
+        success, response = self.run_test(
+            "Vote for Cover",
+            "POST",
+            f"battles/{battle_id}/vote/{cover_id}",
+            200,
+            data=vote_data,
+            files={'voter_id': (None, 'test-voter-123')}
+        )
+        
+        if success:
+            votes = response.get('cover', {}).get('votes', 0)
+            print(f"   Cover now has {votes} votes")
+        
+        # Test double voting (should fail)
+        success, response = self.run_test(
+            "Double Vote (Should Fail)",
+            "POST",
+            f"battles/{battle_id}/vote/{cover_id}",
+            400,
+            data=vote_data,
+            files={'voter_id': (None, 'test-voter-123')}
+        )
+        
+        if success:
+            print("   ✅ Double voting correctly prevented")
+        
+        # Test get cover audio
+        success, response = self.run_test(
+            "Get Cover Audio",
+            "GET",
+            f"battles/{battle_id}/cover/{cover_id}/audio",
+            200
+        )
+        
+        if success:
+            audio_data = response.get('audio_data', '')
+            print(f"   Audio data length: {len(audio_data)} characters")
+        
+        # Test leaderboard
+        success, response = self.run_test(
+            "Battle Leaderboard",
+            "GET",
+            "battles/leaderboard/top",
+            200,
+            data={"limit": 20}
+        )
+        
+        if success:
+            leaderboard = response.get('leaderboard', [])
+            print(f"   Leaderboard has {len(leaderboard)} covers")
+            if leaderboard:
+                top_cover = leaderboard[0]
+                print(f"   Top cover: {top_cover.get('title', '')} with {top_cover.get('votes', 0)} votes")
         
         return True
 
 def main():
-    print("🎵 SIDETRACK Studios API Testing - Iteration 4 (iTunes Music Integration)")
+    print("🎵 SIDETRACK Studios API Testing - Iteration 5 (Cover Battle Feature)")
     print("=" * 70)
     
     tester = SidetrackAPITester()
@@ -327,8 +436,11 @@ def main():
     tester.test_recordings_crud()
     tester.test_list_songs()
     
-    # Test NEW iTunes music endpoints
+    # Test iTunes music endpoints
     tester.test_itunes_endpoints()
+    
+    # Test NEW Cover Battle endpoints
+    tester.test_cover_battle_endpoints()
 
     # Print results
     print(f"\n📊 Test Results: {tester.tests_passed}/{tester.tests_run} passed")

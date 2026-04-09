@@ -123,6 +123,39 @@ class Recording(BaseModel):
     audio_data: str = ""
     created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
 
+# --- Cover Battle Models ---
+class BattleCreate(BaseModel):
+    song_title: str
+    song_artist: str = ""
+    song_cover_url: str = ""
+    challenge_text: str = ""
+
+class Battle(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    song_title: str
+    song_artist: str = ""
+    song_cover_url: str = ""
+    challenge_text: str = ""
+    status: str = "active"
+    cover_count: int = 0
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class CoverSubmit(BaseModel):
+    username: str
+    title: str = ""
+
+class Cover(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    battle_id: str
+    username: str
+    title: str = ""
+    audio_data: str = ""
+    votes: int = 0
+    voters: List[str] = []
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
 # --- Shazam Integration ---
 async def recognize_with_shazam(audio_bytes: bytes) -> Optional[dict]:
     """Send audio to Shazam API for recognition."""
@@ -596,6 +629,99 @@ async def music_album(album_id: str):
         },
         "tracks": tracks,
     }
+
+# --- Cover Battle Endpoints ---
+
+@api_router.post("/battles")
+async def create_battle(battle: BattleCreate):
+    """Create a new cover battle for a song."""
+    b = Battle(**battle.model_dump())
+    doc = b.model_dump()
+    await db.battles.insert_one(doc)
+    stored = await db.battles.find_one({"id": b.id}, {"_id": 0})
+    return {"success": True, "battle": stored}
+
+@api_router.get("/battles")
+async def list_battles(status: str = "active", limit: int = 20):
+    """List battles with cover counts."""
+    query = {}
+    if status:
+        query["status"] = status
+    battles = await db.battles.find(query, {"_id": 0}).sort("created_at", -1).to_list(limit)
+    return {"success": True, "battles": battles}
+
+@api_router.get("/battles/{battle_id}")
+async def get_battle(battle_id: str):
+    """Get battle with all covers sorted by votes."""
+    battle = await db.battles.find_one({"id": battle_id}, {"_id": 0})
+    if not battle:
+        raise HTTPException(status_code=404, detail="Battle not found")
+    covers = await db.covers.find({"battle_id": battle_id}, {"_id": 0, "audio_data": 0}).sort("votes", -1).to_list(100)
+    return {"success": True, "battle": battle, "covers": covers}
+
+@api_router.post("/battles/{battle_id}/submit")
+async def submit_cover(battle_id: str, username: str = Form(...), title: str = Form(""), file: UploadFile = File(...)):
+    """Submit a cover recording to a battle."""
+    battle = await db.battles.find_one({"id": battle_id}, {"_id": 0})
+    if not battle:
+        raise HTTPException(status_code=404, detail="Battle not found")
+    if battle.get("status") != "active":
+        raise HTTPException(status_code=400, detail="Battle is no longer active")
+
+    audio_bytes = await file.read()
+    audio_b64 = base64.b64encode(audio_bytes).decode('utf-8')
+
+    cover = Cover(battle_id=battle_id, username=username, title=title or f"{username}'s Cover", audio_data=audio_b64)
+    doc = cover.model_dump()
+    await db.covers.insert_one(doc)
+
+    await db.battles.update_one({"id": battle_id}, {"$inc": {"cover_count": 1}})
+
+    stored = await db.covers.find_one({"id": cover.id}, {"_id": 0, "audio_data": 0})
+    return {"success": True, "cover": stored}
+
+@api_router.post("/battles/{battle_id}/vote/{cover_id}")
+async def vote_cover(battle_id: str, cover_id: str, voter_id: str = Form(...)):
+    """Vote for a cover. Each voter can only vote once per cover."""
+    cover = await db.covers.find_one({"id": cover_id, "battle_id": battle_id})
+    if not cover:
+        raise HTTPException(status_code=404, detail="Cover not found")
+
+    if voter_id in cover.get("voters", []):
+        raise HTTPException(status_code=400, detail="Already voted for this cover")
+
+    await db.covers.update_one(
+        {"id": cover_id},
+        {"$inc": {"votes": 1}, "$push": {"voters": voter_id}}
+    )
+    updated = await db.covers.find_one({"id": cover_id}, {"_id": 0, "audio_data": 0})
+    return {"success": True, "cover": updated}
+
+@api_router.get("/battles/{battle_id}/cover/{cover_id}/audio")
+async def get_cover_audio(battle_id: str, cover_id: str):
+    """Get the audio data for a cover."""
+    cover = await db.covers.find_one({"id": cover_id, "battle_id": battle_id}, {"_id": 0})
+    if not cover:
+        raise HTTPException(status_code=404, detail="Cover not found")
+    return {"success": True, "audio_data": cover.get("audio_data", "")}
+
+@api_router.get("/battles/leaderboard/top")
+async def battle_leaderboard(limit: int = 20):
+    """Get top covers across all battles."""
+    pipeline = [
+        {"$project": {"_id": 0, "audio_data": 0}},
+        {"$sort": {"votes": -1}},
+        {"$limit": limit}
+    ]
+    top_covers = await db.covers.aggregate(pipeline).to_list(limit)
+    # Enrich with battle info
+    for cover in top_covers:
+        battle = await db.battles.find_one({"id": cover.get("battle_id")}, {"_id": 0})
+        if battle:
+            cover["song_title"] = battle.get("song_title", "")
+            cover["song_artist"] = battle.get("song_artist", "")
+            cover["song_cover_url"] = battle.get("song_cover_url", "")
+    return {"success": True, "leaderboard": top_covers}
 
 # Include router
 app.include_router(api_router)
