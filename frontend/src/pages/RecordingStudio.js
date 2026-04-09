@@ -1,12 +1,31 @@
-import { useState, useRef, useEffect, useCallback } from "react";
-import { Mic, Video, Square, ArrowLeft, Camera, CameraOff } from "lucide-react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { Mic, Video, Square, ArrowLeft, Camera, Maximize, SplitSquareVertical, Type, Guitar, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { API } from "@/App";
+import axios from "axios";
+
+const LAYOUTS = [
+  { key: "camera", label: "Camera", icon: Camera, desc: "Full selfie view" },
+  { key: "split", label: "Split", icon: SplitSquareVertical, desc: "Camera + Lyrics" },
+  { key: "lyrics", label: "Lyrics", icon: Type, desc: "Full lyrics view" },
+  { key: "guitar", label: "Guitar", icon: Guitar, desc: "Full guitar tabs" },
+];
+
+const SOCIAL_LINKS = [
+  { key: "tiktok", label: "TikTok Live", color: "#00F2EA", url: "https://www.tiktok.com/live", icon: "M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" },
+  { key: "instagram", label: "IG Live", color: "#E1306C", url: "https://www.instagram.com/", icon: "M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8A1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5a5 5 0 0 1-5 5a5 5 0 0 1-5-5a5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3a3 3 0 0 0 3 3a3 3 0 0 0 3-3a3 3 0 0 0-3-3Z" },
+  { key: "youtube", label: "YT Live", color: "#FF0000", url: "https://studio.youtube.com/channel/UC/livestreaming", icon: "m10 15 5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73Z" },
+];
 
 export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
-  const [mode, setMode] = useState("audio"); // "audio" or "video"
+  const [mode, setMode] = useState("audio");
+  const [layout, setLayout] = useState("split");
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
+  const [lyrics, setLyrics] = useState(null);
+  const [currentTime, setCurrentTime] = useState(0);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
@@ -14,73 +33,54 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    return () => {
-      stopAllStreams();
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
+    if (song?.id) fetchLyrics();
+    return () => { stopAllStreams(); if (timerRef.current) clearInterval(timerRef.current); };
+  }, [song?.id]);
+
+  const fetchLyrics = async () => {
+    try {
+      const res = await axios.get(`${API}/songs/${song.id}/lyrics`);
+      if (res.data.success) setLyrics(res.data);
+    } catch (err) { /* mock data will be used */ }
+  };
 
   const stopAllStreams = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-    }
+    if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
   };
 
   const startRecording = async () => {
     try {
-      const constraints = mode === "video"
+      const needsVideo = mode === "video" || (layout !== "lyrics" && layout !== "guitar");
+      const constraints = needsVideo
         ? { audio: true, video: { facingMode: "user", width: 1280, height: 720 } }
         : { audio: true };
-
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
-
-      if (mode === "video" && videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-
-      const mimeType = mode === "video" ? "video/webm" : "audio/webm";
+      if (needsVideo && videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
+      const mimeType = needsVideo ? "video/webm" : "audio/webm";
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunksRef.current.push(e.data);
-      };
-
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
       mediaRecorder.onstop = () => {
-        const mimeType = mode === "video" ? "video/webm" : "audio/webm";
         const blob = new Blob(chunksRef.current, { type: mimeType });
         const url = URL.createObjectURL(blob);
         stopAllStreams();
-
         onRecordingComplete({
-          id: crypto.randomUUID(),
-          songId: song?.id,
-          songTitle: song?.title || "Unknown",
-          type: mode,
-          blob,
-          url,
-          duration,
-          createdAt: new Date().toISOString(),
+          id: crypto.randomUUID(), songId: song?.id, songTitle: song?.title || "Unknown",
+          type: needsVideo ? "video" : "audio", blob, url, duration, createdAt: new Date().toISOString(),
         });
       };
-
       mediaRecorder.start();
       setIsRecording(true);
       setDuration(0);
-
+      setCurrentTime(0);
       timerRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1);
+        setDuration((p) => p + 1);
+        setCurrentTime((p) => p + 1);
       }, 1000);
     } catch (err) {
-      toast.error(
-        mode === "video"
-          ? "Camera/microphone access denied"
-          : "Microphone access denied"
-      );
+      toast.error("Camera/microphone access denied");
     }
   };
 
@@ -92,149 +92,189 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
     }
   }, []);
 
-  const formatDuration = (s) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
-  };
+  const fmtDur = (s) => `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
+
+  const currentChord = useMemo(() => {
+    if (!lyrics?.chords) return null;
+    for (let i = lyrics.chords.length - 1; i >= 0; i--) { if (currentTime >= lyrics.chords[i].time) return lyrics.chords[i]; }
+    return lyrics.chords[0] || null;
+  }, [lyrics?.chords, currentTime]);
+
+  const activeLyricIdx = useMemo(() => {
+    if (!lyrics?.lyrics) return 0;
+    for (let i = lyrics.lyrics.length - 1; i >= 0; i--) { if (currentTime >= lyrics.lyrics[i].time) return i; }
+    return 0;
+  }, [lyrics?.lyrics, currentTime]);
+
+  const showCamera = layout === "camera" || layout === "split";
+  const showLyrics = layout === "lyrics" || layout === "split";
+  const showGuitar = layout === "guitar";
 
   return (
-    <div className="min-h-screen bg-[#05050A] flex flex-col" data-testid="recording-studio">
+    <div className="min-h-screen bg-[#05050A] flex flex-col max-w-full overflow-x-hidden" data-testid="recording-studio">
       {/* Header */}
-      <div className="glass-heavy px-4 py-3 flex items-center gap-3">
-        <Button
-          data-testid="back-btn"
-          variant="ghost"
-          size="icon"
-          onClick={onBack}
-          className="text-[#A0A0B0] hover:text-white"
-        >
-          <ArrowLeft className="w-5 h-5" />
+      <div className="glass-heavy px-3 py-2 flex items-center gap-2 flex-shrink-0">
+        <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#A0A0B0] hover:text-white w-8 h-8">
+          <ArrowLeft className="w-4 h-4" />
         </Button>
-        <div>
-          <h2 className="font-['Outfit'] text-lg font-bold">Recording Studio</h2>
-          {song && (
-            <p className="text-xs text-[#A0A0B0]">{song.title} - {song.artist}</p>
-          )}
+        <div className="flex-1 min-w-0">
+          <h2 className="font-['Outfit'] text-base font-bold truncate">Recording Studio</h2>
+          {song && <p className="text-[10px] text-[#A0A0B0] truncate">{song.title} - {song.artist}</p>}
         </div>
-      </div>
-
-      {/* Mode Toggle */}
-      <div className="px-4 py-4 flex gap-3" data-testid="mode-toggle">
-        <Button
-          data-testid="audio-mode-btn"
-          onClick={() => { if (!isRecording) setMode("audio"); }}
-          className={`flex-1 gap-2 rounded-2xl h-12 transition-all ${
-            mode === "audio"
-              ? "bg-[#8A2BE2] text-white glow-violet"
-              : "bg-[#12121A] text-[#A0A0B0] border border-white/10 hover:border-[#8A2BE2]/40"
-          }`}
-        >
-          <Mic className="w-4 h-4" />
-          Audio Only
-        </Button>
-        <Button
-          data-testid="video-mode-btn"
-          onClick={() => { if (!isRecording) setMode("video"); }}
-          className={`flex-1 gap-2 rounded-2xl h-12 transition-all ${
-            mode === "video"
-              ? "bg-[#8A2BE2] text-white glow-violet"
-              : "bg-[#12121A] text-[#A0A0B0] border border-white/10 hover:border-[#8A2BE2]/40"
-          }`}
-        >
-          <Video className="w-4 h-4" />
-          Video
-        </Button>
-      </div>
-
-      {/* Video Preview / Audio Visualizer */}
-      <div className="flex-1 px-4 flex items-center justify-center">
-        {mode === "video" ? (
-          <div className="relative w-full max-w-md aspect-[9/16] sm:aspect-video rounded-2xl overflow-hidden bg-[#12121A] border border-white/10">
-            <video
-              ref={videoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover"
-              data-testid="video-preview"
-            />
-            {!isRecording && !streamRef.current && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#12121A]">
-                <Camera className="w-12 h-12 text-[#8A2BE2] mb-3" />
-                <p className="text-sm text-[#A0A0B0]">Camera preview will appear here</p>
-              </div>
-            )}
-            {isRecording && (
-              <div className="absolute top-4 right-4 flex items-center gap-2">
-                <div className="w-3 h-3 rounded-full bg-red-500 animate-rec-pulse" />
-                <span className="text-white text-sm font-mono glass px-2 py-1 rounded-lg">
-                  {formatDuration(duration)}
-                </span>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="w-full max-w-md" data-testid="audio-visualizer-section">
-            {/* Audio recording visual */}
-            <div className="surface-card p-8 flex flex-col items-center">
-              <div className="relative mb-6">
-                <div className={`w-32 h-32 rounded-full flex items-center justify-center ${
-                  isRecording ? "bg-[#8A2BE2]/20" : "bg-[#12121A]"
-                } border border-white/10 transition-all`}>
-                  <Mic className={`w-12 h-12 ${isRecording ? "text-[#00E5FF]" : "text-[#8A2BE2]"}`} />
-                </div>
-                {isRecording && (
-                  <>
-                    <div className="absolute inset-0 w-32 h-32 rounded-full border border-[#8A2BE2]/30 animate-pulse-ring" />
-                    <div className="absolute -inset-4 w-40 h-40 rounded-full border border-[#8A2BE2]/15 animate-pulse-ring" style={{ animationDelay: "0.5s" }} />
-                  </>
-                )}
-              </div>
-              {isRecording && (
-                <div className="flex items-center gap-[2px] mb-4 h-10">
-                  {Array.from({ length: 30 }).map((_, i) => (
-                    <div
-                      key={i}
-                      className="w-[3px] bg-[#8A2BE2] rounded-full"
-                      style={{
-                        animation: "waveform 0.6s ease-in-out infinite",
-                        animationDelay: `${i * 0.04}s`,
-                        height: "4px",
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-              <span className="text-2xl font-mono text-white font-bold" data-testid="duration-display">
-                {formatDuration(duration)}
-              </span>
-              <span className="text-xs text-[#606070] mt-1">
-                {isRecording ? "Recording..." : "Ready to record"}
-              </span>
-            </div>
+        {isRecording && (
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-rec-pulse" />
+            <span className="text-xs font-mono text-white">{fmtDur(duration)}</span>
           </div>
         )}
       </div>
 
-      {/* Record Button */}
-      <div className="px-4 py-6 flex justify-center">
-        <Button
-          data-testid="record-start-stop-btn"
-          onClick={isRecording ? stopRecording : startRecording}
-          className={`w-20 h-20 rounded-full transition-all ${
-            isRecording
-              ? "bg-red-500 hover:bg-red-600 animate-rec-pulse"
-              : "bg-[#8A2BE2] hover:bg-[#9D4CDD] glow-violet hover:-translate-y-1"
-          }`}
-        >
-          {isRecording ? (
-            <Square className="w-8 h-8 text-white" />
-          ) : (
-            <Mic className="w-8 h-8 text-white" />
-          )}
-        </Button>
+      {/* Layout Selector - horizontal scrollable */}
+      <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
+        {LAYOUTS.map((l) => (
+          <Button key={l.key} data-testid={`layout-${l.key}`}
+            onClick={() => { if (!isRecording) setLayout(l.key); }}
+            className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
+              layout === l.key ? "bg-[#8A2BE2] text-white" : "bg-[#12121A] text-[#606070] border border-white/10"
+            }`}>
+            <l.icon className="w-3 h-3" />{l.label}
+          </Button>
+        ))}
       </div>
+
+      {/* Main content area - top/bottom horizontal layout */}
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {/* Top section: Camera or Guitar */}
+        {showCamera && (
+          <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden`} data-testid="camera-section">
+            <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
+            {!streamRef.current && !isRecording && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]">
+                <Camera className="w-10 h-10 text-[#8A2BE2]/40 mb-2" />
+                <p className="text-xs text-[#606070]">Camera activates when recording</p>
+              </div>
+            )}
+            {/* Overlay info */}
+            {isRecording && (
+              <div className="absolute bottom-2 left-2 glass px-2 py-1 rounded-lg">
+                <span className="text-[10px] text-[#00E5FF] font-mono">{fmtDur(duration)}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {showGuitar && (
+          <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4" data-testid="guitar-full">
+            {currentChord ? (
+              <div className="text-center animate-fade-in">
+                <div className="text-6xl sm:text-8xl font-['Outfit'] font-extrabold text-[#8A2BE2] glow-text-violet landscape-chords">
+                  {currentChord.chord}
+                </div>
+                <GuitarDiagram chord={currentChord.chord} />
+                {lyrics?.chords && (
+                  <div className="flex gap-3 mt-6 justify-center flex-wrap">
+                    {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
+                      <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#8A2BE2]/10 text-[#8A2BE2]/50">{c.chord}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-[#606070] text-sm">Guitar chords will appear here</p>
+            )}
+          </div>
+        )}
+
+        {/* Bottom section: Lyrics */}
+        {(showLyrics || layout === "split") && (
+          <div className={`${layout === "lyrics" ? "flex-1" : "h-[55%]"} bg-[#05050A] border-t border-white/5 overflow-hidden flex-shrink-0`} data-testid="lyrics-section">
+            <ScrollArea className="h-full">
+              <div className="p-4 space-y-2">
+                {layout === "split" && currentChord && (
+                  <div className="text-center mb-3 pb-3 border-b border-white/5">
+                    <span className="text-3xl font-['Outfit'] font-extrabold text-[#8A2BE2] glow-text-violet">{currentChord.chord}</span>
+                  </div>
+                )}
+                {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                  if (line.type === "section") return (
+                    <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#00E5FF]" : "text-[#606070]"}`}>{line.text}</p>
+                  );
+                  if (line.type === "break") return <div key={i} className="h-2" />;
+                  return (
+                    <p key={i} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
+                      i === activeLyricIdx ? "text-[#00E5FF] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#606070]/50" : "text-[#A0A0B0]"
+                    }`}>{line.text}</p>
+                  );
+                }) : (
+                  <p className="text-[#606070] text-sm text-center py-8">Lyrics will sync here during recording</p>
+                )}
+              </div>
+            </ScrollArea>
+          </div>
+        )}
+      </div>
+
+      {/* Record Button + Social Links - fixed at bottom */}
+      <div className="px-4 py-2 flex flex-col gap-2 flex-shrink-0 glass-heavy border-t border-white/5">
+        {/* Social Live Feed Links */}
+        <div className="flex items-center justify-center gap-2" data-testid="social-links">
+          {SOCIAL_LINKS.map((s) => (
+            <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer"
+              data-testid={`social-${s.key}`}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border border-white/10 hover:border-white/30 transition-all"
+              style={{ color: s.color }}
+            >
+              <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d={s.icon} />
+              </svg>
+              {s.label}
+              <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+            </a>
+          ))}
+        </div>
+
+        {/* Controls row */}
+        <div className="flex items-center justify-center gap-4">
+          {/* Mode toggle */}
+          <Button data-testid="toggle-mode-btn" variant="ghost" onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
+            className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#00E5FF]" : "text-[#A0A0B0]"}`}>
+            <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
+          </Button>
+
+          {/* Record button */}
+          <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
+            className={`w-16 h-16 rounded-full transition-all ${
+              isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-[#8A2BE2] hover:bg-[#9D4CDD] glow-violet"
+            }`}>
+            {isRecording ? <Square className="w-7 h-7 text-white" /> : <Mic className="w-7 h-7 text-white" />}
+          </Button>
+
+          {/* Duration */}
+          <span className="text-sm font-mono text-[#606070] w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GuitarDiagram({ chord }) {
+  const shapes = {
+    Am: [[-1,0,2,2,1,0]], C: [[-1,3,2,0,1,0]], G: [[3,2,0,0,0,3]], F: [[1,3,3,2,1,1]],
+    Dm: [[-1,-1,0,2,3,1]], Em: [[0,2,2,0,0,0]], D: [[-1,-1,0,2,3,2]], E: [[0,2,2,1,0,0]],
+    A: [[-1,0,2,2,2,0]], B: [[-1,2,4,4,4,2]],
+  };
+  const frets = shapes[chord]?.[0];
+  if (!frets) return null;
+  return (
+    <div className="mt-4 flex justify-center gap-1">
+      {frets.map((f, i) => (
+        <div key={i} className="flex flex-col items-center gap-1">
+          <span className="text-[8px] text-[#606070]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
+          {[1,2,3,4].map((pos) => (
+            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#8A2BE2] border-[#8A2BE2]" : "border-white/10"}`} />
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

@@ -130,6 +130,34 @@ class BattleCreate(BaseModel):
     song_cover_url: str = ""
     challenge_text: str = ""
 
+# --- Playlist Models ---
+class PlaylistCreate(BaseModel):
+    name: str
+    description: str = ""
+    is_public: bool = True
+    owner: str = "anonymous"
+
+class Playlist(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str = ""
+    is_public: bool = True
+    owner: str = "anonymous"
+    tracks: List[dict] = []
+    track_count: int = 0
+    cover_url: str = ""
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+class PlaylistAddTrack(BaseModel):
+    track_id: str
+    title: str
+    artist: str = ""
+    album: str = ""
+    cover_url: str = ""
+    preview_url: str = ""
+    duration_ms: int = 0
+
 class Battle(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
@@ -722,6 +750,79 @@ async def battle_leaderboard(limit: int = 20):
             cover["song_artist"] = battle.get("song_artist", "")
             cover["song_cover_url"] = battle.get("song_cover_url", "")
     return {"success": True, "leaderboard": top_covers}
+
+# --- Playlist Endpoints ---
+
+@api_router.post("/playlists")
+async def create_playlist(playlist: PlaylistCreate):
+    pl = Playlist(**playlist.model_dump())
+    doc = pl.model_dump()
+    await db.playlists.insert_one(doc)
+    stored = await db.playlists.find_one({"id": pl.id}, {"_id": 0})
+    return {"success": True, "playlist": stored}
+
+@api_router.get("/playlists")
+async def list_playlists(owner: str = "", public_only: bool = False):
+    query = {}
+    if owner:
+        query["owner"] = owner
+    if public_only:
+        query["is_public"] = True
+    playlists = await db.playlists.find(query, {"_id": 0, "tracks": 0}).sort("created_at", -1).to_list(50)
+    return {"success": True, "playlists": playlists}
+
+@api_router.get("/playlists/{playlist_id}")
+async def get_playlist(playlist_id: str):
+    pl = await db.playlists.find_one({"id": playlist_id}, {"_id": 0})
+    if not pl:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    return {"success": True, "playlist": pl}
+
+@api_router.post("/playlists/{playlist_id}/tracks")
+async def add_track_to_playlist(playlist_id: str, track: PlaylistAddTrack):
+    pl = await db.playlists.find_one({"id": playlist_id})
+    if not pl:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    track_doc = track.model_dump()
+    track_doc["added_at"] = datetime.now(timezone.utc).isoformat()
+    await db.playlists.update_one(
+        {"id": playlist_id},
+        {"$push": {"tracks": track_doc}, "$inc": {"track_count": 1}}
+    )
+    # Update cover with first track's cover
+    if not pl.get("cover_url") and track.cover_url:
+        await db.playlists.update_one({"id": playlist_id}, {"$set": {"cover_url": track.cover_url}})
+    stored = await db.playlists.find_one({"id": playlist_id}, {"_id": 0})
+    return {"success": True, "playlist": stored}
+
+@api_router.delete("/playlists/{playlist_id}/tracks/{track_id}")
+async def remove_track_from_playlist(playlist_id: str, track_id: str):
+    result = await db.playlists.update_one(
+        {"id": playlist_id},
+        {"$pull": {"tracks": {"track_id": track_id}}, "$inc": {"track_count": -1}}
+    )
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Track not found in playlist")
+    return {"success": True, "message": "Track removed"}
+
+@api_router.put("/playlists/{playlist_id}")
+async def update_playlist(playlist_id: str, name: str = Form(""), is_public: bool = Form(True)):
+    update = {}
+    if name:
+        update["name"] = name
+    update["is_public"] = is_public
+    result = await db.playlists.update_one({"id": playlist_id}, {"$set": update})
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    stored = await db.playlists.find_one({"id": playlist_id}, {"_id": 0, "tracks": 0})
+    return {"success": True, "playlist": stored}
+
+@api_router.delete("/playlists/{playlist_id}")
+async def delete_playlist(playlist_id: str):
+    result = await db.playlists.delete_one({"id": playlist_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    return {"success": True, "message": "Playlist deleted"}
 
 # Include router
 app.include_router(api_router)

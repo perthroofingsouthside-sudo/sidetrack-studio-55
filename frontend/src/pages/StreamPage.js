@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album } from "lucide-react";
+import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -16,7 +16,10 @@ export default function StreamPage({ onTrackSelect }) {
   const [activeTab, setActiveTab] = useState("browse");
   const [nowPlaying, setNowPlaying] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [playlists, setPlaylists] = useState([]);
+  const [addingTrack, setAddingTrack] = useState(null);
   const audioRef = useRef(null);
+  const owner = localStorage.getItem("sidetrack_username") || "anonymous";
 
   useEffect(() => {
     loadBrowseData();
@@ -99,6 +102,36 @@ export default function StreamPage({ onTrackSelect }) {
     const m = Math.floor(ms / 60000);
     const s = Math.floor((ms % 60000) / 1000);
     return `${m}:${s.toString().padStart(2, "0")}`;
+  };
+
+  const loadPlaylists = async () => {
+    try {
+      const res = await axios.get(`${API}/playlists?owner=${owner}`);
+      if (res.data?.success) setPlaylists(res.data.playlists);
+    } catch { /* ignore */ }
+  };
+
+  const addToPlaylist = async (playlistId, track) => {
+    try {
+      await axios.post(`${API}/playlists/${playlistId}/tracks`, {
+        track_id: track.id || "",
+        title: track.title || "",
+        artist: track.artist || "",
+        album: track.album || "",
+        cover_url: track.cover_url || "",
+        preview_url: track.preview_url || "",
+        duration_ms: track.duration_ms || 0,
+      });
+      toast.success(`Added to playlist!`);
+      setAddingTrack(null);
+    } catch {
+      toast.error("Failed to add track");
+    }
+  };
+
+  const showAddToPlaylist = (track) => {
+    loadPlaylists();
+    setAddingTrack(track);
   };
 
   return (
@@ -206,6 +239,7 @@ export default function StreamPage({ onTrackSelect }) {
                       isPlaying={isPlaying}
                       onPlay={playTrack}
                       onStudio={handleSelectForStudio}
+                      onAddToPlaylist={showAddToPlaylist}
                       formatMs={formatMs}
                     />
                   ))}
@@ -237,6 +271,7 @@ export default function StreamPage({ onTrackSelect }) {
                 isPlaying={isPlaying}
                 onPlay={playTrack}
                 onStudio={handleSelectForStudio}
+                onAddToPlaylist={showAddToPlaylist}
                 formatMs={formatMs}
               />
             ))}
@@ -284,11 +319,42 @@ export default function StreamPage({ onTrackSelect }) {
           </div>
         </div>
       )}
+
+      {/* Add to Playlist Modal */}
+      {addingTrack && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center" onClick={() => setAddingTrack(null)} data-testid="playlist-picker-modal">
+          <div className="w-full max-w-sm bg-[#12121A] border border-white/10 rounded-t-2xl sm:rounded-2xl p-4 max-h-[60vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+            <h3 className="font-['Outfit'] text-base font-bold text-white mb-1">Add to Playlist</h3>
+            <p className="text-xs text-[#606070] mb-3 truncate">{addingTrack.title} — {addingTrack.artist}</p>
+            {playlists.length === 0 ? (
+              <p className="text-sm text-[#606070] text-center py-4">No playlists yet. Create one from the Playlists tab.</p>
+            ) : (
+              <div className="space-y-1">
+                {playlists.map((pl) => (
+                  <button key={pl.id} data-testid={`add-to-pl-${pl.id}`}
+                    onClick={() => addToPlaylist(pl.id, addingTrack)}
+                    className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left">
+                    <div className="w-10 h-10 rounded-lg bg-[#8A2BE2]/10 flex items-center justify-center flex-shrink-0">
+                      <ListMusic className="w-4 h-4 text-[#8A2BE2]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm text-white truncate">{pl.name}</p>
+                      <p className="text-[10px] text-[#606070]">{pl.track_count || 0} tracks</p>
+                    </div>
+                    <Plus className="w-4 h-4 text-[#8A2BE2]" />
+                  </button>
+                ))}
+              </div>
+            )}
+            <Button onClick={() => setAddingTrack(null)} variant="ghost" className="w-full mt-3 text-[#606070] text-sm">Cancel</Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, formatMs }) {
+function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, onAddToPlaylist, formatMs }) {
   const isActive = nowPlaying?.id === track.id;
   return (
     <div
@@ -337,6 +403,18 @@ function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, formatM
       <span className="text-xs text-[#606070] flex-shrink-0 hidden sm:block">
         {formatMs(track.duration_ms)}
       </span>
+
+      {/* Add to playlist */}
+      <Button
+        data-testid={`add-playlist-btn-${idx}`}
+        onClick={() => onAddToPlaylist(track)}
+        variant="ghost"
+        size="icon"
+        className="text-[#606070]/50 hover:text-[#00E5FF] hover:bg-[#00E5FF]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+        title="Add to playlist"
+      >
+        <Plus className="w-4 h-4" />
+      </Button>
 
       {/* Studio button */}
       <Button
