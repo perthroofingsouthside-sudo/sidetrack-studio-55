@@ -1,10 +1,11 @@
-import { Home, Music2, Mic2, Share2, Radio, Swords, ListMusic } from "lucide-react";
+import { Home, Music2, Mic2, Share2, Radio, Swords, ListMusic, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   { key: "stream", icon: Radio, label: "Stream", alwaysEnabled: true },
   { key: "home", icon: Home, label: "Discover", alwaysEnabled: true },
   { key: "battle", icon: Swords, label: "Battle", alwaysEnabled: true },
+  { key: "star", icon: Star, label: "Star", alwaysEnabled: true },
   { key: "playlists", icon: ListMusic, label: "Playlists", alwaysEnabled: true },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
@@ -16,10 +17,11 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
       className="fixed bottom-0 left-0 right-0 z-50 glass-heavy safe-bottom"
       data-testid="bottom-nav"
     >
-      <div className="flex items-center justify-around max-w-xl mx-auto h-16">
+      <div className="flex items-center justify-around max-w-2xl mx-auto h-16 px-1">
         {NAV_ITEMS.map((item) => {
           const isActive = currentView === item.key;
           const isDisabled = !item.alwaysEnabled && item.key !== "home" && !hasSong;
+          const isStar = item.key === "star";
 
           return (
             <Button
@@ -27,16 +29,22 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
               data-testid={`nav-${item.key}`}
               variant="ghost"
               onClick={() => !isDisabled && onNavigate(item.key)}
-              className={`flex flex-col items-center gap-0.5 h-14 px-2 sm:px-3 rounded-xl transition-all ${
+              className={`flex flex-col items-center gap-0.5 h-14 px-1.5 sm:px-2 rounded-xl transition-all min-w-0 ${
                 isActive
-                  ? "text-[#8A2BE2]"
+                  ? isStar ? "text-[#FFD60A]" : "text-[#8A2BE2]"
                   : isDisabled
                   ? "text-[#606070]/40 cursor-not-allowed"
                   : "text-[#606070] hover:text-[#A0A0B0]"
               }`}
             >
-              <item.icon className={`w-5 h-5 ${isActive ? "drop-shadow-[0_0_8px_rgba(138,43,226,0.6)]" : ""}`} />
-              <span className="text-[9px] font-medium">{item.label}</span>
+              <item.icon className={`w-4.5 h-4.5 ${
+                isActive
+                  ? isStar
+                    ? "drop-shadow-[0_0_8px_rgba(255,214,10,0.6)]"
+                    : "drop-shadow-[0_0_8px_rgba(138,43,226,0.6)]"
+                  : ""
+              }`} style={{ width: 18, height: 18 }} />
+              <span className="text-[8px] sm:text-[9px] font-medium">{item.label}</span>
             </Button>
           );
         })}

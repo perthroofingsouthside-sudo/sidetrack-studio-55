@@ -902,6 +902,104 @@ async def get_duet_audio(duet_id: str):
         raise HTTPException(status_code=404, detail="Duet not found")
     return {"success": True, "audio_data": duet.get("audio_data", "")}
 
+# --- Become a Star (Karaoke) Endpoints ---
+
+class StarPerformance(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    username: str
+    song_title: str = ""
+    song_artist: str = ""
+    song_cover_url: str = ""
+    song_id: str = ""
+    title: str = ""
+    audio_data: str = ""
+    votes: int = 0
+    voters: List[str] = []
+    status: str = "published"
+    created_at: str = Field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+@api_router.post("/stars")
+async def submit_star_performance(
+    username: str = Form(...),
+    song_title: str = Form(""),
+    song_artist: str = Form(""),
+    song_cover_url: str = Form(""),
+    song_id: str = Form(""),
+    title: str = Form(""),
+    file: UploadFile = File(...)
+):
+    """Submit a karaoke performance to Become a Star feed."""
+    audio_bytes = await file.read()
+    if len(audio_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Empty audio file")
+    audio_b64 = base64.b64encode(audio_bytes).decode('utf-8')
+
+    perf = StarPerformance(
+        username=username,
+        song_title=song_title,
+        song_artist=song_artist,
+        song_cover_url=song_cover_url,
+        song_id=song_id,
+        title=title or f"{username} sings {song_title}",
+        audio_data=audio_b64,
+    )
+    doc = perf.model_dump()
+    await db.stars.insert_one(doc)
+    stored = await db.stars.find_one({"id": perf.id}, {"_id": 0, "audio_data": 0})
+    return {"success": True, "performance": stored}
+
+@api_router.get("/stars/feed")
+async def star_feed(limit: int = 30):
+    """Get the public Star feed, sorted by most recent."""
+    performances = await db.stars.find(
+        {"status": "published"}, {"_id": 0, "audio_data": 0}
+    ).sort("created_at", -1).to_list(limit)
+    return {"success": True, "performances": performances}
+
+@api_router.get("/stars/leaderboard")
+async def star_leaderboard(limit: int = 20):
+    """Get top-voted star performances."""
+    pipeline = [
+        {"$match": {"status": "published"}},
+        {"$project": {"_id": 0, "audio_data": 0}},
+        {"$sort": {"votes": -1}},
+        {"$limit": limit}
+    ]
+    top = await db.stars.aggregate(pipeline).to_list(limit)
+    return {"success": True, "leaderboard": top}
+
+@api_router.get("/stars/{perf_id}")
+async def get_star_performance(perf_id: str):
+    """Get a single star performance (without audio)."""
+    perf = await db.stars.find_one({"id": perf_id}, {"_id": 0, "audio_data": 0})
+    if not perf:
+        raise HTTPException(status_code=404, detail="Performance not found")
+    return {"success": True, "performance": perf}
+
+@api_router.get("/stars/{perf_id}/audio")
+async def get_star_audio(perf_id: str):
+    """Get the audio data for a star performance."""
+    perf = await db.stars.find_one({"id": perf_id}, {"_id": 0})
+    if not perf:
+        raise HTTPException(status_code=404, detail="Performance not found")
+    return {"success": True, "audio_data": perf.get("audio_data", "")}
+
+@api_router.post("/stars/{perf_id}/vote")
+async def vote_star(perf_id: str, voter_id: str = Form(...)):
+    """Vote for a star performance. Each voter can vote once."""
+    perf = await db.stars.find_one({"id": perf_id})
+    if not perf:
+        raise HTTPException(status_code=404, detail="Performance not found")
+    if voter_id in perf.get("voters", []):
+        raise HTTPException(status_code=400, detail="Already voted")
+    await db.stars.update_one(
+        {"id": perf_id},
+        {"$inc": {"votes": 1}, "$push": {"voters": voter_id}}
+    )
+    updated = await db.stars.find_one({"id": perf_id}, {"_id": 0, "audio_data": 0})
+    return {"success": True, "performance": updated}
+
 # Include router
 app.include_router(api_router)
 

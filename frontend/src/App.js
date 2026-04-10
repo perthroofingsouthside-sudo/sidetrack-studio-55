@@ -9,6 +9,7 @@ import StreamPage from "@/pages/StreamPage";
 import BattleArena from "@/pages/BattleArena";
 import PlaylistsPage from "@/pages/PlaylistsPage";
 import DuetStudio from "@/pages/DuetStudio";
+import BecomeAStar from "@/pages/BecomeAStar";
 import BottomNav from "@/components/BottomNav";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -54,6 +55,8 @@ function App() {
         return <BattleArena currentSong={currentSong} onStartDuet={handleStartDuet} />;
       case "playlists":
         return <PlaylistsPage onTrackSelect={handleTrackSelect} />;
+      case "star":
+        return <BecomeAStar />;
       case "duet":
         return (
           <DuetStudio
