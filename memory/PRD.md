@@ -1,7 +1,7 @@
 # SIDETRACK Studios - Music Recognition, Streaming & Creation App
 
 ## Original Problem Statement
-Build a music app like Shazam + Tidal called SIDETRACK Studios. Features: song recognition, music streaming (search/browse/play), stem separation (vocals/guitar/bass/drums), stem mixer, split screen guitar chords + lyrics, audio/video recording with editing, social media sharing, Cover Battles, Playlists (public/private), flexible recording layouts (top/bottom horizontal), social live feed options, and Duet Mode.
+Build a music app like Shazam + Tidal called SIDETRACK Studios. Features: song recognition, music streaming, stem separation, stem mixer, split screen guitar chords + lyrics, audio/video recording with editing, social media sharing, Cover Battles, Playlists, flexible recording layouts, social live feed options, Duet Mode, and Become a Star (karaoke feed).
 
 ## Architecture
 - **Frontend**: React + Tailwind CSS + Shadcn/UI
@@ -15,22 +15,30 @@ Build a music app like Shazam + Tidal called SIDETRACK Studios. Features: song r
 - [x] Song search returning real tracks with 30-second previews
 - [x] Audio playback with now-playing mini bar
 - [x] Song recognition (Shazam with demo fallback)
-- [x] Replicate Demucs stem separation (WORKING - billing active)
+- [x] Replicate Demucs stem separation (WORKING)
 - [x] Stem Mixer (4-track: vocals/guitar/bass/drums) with mute/solo
 - [x] Split Screen: Guitar chords + Lyrics (mock data)
 - [x] Audio recording mode + Video recording mode
-- [x] 4 Flexible Recording Layouts: Camera, Split (Camera+Lyrics), Lyrics, Guitar (top/bottom horizontal)
+- [x] 4 Flexible Recording Layouts: Camera, Split, Lyrics, Guitar (top/bottom horizontal)
 - [x] Social live feed links in Recording Studio (TikTok Live, IG Live, YouTube Live)
 - [x] Waveform trim editor
 - [x] Social media sharing (Instagram, TikTok, Twitter/X, YouTube)
-- [x] 6-tab navigation (Stream, Discover, Battle, Playlists, Studio, Record)
+- [x] 7-tab navigation (Stream, Discover, Battle, Star, Playlists, Studio, Record)
 - [x] SIDETRACK Studios branding with dark neon theme
 - [x] Cover Battle arena with voting and leaderboards
 - [x] Playlists (public/private) with full CRUD
 - [x] Add-to-Playlist from Stream page search results
-- [x] Mobile overflow fix (no horizontal scroll at 375px)
-- [x] Landscape mode CSS support
-- [x] **Duet Mode**: Record side-by-side with another user's cover from Battle Arena. Split-screen (top: partner's cover audio + waveform, bottom: user's camera). 3-2-1 countdown, synchronized playback + recording, flows into EditSharePage. Backend CRUD for duets.
+- [x] Mobile overflow fix + landscape mode CSS support
+- [x] Duet Mode: Record side-by-side with covers from Battle Arena
+- [x] **Become a Star**: Karaoke section with song search, 3 camera/lyrics layouts, gold-themed UI, iTunes backing tracks, recording, Star Feed with voting, Rising Stars leaderboard
+
+## DB Collections
+- songs, recordings, battles, covers, playlists, duets, stars
+
+## Key API Endpoints
+- POST /api/recognize (Shazam), POST /api/songs/{id}/separate (Demucs)
+- GET /api/stream/search, GET /api/music/search (iTunes)
+- CRUD: /api/battles, /api/playlists, /api/duets, /api/stars
 
 ## Prioritized Backlog
 ### P1
@@ -38,4 +46,4 @@ Build a music app like Shazam + Tidal called SIDETRACK Studios. Features: song r
 
 ### P2
 - [ ] Audio/Video editing/trimming feature before social sharing
-- [ ] Social user profiles (battle stats, shared playlists, duet history)
+- [ ] Social user profiles (battle stats, shared playlists, duet/star history)
