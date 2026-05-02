@@ -58,7 +58,7 @@ export default function SocialProfile() {
                   </>
                 )}
               </div>
-              <p className="text-xs text-[#5C5C6B] mt-1">SIDETRACK Studios member</p>
+              <p className="text-xs text-[#5C5C6B] mt-1">SIDETRACK member</p>
             </div>
           </div>
 

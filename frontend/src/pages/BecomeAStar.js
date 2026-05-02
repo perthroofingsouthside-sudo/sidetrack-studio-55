@@ -450,7 +450,7 @@ export default function BecomeAStar() {
           <div className="px-4 py-4 space-y-5 pb-24">
             {/* Challenge Banner */}
             <div className="rounded-2xl p-5 relative overflow-hidden" data-testid="challenge-banner"
-              style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8533 50%, #FF6B00 100%)" }}>
+              style={{ background: "linear-gradient(135deg, #FF6B00 0%, #39FF14 100%)" }}>
               <div className="relative z-10">
                 <p className="text-xs uppercase tracking-[0.2em] font-bold text-white/70 mb-1">This Week's Challenge</p>
                 <h3 className="font-['Outfit'] text-2xl font-extrabold text-white">{currentChallenge.title}</h3>
@@ -632,7 +632,7 @@ export default function BecomeAStar() {
         </div>
         <Button data-testid="sing-now-btn" onClick={() => setView("search")}
           className="h-10 px-4 bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-black rounded-2xl text-sm font-bold gap-1.5"
-          style={{ boxShadow: "0 0 20px rgba(255,214,10,0.3)" }}>
+          style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}>
           <Mic className="w-4 h-4" /> Sing Now
         </Button>
       </div>
@@ -644,7 +644,7 @@ export default function BecomeAStar() {
             <section data-testid="challenge-card">
               <button onClick={() => openChallenge(currentChallenge)}
                 className="w-full rounded-2xl p-4 relative overflow-hidden text-left transition-all hover:scale-[1.01]"
-                style={{ background: "linear-gradient(135deg, #FF6B00 0%, #FF8533 50%, #FF6B00 100%)" }}>
+                style={{ background: "linear-gradient(135deg, #FF6B00 0%, #39FF14 100%)" }}>
                 <div className="relative z-10 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/60">Weekly Challenge</p>

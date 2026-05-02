@@ -60,8 +60,8 @@ export default function EditSharePage({ recording, song, onBack }) {
           type: recording.blob.type,
         });
         await navigator.share({
-          title: `My cover of ${song?.title || "a song"} | SIDETRACK Studios`,
-          text: `Check out my cover on SIDETRACK Studios!`,
+          title: `My cover of ${song?.title || "a song"} | SIDETRACK`,
+          text: `Check out my cover on SIDETRACK!`,
           files: [file],
         });
         toast.success("Shared successfully!");

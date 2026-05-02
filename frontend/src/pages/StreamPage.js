@@ -134,11 +134,15 @@ export default function StreamPage({ onTrackSelect }) {
         <div className={`flex-1 min-w-0 ${showChat ? "lg:mr-[320px]" : ""}`}>
           {/* Header */}
           <div className="px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
-            <div>
-              <h1 className="font-['Outfit'] text-3xl sm:text-4xl font-black tracking-tighter">
-                <span className="text-white">SIDE</span><span className="text-[#FF6B00]">TRACK</span>
-              </h1>
-              <p className="text-[#5C5C6B] text-xs mt-0.5 tracking-wide">studios</p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#39FF14] flex items-center justify-center shadow-[0_0_20px_rgba(255,107,0,0.3)]">
+                <Music2 className="w-5 h-5 text-black" />
+              </div>
+              <div>
+                <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black tracking-[-0.03em] leading-none">
+                  <span className="text-white">SIDE</span><span className="text-[#FF6B00]">TRACK</span>
+                </h1>
+              </div>
             </div>
             <Button data-testid="toggle-chat-btn" onClick={() => setShowChat(!showChat)} variant="ghost"
               className={`hidden lg:flex h-9 px-3 rounded-full text-xs gap-1.5 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>

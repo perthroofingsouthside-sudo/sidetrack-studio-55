@@ -119,12 +119,18 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
         <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#8F8F9D] hover:text-white w-8 h-8">
           <ArrowLeft className="w-4 h-4" />
         </Button>
-        <div className="flex-1 min-w-0">
-          <h2 className="font-['Outfit'] text-base font-black tracking-tight text-white flex items-center gap-2">
-            Live Stage
-            {isRecording && <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-red-500"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />REC</span>}
-          </h2>
-          {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B00] to-[#39FF14] flex items-center justify-center flex-shrink-0">
+            <Mic className="w-3.5 h-3.5 text-black" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="font-['Outfit'] text-sm font-black tracking-tight text-white flex items-center gap-1.5">
+              <span className="text-white">SIDE</span><span className="text-[#FF6B00]">TRACK</span>
+              <span className="text-[#5C5C6B] text-[10px] font-medium ml-0.5">Live Stage</span>
+              {isRecording && <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-red-500 ml-1"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />REC</span>}
+            </h2>
+            {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
+          </div>
         </div>
         <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
           className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>

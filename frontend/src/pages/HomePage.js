@@ -110,9 +110,6 @@ export default function HomePage({ onSongRecognized }) {
           <span className="text-white">SIDE</span>
           <span className="text-[#FF6B00] glow-text-orange">TRACK</span>
         </h1>
-        <p className="text-[#606070] text-[10px] mt-1 text-center font-['Manrope'] uppercase tracking-[0.3em]">
-          studios
-        </p>
         <p className="text-[#A0A0B0] text-sm mt-2 text-center font-['Manrope']">
           Recognize. Separate. Create.
         </p>
