@@ -1,10 +1,13 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Mic, Video, Square, ArrowLeft, Camera, Maximize, SplitSquareVertical, Type, Guitar, ExternalLink } from "lucide-react";
+import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import LiveChat from "@/components/LiveChat";
+
+const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
 const LAYOUTS = [
   { key: "camera", label: "Camera", icon: Camera, desc: "Full selfie view" },
@@ -26,6 +29,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
   const [duration, setDuration] = useState(0);
   const [lyrics, setLyrics] = useState(null);
   const [currentTime, setCurrentTime] = useState(0);
+  const [showChat, setShowChat] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
@@ -41,7 +45,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
     try {
       const res = await axios.get(`${API}/songs/${song.id}/lyrics`);
       if (res.data.success) setLyrics(res.data);
-    } catch (err) { /* mock data will be used */ }
+    } catch { /* mock data will be used */ }
   };
 
   const stopAllStreams = () => {
@@ -79,9 +83,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
         setDuration((p) => p + 1);
         setCurrentTime((p) => p + 1);
       }, 1000);
-    } catch (err) {
-      toast.error("Camera/microphone access denied");
-    }
+    } catch { toast.error("Camera/microphone access denied"); }
   };
 
   const stopRecording = useCallback(() => {
@@ -111,147 +113,158 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
   const showGuitar = layout === "guitar";
 
   return (
-    <div className="min-h-screen bg-[#05050A] flex flex-col max-w-full overflow-x-hidden" data-testid="recording-studio">
-      {/* Header */}
-      <div className="glass-heavy px-3 py-2 flex items-center gap-2 flex-shrink-0">
-        <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#A0A0B0] hover:text-white w-8 h-8">
+    <div className="bg-[#05050A] flex flex-col max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
+      {/* Header bar */}
+      <div className="crystal-glass px-3 py-2 flex items-center gap-2 flex-shrink-0 z-20">
+        <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#8F8F9D] hover:text-white w-8 h-8">
           <ArrowLeft className="w-4 h-4" />
         </Button>
         <div className="flex-1 min-w-0">
-          <h2 className="font-['Outfit'] text-base font-bold truncate">Recording Studio</h2>
-          {song && <p className="text-[10px] text-[#A0A0B0] truncate">{song.title} - {song.artist}</p>}
+          <h2 className="font-['Outfit'] text-base font-black tracking-tight text-white flex items-center gap-2">
+            Live Stage
+            {isRecording && <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-red-500"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />REC</span>}
+          </h2>
+          {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
         </div>
-        {isRecording && (
-          <div className="flex items-center gap-1.5 flex-shrink-0">
-            <div className="w-2.5 h-2.5 rounded-full bg-red-500 animate-rec-pulse" />
-            <span className="text-xs font-mono text-white">{fmtDur(duration)}</span>
-          </div>
-        )}
+        <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
+          className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#00E5FF]/40 text-[#00E5FF]" : "border-white/10 text-[#5C5C6B]"}`}>
+          <MessageCircle className="w-3.5 h-3.5" />
+        </Button>
       </div>
 
-      {/* Layout Selector - horizontal scrollable */}
-      <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
-        {LAYOUTS.map((l) => (
-          <Button key={l.key} data-testid={`layout-${l.key}`}
-            onClick={() => { if (!isRecording) setLayout(l.key); }}
-            className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-              layout === l.key ? "bg-[#8A2BE2] text-white" : "bg-[#12121A] text-[#606070] border border-white/10"
-            }`}>
-            <l.icon className="w-3 h-3" />{l.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Main content area - top/bottom horizontal layout */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        {/* Top section: Camera or Guitar */}
-        {showCamera && (
-          <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden`} data-testid="camera-section">
-            <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
-            {!streamRef.current && !isRecording && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]">
-                <Camera className="w-10 h-10 text-[#8A2BE2]/40 mb-2" />
-                <p className="text-xs text-[#606070]">Camera activates when recording</p>
-              </div>
-            )}
-            {/* Overlay info */}
-            {isRecording && (
-              <div className="absolute bottom-2 left-2 glass px-2 py-1 rounded-lg">
-                <span className="text-[10px] text-[#00E5FF] font-mono">{fmtDur(duration)}</span>
-              </div>
-            )}
+      {/* Main stage area */}
+      <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Stage content */}
+        <div className={`flex-1 flex flex-col min-w-0 ${showChat ? "lg:mr-0" : ""}`}>
+          {/* Layout Selector */}
+          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
+            {LAYOUTS.map((l) => (
+              <Button key={l.key} data-testid={`layout-${l.key}`}
+                onClick={() => { if (!isRecording) setLayout(l.key); }}
+                className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
+                  layout === l.key ? "bg-[#8A2BE2] text-white shadow-[0_0_16px_rgba(138,43,226,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
+                }`}>
+                <l.icon className="w-3 h-3" />{l.label}
+              </Button>
+            ))}
           </div>
-        )}
 
-        {showGuitar && (
-          <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4" data-testid="guitar-full">
-            {currentChord ? (
-              <div className="text-center animate-fade-in">
-                <div className="text-6xl sm:text-8xl font-['Outfit'] font-extrabold text-[#8A2BE2] glow-text-violet landscape-chords">
-                  {currentChord.chord}
-                </div>
-                <GuitarDiagram chord={currentChord.chord} />
-                {lyrics?.chords && (
-                  <div className="flex gap-3 mt-6 justify-center flex-wrap">
-                    {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
-                      <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#8A2BE2]/10 text-[#8A2BE2]/50">{c.chord}</span>
-                    ))}
+          {/* Main content area */}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            {/* Camera / Video */}
+            {showCamera && (
+              <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl mx-3 mt-1 neon-ambient-glow border border-white/5`} data-testid="camera-section">
+                <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
+                {!streamRef.current && !isRecording && (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                    <div className="relative z-10 text-center">
+                      <Camera className="w-12 h-12 text-[#8A2BE2]/40 mb-2 mx-auto" />
+                      <p className="text-xs text-[#5C5C6B]">Camera activates when recording</p>
+                    </div>
+                  </div>
+                )}
+                {/* Overlay info */}
+                {isRecording && (
+                  <div className="absolute bottom-3 left-3 crystal-glass rounded-full px-3 py-1">
+                    <span className="text-[10px] text-[#00E5FF] font-mono font-bold">{fmtDur(duration)}</span>
                   </div>
                 )}
               </div>
-            ) : (
-              <p className="text-[#606070] text-sm">Guitar chords will appear here</p>
             )}
-          </div>
-        )}
 
-        {/* Bottom section: Lyrics */}
-        {(showLyrics || layout === "split") && (
-          <div className={`${layout === "lyrics" ? "flex-1" : "h-[55%]"} bg-[#05050A] border-t border-white/5 overflow-hidden flex-shrink-0`} data-testid="lyrics-section">
-            <ScrollArea className="h-full">
-              <div className="p-4 space-y-2">
-                {layout === "split" && currentChord && (
-                  <div className="text-center mb-3 pb-3 border-b border-white/5">
-                    <span className="text-3xl font-['Outfit'] font-extrabold text-[#8A2BE2] glow-text-violet">{currentChord.chord}</span>
+            {showGuitar && (
+              <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4 rounded-xl mx-3 mt-1 border border-white/5" data-testid="guitar-full">
+                {currentChord ? (
+                  <div className="text-center animate-fade-in">
+                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#8A2BE2] glow-text-violet landscape-chords tracking-tighter">
+                      {currentChord.chord}
+                    </div>
+                    <GuitarDiagram chord={currentChord.chord} />
+                    {lyrics?.chords && (
+                      <div className="flex gap-3 mt-6 justify-center flex-wrap">
+                        {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
+                          <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#8A2BE2]/10 text-[#8A2BE2]/50">{c.chord}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-                {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
-                  if (line.type === "section") return (
-                    <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#00E5FF]" : "text-[#606070]"}`}>{line.text}</p>
-                  );
-                  if (line.type === "break") return <div key={i} className="h-2" />;
-                  return (
-                    <p key={i} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
-                      i === activeLyricIdx ? "text-[#00E5FF] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#606070]/50" : "text-[#A0A0B0]"
-                    }`}>{line.text}</p>
-                  );
-                }) : (
-                  <p className="text-[#606070] text-sm text-center py-8">Lyrics will sync here during recording</p>
+                ) : (
+                  <p className="text-[#5C5C6B] text-sm">Guitar chords will appear here</p>
                 )}
               </div>
-            </ScrollArea>
+            )}
+
+            {/* Lyrics */}
+            {(showLyrics || layout === "split") && (
+              <div className={`${layout === "lyrics" ? "flex-1" : "h-[55%]"} bg-[#05050A] border-t border-white/5 overflow-hidden flex-shrink-0`} data-testid="lyrics-section">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-2">
+                    {layout === "split" && currentChord && (
+                      <div className="text-center mb-3 pb-3 border-b border-white/5">
+                        <span className="text-3xl font-['Outfit'] font-black text-[#8A2BE2] glow-text-violet tracking-tighter">{currentChord.chord}</span>
+                      </div>
+                    )}
+                    {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                      if (line.type === "section") return (
+                        <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#00E5FF]" : "text-[#5C5C6B]"}`}>{line.text}</p>
+                      );
+                      if (line.type === "break") return <div key={i} className="h-2" />;
+                      return (
+                        <p key={i} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
+                          i === activeLyricIdx ? "text-[#00E5FF] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"
+                        }`}>{line.text}</p>
+                      );
+                    }) : (
+                      <p className="text-[#5C5C6B] text-sm text-center py-8">Lyrics will sync here during recording</p>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+          </div>
+
+          {/* Floating controls - crystal glass pill */}
+          <div className="px-3 py-2 flex flex-col gap-2 flex-shrink-0">
+            {/* Social links */}
+            <div className="flex items-center justify-center gap-2" data-testid="social-links">
+              {SOCIAL_LINKS.map((s) => (
+                <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer"
+                  data-testid={`social-${s.key}`}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border border-white/5 hover:border-white/20 transition-all"
+                  style={{ color: s.color }}>
+                  <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={s.icon} /></svg>
+                  {s.label}
+                  <ExternalLink className="w-2.5 h-2.5 opacity-50" />
+                </a>
+              ))}
+            </div>
+
+            {/* Controls row - crystal glass pill */}
+            <div className="crystal-glass rounded-full px-6 py-3 flex items-center justify-center gap-5 mx-auto" data-testid="stage-controls">
+              <Button data-testid="toggle-mode-btn" variant="ghost" onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
+                className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#00E5FF]" : "text-[#8F8F9D]"}`}>
+                <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
+              </Button>
+
+              <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
+                className={`w-14 h-14 rounded-full transition-all ${
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#8A2BE2] hover:bg-[#A64DFF] shadow-[0_0_30px_rgba(138,43,226,0.5)]"
+                }`}>
+                {isRecording ? <Square className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
+              </Button>
+
+              <span className="text-sm font-mono text-[#5C5C6B] w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat sidebar */}
+        {showChat && (
+          <div className="w-[280px] lg:w-[300px] flex-shrink-0 p-2 hidden sm:block" data-testid="stage-chat-panel">
+            <LiveChat trackTitle={song?.title} />
           </div>
         )}
-      </div>
-
-      {/* Record Button + Social Links - fixed at bottom */}
-      <div className="px-4 py-2 flex flex-col gap-2 flex-shrink-0 glass-heavy border-t border-white/5">
-        {/* Social Live Feed Links */}
-        <div className="flex items-center justify-center gap-2" data-testid="social-links">
-          {SOCIAL_LINKS.map((s) => (
-            <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer"
-              data-testid={`social-${s.key}`}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border border-white/10 hover:border-white/30 transition-all"
-              style={{ color: s.color }}
-            >
-              <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d={s.icon} />
-              </svg>
-              {s.label}
-              <ExternalLink className="w-2.5 h-2.5 opacity-50" />
-            </a>
-          ))}
-        </div>
-
-        {/* Controls row */}
-        <div className="flex items-center justify-center gap-4">
-          {/* Mode toggle */}
-          <Button data-testid="toggle-mode-btn" variant="ghost" onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
-            className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#00E5FF]" : "text-[#A0A0B0]"}`}>
-            <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
-          </Button>
-
-          {/* Record button */}
-          <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
-            className={`w-16 h-16 rounded-full transition-all ${
-              isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-[#8A2BE2] hover:bg-[#9D4CDD] glow-violet"
-            }`}>
-            {isRecording ? <Square className="w-7 h-7 text-white" /> : <Mic className="w-7 h-7 text-white" />}
-          </Button>
-
-          {/* Duration */}
-          <span className="text-sm font-mono text-[#606070] w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
-        </div>
       </div>
     </div>
   );
@@ -269,9 +282,9 @@ function GuitarDiagram({ chord }) {
     <div className="mt-4 flex justify-center gap-1">
       {frets.map((f, i) => (
         <div key={i} className="flex flex-col items-center gap-1">
-          <span className="text-[8px] text-[#606070]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
+          <span className="text-[8px] text-[#5C5C6B]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
           {[1,2,3,4].map((pos) => (
-            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#8A2BE2] border-[#8A2BE2]" : "border-white/10"}`} />
+            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#8A2BE2] border-[#8A2BE2] shadow-[0_0_8px_rgba(138,43,226,0.5)]" : "border-white/10"}`} />
           ))}
         </div>
       ))}

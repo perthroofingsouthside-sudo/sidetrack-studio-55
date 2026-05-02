@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, Check } from "lucide-react";
+import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, SkipForward, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import LiveChat from "@/components/LiveChat";
 
 export default function StreamPage({ onTrackSelect }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -16,14 +17,20 @@ export default function StreamPage({ onTrackSelect }) {
   const [activeTab, setActiveTab] = useState("browse");
   const [nowPlaying, setNowPlaying] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [showChat, setShowChat] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [addingTrack, setAddingTrack] = useState(null);
   const audioRef = useRef(null);
+  const progressRef = useRef(null);
   const owner = localStorage.getItem("sidetrack_username") || "anonymous";
 
   useEffect(() => {
     loadBrowseData();
-    return () => { if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; } };
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if (progressRef.current) cancelAnimationFrame(progressRef.current);
+    };
   }, []);
 
   const loadBrowseData = async () => {
@@ -34,9 +41,7 @@ export default function StreamPage({ onTrackSelect }) {
       ]);
       if (songsRes?.data?.success) setTopSongs(songsRes.data.tracks);
       if (albumsRes?.data?.success) setTopAlbums(albumsRes.data.albums);
-    } catch (err) {
-      // Will show empty state
-    }
+    } catch { /* empty */ }
   };
 
   const handleSearch = useCallback(async () => {
@@ -49,52 +54,47 @@ export default function StreamPage({ onTrackSelect }) {
         setSearchResults(res.data.tracks);
         if (res.data.tracks.length === 0) toast.info("No results found");
       }
-    } catch (err) {
-      toast.error("Search failed. Try again.");
-    } finally {
-      setSearching(false);
-    }
+    } catch { toast.error("Search failed. Try again."); }
+    finally { setSearching(false); }
   }, [searchQuery]);
 
+  const trackProgress = (audio) => {
+    const update = () => {
+      if (audio && audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      }
+      if (!audio.paused) progressRef.current = requestAnimationFrame(update);
+    };
+    progressRef.current = requestAnimationFrame(update);
+  };
+
   const playTrack = (track) => {
-    if (!track.preview_url) {
-      toast.info("No preview available for this track");
-      return;
-    }
-    if (audioRef.current) {
-      audioRef.current.pause();
-    }
+    if (!track.preview_url) { toast.info("No preview available"); return; }
+    if (audioRef.current) audioRef.current.pause();
+    if (progressRef.current) cancelAnimationFrame(progressRef.current);
     const audio = new Audio(track.preview_url);
     audio.volume = 0.8;
     audio.play().catch(() => toast.error("Playback failed"));
     audioRef.current = audio;
     setNowPlaying(track);
     setIsPlaying(true);
-    audio.onended = () => { setIsPlaying(false); };
+    setProgress(0);
+    trackProgress(audio);
+    audio.onended = () => { setIsPlaying(false); setProgress(0); };
   };
 
   const togglePlayPause = () => {
     if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
+    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+    else { audioRef.current.play().catch(() => {}); setIsPlaying(true); trackProgress(audioRef.current); }
   };
 
   const handleSelectForStudio = (track) => {
-    const song = {
-      id: track.id || crypto.randomUUID(),
-      title: track.title,
-      artist: track.artist,
-      album: track.album || "",
-      cover_url: track.cover_url || "",
-      genre: track.genre || "",
+    onTrackSelect({
+      id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
+      album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
       preview_url: track.preview_url || "",
-    };
-    onTrackSelect(song);
+    });
   };
 
   const formatMs = (ms) => {
@@ -114,208 +114,178 @@ export default function StreamPage({ onTrackSelect }) {
   const addToPlaylist = async (playlistId, track) => {
     try {
       await axios.post(`${API}/playlists/${playlistId}/tracks`, {
-        track_id: track.id || "",
-        title: track.title || "",
-        artist: track.artist || "",
-        album: track.album || "",
-        cover_url: track.cover_url || "",
-        preview_url: track.preview_url || "",
-        duration_ms: track.duration_ms || 0,
+        track_id: track.id || "", title: track.title || "", artist: track.artist || "",
+        album: track.album || "", cover_url: track.cover_url || "",
+        preview_url: track.preview_url || "", duration_ms: track.duration_ms || 0,
       });
-      toast.success(`Added to playlist!`);
+      toast.success("Added to playlist!");
       setAddingTrack(null);
-    } catch {
-      toast.error("Failed to add track");
-    }
+    } catch { toast.error("Failed to add track"); }
   };
 
-  const showAddToPlaylist = (track) => {
-    loadPlaylists();
-    setAddingTrack(track);
-  };
+  const showAddToPlaylist = (track) => { loadPlaylists(); setAddingTrack(track); };
+
+  const HERO_BG = "https://images.unsplash.com/photo-1648237409808-aa4649c07ec8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjh8MHwxfHNlYXJjaHwzfHxzaW5nZXIlMjBtaWNyb3Bob25lJTIwbmVvbnxlbnwwfHx8fDE3Nzc2OTUxNzB8MA&ixlib=rb-4.1.0&q=85&w=800";
 
   return (
     <div className="min-h-screen bg-[#05050A]" data-testid="stream-page">
-      {/* Header */}
-      <div className="px-4 pt-6 pb-2">
-        <h1 className="font-['Outfit'] text-2xl font-extrabold tracking-tight">
-          <span className="text-white">SIDE</span>
-          <span className="text-[#8A2BE2]">TRACK</span>
-        </h1>
-        <p className="text-[#606070] text-xs mt-1">studios | Discover, play, and create</p>
-      </div>
-
-      {/* Search Bar */}
-      <div className="px-4 py-3" data-testid="search-bar">
-        <div className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#606070]" />
-            <Input
-              data-testid="search-input"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-              placeholder="Search songs, artists, albums..."
-              className="pl-10 h-11 bg-[#12121A] border-white/10 text-white placeholder:text-[#606070] rounded-2xl focus:border-[#8A2BE2]"
-            />
+      <div className="flex flex-col lg:flex-row">
+        {/* Main content area */}
+        <div className={`flex-1 min-w-0 ${showChat ? "lg:mr-[320px]" : ""}`}>
+          {/* Header */}
+          <div className="px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
+            <div>
+              <h1 className="font-['Outfit'] text-3xl sm:text-4xl font-black tracking-tighter">
+                <span className="text-white">SIDE</span><span className="text-[#8A2BE2]">TRACK</span>
+              </h1>
+              <p className="text-[#5C5C6B] text-xs mt-0.5 tracking-wide">studios</p>
+            </div>
+            <Button data-testid="toggle-chat-btn" onClick={() => setShowChat(!showChat)} variant="ghost"
+              className={`hidden lg:flex h-9 px-3 rounded-full text-xs gap-1.5 border ${showChat ? "border-[#00E5FF]/40 text-[#00E5FF]" : "border-white/10 text-[#5C5C6B]"}`}>
+              <Volume2 className="w-3.5 h-3.5" /> Chat
+            </Button>
           </div>
-          <Button
-            data-testid="search-btn"
-            onClick={handleSearch}
-            disabled={searching}
-            className="h-11 px-5 bg-[#8A2BE2] hover:bg-[#9D4CDD] text-white rounded-2xl"
-          >
-            {searching ? "..." : "Search"}
-          </Button>
-        </div>
-      </div>
 
-      {/* Tab Toggle */}
-      <div className="px-4 flex gap-2 mb-4">
-        {[
-          { key: "browse", label: "Browse", icon: TrendingUp },
-          { key: "search", label: "Search", icon: Search },
-        ].map((tab) => (
-          <Button
-            key={tab.key}
-            data-testid={`tab-${tab.key}`}
-            onClick={() => setActiveTab(tab.key)}
-            className={`h-8 px-4 rounded-full text-xs gap-1.5 transition-all ${
-              activeTab === tab.key
-                ? "bg-[#8A2BE2] text-white"
-                : "bg-[#12121A] text-[#A0A0B0] border border-white/10"
-            }`}
-          >
-            <tab.icon className="w-3 h-3" />
-            {tab.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* Content */}
-      <ScrollArea className="h-[calc(100vh-280px)]">
-        {activeTab === "browse" ? (
-          <div className="px-4 space-y-6 pb-32">
-            {/* Top Albums */}
-            {topAlbums.length > 0 && (
-              <section data-testid="top-albums">
-                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-                  <Album className="w-4 h-4 text-[#8A2BE2]" />
-                  Top Albums
-                </h3>
-                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                  {topAlbums.map((album) => (
-                    <div key={album.id} className="flex-shrink-0 w-36 group cursor-pointer">
-                      <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#8A2BE2]/40 transition-all">
-                        <img
-                          src={album.cover_url || album.cover_thumb}
-                          alt={album.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                          loading="lazy"
-                        />
-                      </div>
-                      <p className="text-xs font-medium text-white truncate">{album.name}</p>
-                      <p className="text-[10px] text-[#606070] truncate">{album.artist}</p>
-                    </div>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Top Songs */}
-            {topSongs.length > 0 && (
-              <section data-testid="top-songs">
-                <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-[#00E5FF]" />
-                  Top Songs
-                </h3>
-                <div className="space-y-1">
-                  {topSongs.slice(0, 15).map((track, idx) => (
-                    <TrackRow
-                      key={track.id || idx}
-                      track={track}
-                      idx={idx}
-                      nowPlaying={nowPlaying}
-                      isPlaying={isPlaying}
-                      onPlay={playTrack}
-                      onStudio={handleSelectForStudio}
-                      onAddToPlaylist={showAddToPlaylist}
-                      formatMs={formatMs}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {topSongs.length === 0 && topAlbums.length === 0 && (
-              <div className="text-center py-16" data-testid="loading-browse">
-                <Disc3 className="w-12 h-12 text-[#8A2BE2]/30 mx-auto mb-4 animate-spin" />
-                <p className="text-sm text-[#606070]">Loading music...</p>
+          {/* Search */}
+          <div className="px-4 sm:px-6 py-3" data-testid="search-bar">
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C5C6B]" />
+                <Input data-testid="search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  placeholder="Search songs, artists, albums..."
+                  className="pl-10 h-12 bg-[#0F0F16] border-white/5 text-white placeholder:text-[#5C5C6B] rounded-2xl focus:border-[#8A2BE2] text-sm" />
               </div>
-            )}
+              <Button data-testid="search-btn" onClick={handleSearch} disabled={searching}
+                className="h-12 px-6 bg-[#8A2BE2] hover:bg-[#A64DFF] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] text-white rounded-2xl font-bold transition-all">
+                {searching ? "..." : "Search"}
+              </Button>
+            </div>
           </div>
-        ) : (
-          /* Search Results */
-          <div className="px-4 space-y-1 pb-32" data-testid="search-results">
-            {searchResults.length === 0 && !searching && (
-              <p className="text-center text-[#606070] text-sm py-8">
-                {searchQuery ? "No results found" : "Search for songs, artists, or albums"}
-              </p>
-            )}
-            {searchResults.map((track, idx) => (
-              <TrackRow
-                key={track.id || idx}
-                track={track}
-                idx={idx}
-                nowPlaying={nowPlaying}
-                isPlaying={isPlaying}
-                onPlay={playTrack}
-                onStudio={handleSelectForStudio}
-                onAddToPlaylist={showAddToPlaylist}
-                formatMs={formatMs}
-              />
+
+          {/* Tab Toggle */}
+          <div className="px-4 sm:px-6 flex gap-2 mb-4">
+            {[{ key: "browse", label: "Browse", icon: TrendingUp }, { key: "search", label: "Results", icon: Search }].map((tab) => (
+              <Button key={tab.key} data-testid={`tab-${tab.key}`} onClick={() => setActiveTab(tab.key)}
+                className={`h-9 px-4 rounded-full text-xs gap-1.5 transition-all ${
+                  activeTab === tab.key ? "bg-[#8A2BE2] text-white shadow-[0_0_16px_rgba(138,43,226,0.4)]" : "bg-[#0F0F16] text-[#8F8F9D] border border-white/5 hover:border-white/15"
+                }`}>
+                <tab.icon className="w-3 h-3" />{tab.label}
+              </Button>
             ))}
           </div>
-        )}
-      </ScrollArea>
 
-      {/* Now Playing Mini Bar */}
+          {/* Content */}
+          <ScrollArea className="h-[calc(100vh-280px)]">
+            {activeTab === "browse" ? (
+              <div className="px-4 sm:px-6 space-y-8 pb-36">
+                {/* Hero Section */}
+                <div className="relative rounded-2xl overflow-hidden h-44 sm:h-52" data-testid="hero-section">
+                  <img src={HERO_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#05050A] via-[#05050A]/80 to-transparent" />
+                  <div className="relative z-10 h-full flex flex-col justify-end p-5 sm:p-6">
+                    <p className="uppercase tracking-[0.2em] text-xs font-bold text-[#00E5FF] mb-1">Now Streaming</p>
+                    <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      Discover. Play. Create.
+                    </h2>
+                    <p className="text-sm text-[#8F8F9D] mt-1">Millions of tracks at your fingertips</p>
+                  </div>
+                </div>
+
+                {/* Top Albums */}
+                {topAlbums.length > 0 && (
+                  <section data-testid="top-albums">
+                    <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-4 flex items-center gap-2">
+                      <Album className="w-4 h-4 text-[#8A2BE2]" /> Top Albums
+                    </h3>
+                    <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 scrollbar-hide">
+                      {topAlbums.map((album) => (
+                        <div key={album.id} className="flex-shrink-0 w-36 group cursor-pointer">
+                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#8A2BE2]/40 group-hover:shadow-[0_0_20px_rgba(138,43,226,0.2)] transition-all duration-300">
+                            <img src={album.cover_url || album.cover_thumb} alt={album.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                          </div>
+                          <p className="text-xs font-medium text-white truncate">{album.name}</p>
+                          <p className="text-[10px] text-[#5C5C6B] truncate">{album.artist}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Top Songs */}
+                {topSongs.length > 0 && (
+                  <section data-testid="top-songs">
+                    <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-[#00E5FF]" /> Top Songs
+                    </h3>
+                    <div className="space-y-1">
+                      {topSongs.slice(0, 15).map((track, idx) => (
+                        <TrackRow key={track.id || idx} track={track} idx={idx} nowPlaying={nowPlaying}
+                          isPlaying={isPlaying} onPlay={playTrack} onStudio={handleSelectForStudio}
+                          onAddToPlaylist={showAddToPlaylist} formatMs={formatMs} />
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {topSongs.length === 0 && topAlbums.length === 0 && (
+                  <div className="text-center py-16" data-testid="loading-browse">
+                    <Disc3 className="w-12 h-12 text-[#8A2BE2]/30 mx-auto mb-4 animate-spin" />
+                    <p className="text-sm text-[#5C5C6B]">Loading music...</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="px-4 sm:px-6 space-y-1 pb-36" data-testid="search-results">
+                {searchResults.length === 0 && !searching && (
+                  <p className="text-center text-[#5C5C6B] text-sm py-8">
+                    {searchQuery ? "No results found" : "Search for songs, artists, or albums"}
+                  </p>
+                )}
+                {searchResults.map((track, idx) => (
+                  <TrackRow key={track.id || idx} track={track} idx={idx} nowPlaying={nowPlaying}
+                    isPlaying={isPlaying} onPlay={playTrack} onStudio={handleSelectForStudio}
+                    onAddToPlaylist={showAddToPlaylist} formatMs={formatMs} />
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+
+        {/* Live Chat Sidebar (desktop) */}
+        {showChat && (
+          <div className="hidden lg:block fixed right-0 top-0 bottom-16 w-[320px] z-30 p-3" data-testid="chat-sidebar">
+            <LiveChat trackTitle={nowPlaying?.title} />
+          </div>
+        )}
+      </div>
+
+      {/* Now Playing Bar */}
       {nowPlaying && (
-        <div
-          className="fixed bottom-16 left-0 right-0 glass-heavy border-t border-white/5 px-4 py-2 z-40"
-          data-testid="now-playing-bar"
-        >
-          <div className="flex items-center gap-3 max-w-lg mx-auto">
-            <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-              <img
-                src={nowPlaying.cover_url || nowPlaying.cover_thumb || ""}
-                alt=""
-                className="w-full h-full object-cover"
-              />
+        <div className="fixed bottom-16 left-0 right-0 crystal-glass z-40" data-testid="now-playing-bar">
+          {/* Progress bar */}
+          <div className="w-full h-[3px] bg-white/5">
+            <div className="neon-progress" style={{ width: `${progress}%`, transition: "width 0.1s linear" }} />
+          </div>
+          <div className="px-4 py-2">
+            <div className="flex items-center gap-3 max-w-2xl mx-auto">
+              <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 neon-ambient-glow">
+                <img src={nowPlaying.cover_url || nowPlaying.cover_thumb || ""} alt="" className="w-full h-full object-cover" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-white truncate">{nowPlaying.title}</p>
+                <p className="text-[10px] text-[#5C5C6B] truncate">{nowPlaying.artist}</p>
+              </div>
+              <Button data-testid="mini-play-pause" variant="ghost" size="icon" onClick={togglePlayPause}
+                className="text-white hover:text-[#00E5FF] rounded-full transition-colors">
+                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="white" />}
+              </Button>
+              <Button data-testid="mini-studio-btn" variant="ghost" size="icon" onClick={() => handleSelectForStudio(nowPlaying)}
+                className="text-[#8A2BE2] hover:text-[#00E5FF] rounded-full transition-colors" title="Open in Studio">
+                <Music2 className="w-4 h-4" />
+              </Button>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium text-white truncate">{nowPlaying.title}</p>
-              <p className="text-[10px] text-[#606070] truncate">{nowPlaying.artist}</p>
-            </div>
-            <Button
-              data-testid="mini-play-pause"
-              variant="ghost"
-              size="icon"
-              onClick={togglePlayPause}
-              className="text-white rounded-full"
-            >
-              {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="white" />}
-            </Button>
-            <Button
-              data-testid="mini-studio-btn"
-              variant="ghost"
-              size="icon"
-              onClick={() => handleSelectForStudio(nowPlaying)}
-              className="text-[#8A2BE2] hover:text-[#00E5FF] rounded-full"
-              title="Open in Studio"
-            >
-              <Music2 className="w-4 h-4" />
-            </Button>
           </div>
         </div>
       )}
@@ -323,30 +293,29 @@ export default function StreamPage({ onTrackSelect }) {
       {/* Add to Playlist Modal */}
       {addingTrack && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-end sm:items-center justify-center" onClick={() => setAddingTrack(null)} data-testid="playlist-picker-modal">
-          <div className="w-full max-w-sm bg-[#12121A] border border-white/10 rounded-t-2xl sm:rounded-2xl p-4 max-h-[60vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-sm bg-[#0F0F16] border border-white/10 rounded-t-2xl sm:rounded-2xl p-4 max-h-[60vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
             <h3 className="font-['Outfit'] text-base font-bold text-white mb-1">Add to Playlist</h3>
-            <p className="text-xs text-[#606070] mb-3 truncate">{addingTrack.title} — {addingTrack.artist}</p>
+            <p className="text-xs text-[#5C5C6B] mb-3 truncate">{addingTrack.title} — {addingTrack.artist}</p>
             {playlists.length === 0 ? (
-              <p className="text-sm text-[#606070] text-center py-4">No playlists yet. Create one from the Playlists tab.</p>
+              <p className="text-sm text-[#5C5C6B] text-center py-4">No playlists yet. Create one from the Playlists tab.</p>
             ) : (
               <div className="space-y-1">
                 {playlists.map((pl) => (
-                  <button key={pl.id} data-testid={`add-to-pl-${pl.id}`}
-                    onClick={() => addToPlaylist(pl.id, addingTrack)}
+                  <button key={pl.id} data-testid={`add-to-pl-${pl.id}`} onClick={() => addToPlaylist(pl.id, addingTrack)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left">
                     <div className="w-10 h-10 rounded-lg bg-[#8A2BE2]/10 flex items-center justify-center flex-shrink-0">
                       <ListMusic className="w-4 h-4 text-[#8A2BE2]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">{pl.name}</p>
-                      <p className="text-[10px] text-[#606070]">{pl.track_count || 0} tracks</p>
+                      <p className="text-[10px] text-[#5C5C6B]">{pl.track_count || 0} tracks</p>
                     </div>
                     <Plus className="w-4 h-4 text-[#8A2BE2]" />
                   </button>
                 ))}
               </div>
             )}
-            <Button onClick={() => setAddingTrack(null)} variant="ghost" className="w-full mt-3 text-[#606070] text-sm">Cancel</Button>
+            <Button onClick={() => setAddingTrack(null)} variant="ghost" className="w-full mt-3 text-[#5C5C6B] text-sm">Cancel</Button>
           </div>
         </div>
       )}
@@ -357,74 +326,33 @@ export default function StreamPage({ onTrackSelect }) {
 function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, onAddToPlaylist, formatMs }) {
   const isActive = nowPlaying?.id === track.id;
   return (
-    <div
-      className={`flex items-center gap-3 p-3 rounded-xl transition-all group ${
-        isActive ? "bg-[#8A2BE2]/10 border border-[#8A2BE2]/20" : "hover:bg-white/5"
-      }`}
-      data-testid={`track-row-${idx}`}
-    >
-      {/* Number / Play button */}
-      <div className="w-8 text-center flex-shrink-0">
-        <span className="text-xs text-[#606070] group-hover:hidden">{idx + 1}</span>
-        <button
-          onClick={() => onPlay(track)}
-          className="hidden group-hover:block"
-          data-testid={`play-btn-${idx}`}
-        >
-          <Play className="w-4 h-4 text-[#8A2BE2]" fill="#8A2BE2" />
+    <div className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${
+      isActive ? "bg-[#8A2BE2]/8 border border-[#8A2BE2]/20" : "hover:bg-white/[0.03]"
+    }`} data-testid={`track-row-${idx}`}>
+      <div className="w-7 text-center flex-shrink-0">
+        <span className="text-xs text-[#5C5C6B] group-hover:hidden font-mono">{String(idx + 1).padStart(2, "0")}</span>
+        <button onClick={() => onPlay(track)} className="hidden group-hover:block" data-testid={`play-btn-${idx}`}>
+          <Play className="w-4 h-4 text-[#00E5FF]" fill="#00E5FF" />
         </button>
       </div>
-
-      {/* Cover art */}
-      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-white/5">
         {track.cover_url || track.cover_thumb ? (
-          <img
-            src={track.cover_thumb || track.cover_url}
-            alt={track.title}
-            className="w-full h-full object-cover"
-            loading="lazy"
-          />
+          <img src={track.cover_thumb || track.cover_url} alt={track.title} className="w-full h-full object-cover" loading="lazy" />
         ) : (
-          <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
-            <Disc3 className="w-5 h-5 text-[#606070]" />
-          </div>
+          <div className="w-full h-full bg-[#0F0F16] flex items-center justify-center"><Disc3 className="w-5 h-5 text-[#5C5C6B]" /></div>
         )}
       </div>
-
-      {/* Track info */}
       <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onPlay(track)}>
-        <p className={`text-sm font-medium truncate ${isActive ? "text-[#8A2BE2]" : "text-white"}`}>
-          {track.title}
-        </p>
-        <p className="text-xs text-[#606070] truncate">{track.artist}</p>
+        <p className={`text-sm font-medium truncate ${isActive ? "text-[#00E5FF]" : "text-white"}`}>{track.title}</p>
+        <p className="text-xs text-[#5C5C6B] truncate">{track.artist}</p>
       </div>
-
-      {/* Duration */}
-      <span className="text-xs text-[#606070] flex-shrink-0 hidden sm:block">
-        {formatMs(track.duration_ms)}
-      </span>
-
-      {/* Add to playlist */}
-      <Button
-        data-testid={`add-playlist-btn-${idx}`}
-        onClick={() => onAddToPlaylist(track)}
-        variant="ghost"
-        size="icon"
-        className="text-[#606070]/50 hover:text-[#00E5FF] hover:bg-[#00E5FF]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        title="Add to playlist"
-      >
+      <span className="text-xs text-[#5C5C6B] flex-shrink-0 hidden sm:block font-mono">{formatMs(track.duration_ms)}</span>
+      <Button data-testid={`add-playlist-btn-${idx}`} onClick={() => onAddToPlaylist(track)} variant="ghost" size="icon"
+        className="text-[#5C5C6B]/50 hover:text-[#00E5FF] hover:bg-[#00E5FF]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Add to playlist">
         <Plus className="w-4 h-4" />
       </Button>
-
-      {/* Studio button */}
-      <Button
-        data-testid={`studio-btn-${idx}`}
-        onClick={() => onStudio(track)}
-        variant="ghost"
-        size="icon"
-        className="text-[#8A2BE2]/50 hover:text-[#00E5FF] hover:bg-[#8A2BE2]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
-        title="Open in Studio"
-      >
+      <Button data-testid={`studio-btn-${idx}`} onClick={() => onStudio(track)} variant="ghost" size="icon"
+        className="text-[#8A2BE2]/50 hover:text-[#00E5FF] hover:bg-[#8A2BE2]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Open in Studio">
         <Music2 className="w-4 h-4" />
       </Button>
     </div>
