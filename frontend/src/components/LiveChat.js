@@ -115,7 +115,7 @@ export default function LiveChat({ trackTitle }) {
             data-testid="chat-send-btn"
             onClick={sendMessage}
             size="icon"
-            className="h-9 w-9 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] rounded-lg flex-shrink-0"
+            className="h-9 w-9 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(255,107,0,0.6)] rounded-lg flex-shrink-0"
           >
             <Send className="w-3.5 h-3.5 text-white" />
           </Button>

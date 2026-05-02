@@ -157,7 +157,7 @@ export default function StreamPage({ onTrackSelect }) {
                   className="pl-10 h-12 bg-[#0F0F16] border-white/5 text-white placeholder:text-[#5C5C6B] rounded-2xl focus:border-[#FF6B00] text-sm" />
               </div>
               <Button data-testid="search-btn" onClick={handleSearch} disabled={searching}
-                className="h-12 px-6 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] text-white rounded-2xl font-bold transition-all">
+                className="h-12 px-6 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(255,107,0,0.6)] text-white rounded-2xl font-bold transition-all">
                 {searching ? "..." : "Search"}
               </Button>
             </div>
@@ -168,7 +168,7 @@ export default function StreamPage({ onTrackSelect }) {
             {[{ key: "browse", label: "Browse", icon: TrendingUp }, { key: "search", label: "Results", icon: Search }].map((tab) => (
               <Button key={tab.key} data-testid={`tab-${tab.key}`} onClick={() => setActiveTab(tab.key)}
                 className={`h-9 px-4 rounded-full text-xs gap-1.5 transition-all ${
-                  activeTab === tab.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(138,43,226,0.4)]" : "bg-[#0F0F16] text-[#8F8F9D] border border-white/5 hover:border-white/15"
+                  activeTab === tab.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.4)]" : "bg-[#0F0F16] text-[#8F8F9D] border border-white/5 hover:border-white/15"
                 }`}>
                 <tab.icon className="w-3 h-3" />{tab.label}
               </Button>
@@ -201,7 +201,7 @@ export default function StreamPage({ onTrackSelect }) {
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 scrollbar-hide">
                       {topAlbums.map((album) => (
                         <div key={album.id} className="flex-shrink-0 w-36 group cursor-pointer">
-                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#FF6B00]/40 group-hover:shadow-[0_0_20px_rgba(138,43,226,0.2)] transition-all duration-300">
+                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#FF6B00]/40 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.2)] transition-all duration-300">
                             <img src={album.cover_url || album.cover_thumb} alt={album.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                           </div>

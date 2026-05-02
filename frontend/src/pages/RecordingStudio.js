@@ -142,7 +142,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
               <Button key={l.key} data-testid={`layout-${l.key}`}
                 onClick={() => { if (!isRecording) setLayout(l.key); }}
                 className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(138,43,226,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
+                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
                 }`}>
                 <l.icon className="w-3 h-3" />{l.label}
               </Button>
@@ -249,7 +249,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
 
               <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
                 className={`w-14 h-14 rounded-full transition-all ${
-                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(138,43,226,0.5)]"
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(255,107,0,0.5)]"
                 }`}>
                 {isRecording ? <Square className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
               </Button>
@@ -284,7 +284,7 @@ function GuitarDiagram({ chord }) {
         <div key={i} className="flex flex-col items-center gap-1">
           <span className="text-[8px] text-[#5C5C6B]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
           {[1,2,3,4].map((pos) => (
-            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_8px_rgba(138,43,226,0.5)]" : "border-white/10"}`} />
+            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.5)]" : "border-white/10"}`} />
           ))}
         </div>
       ))}
