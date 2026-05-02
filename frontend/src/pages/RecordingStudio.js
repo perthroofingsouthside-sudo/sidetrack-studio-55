@@ -127,7 +127,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
           {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
         </div>
         <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
-          className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#00E5FF]/40 text-[#00E5FF]" : "border-white/10 text-[#5C5C6B]"}`}>
+          className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>
           <MessageCircle className="w-3.5 h-3.5" />
         </Button>
       </div>
@@ -142,7 +142,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
               <Button key={l.key} data-testid={`layout-${l.key}`}
                 onClick={() => { if (!isRecording) setLayout(l.key); }}
                 className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-                  layout === l.key ? "bg-[#8A2BE2] text-white shadow-[0_0_16px_rgba(138,43,226,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
+                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(138,43,226,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
                 }`}>
                 <l.icon className="w-3 h-3" />{l.label}
               </Button>
@@ -159,7 +159,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
                     <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
                     <div className="relative z-10 text-center">
-                      <Camera className="w-12 h-12 text-[#8A2BE2]/40 mb-2 mx-auto" />
+                      <Camera className="w-12 h-12 text-[#FF6B00]/40 mb-2 mx-auto" />
                       <p className="text-xs text-[#5C5C6B]">Camera activates when recording</p>
                     </div>
                   </div>
@@ -167,7 +167,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
                 {/* Overlay info */}
                 {isRecording && (
                   <div className="absolute bottom-3 left-3 crystal-glass rounded-full px-3 py-1">
-                    <span className="text-[10px] text-[#00E5FF] font-mono font-bold">{fmtDur(duration)}</span>
+                    <span className="text-[10px] text-[#39FF14] font-mono font-bold">{fmtDur(duration)}</span>
                   </div>
                 )}
               </div>
@@ -177,14 +177,14 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
               <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4 rounded-xl mx-3 mt-1 border border-white/5" data-testid="guitar-full">
                 {currentChord ? (
                   <div className="text-center animate-fade-in">
-                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#8A2BE2] glow-text-violet landscape-chords tracking-tighter">
+                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange landscape-chords tracking-tighter">
                       {currentChord.chord}
                     </div>
                     <GuitarDiagram chord={currentChord.chord} />
                     {lyrics?.chords && (
                       <div className="flex gap-3 mt-6 justify-center flex-wrap">
                         {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
-                          <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#8A2BE2]/10 text-[#8A2BE2]/50">{c.chord}</span>
+                          <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
                         ))}
                       </div>
                     )}
@@ -202,17 +202,17 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
                   <div className="p-4 space-y-2">
                     {layout === "split" && currentChord && (
                       <div className="text-center mb-3 pb-3 border-b border-white/5">
-                        <span className="text-3xl font-['Outfit'] font-black text-[#8A2BE2] glow-text-violet tracking-tighter">{currentChord.chord}</span>
+                        <span className="text-3xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</span>
                       </div>
                     )}
                     {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
                       if (line.type === "section") return (
-                        <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#00E5FF]" : "text-[#5C5C6B]"}`}>{line.text}</p>
+                        <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>
                       );
                       if (line.type === "break") return <div key={i} className="h-2" />;
                       return (
                         <p key={i} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
-                          i === activeLyricIdx ? "text-[#00E5FF] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"
+                          i === activeLyricIdx ? "text-[#39FF14] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"
                         }`}>{line.text}</p>
                       );
                     }) : (
@@ -243,13 +243,13 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
             {/* Controls row - crystal glass pill */}
             <div className="crystal-glass rounded-full px-6 py-3 flex items-center justify-center gap-5 mx-auto" data-testid="stage-controls">
               <Button data-testid="toggle-mode-btn" variant="ghost" onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
-                className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#00E5FF]" : "text-[#8F8F9D]"}`}>
+                className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#39FF14]" : "text-[#8F8F9D]"}`}>
                 <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
               </Button>
 
               <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
                 className={`w-14 h-14 rounded-full transition-all ${
-                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#8A2BE2] hover:bg-[#A64DFF] shadow-[0_0_30px_rgba(138,43,226,0.5)]"
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(138,43,226,0.5)]"
                 }`}>
                 {isRecording ? <Square className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
               </Button>
@@ -284,7 +284,7 @@ function GuitarDiagram({ chord }) {
         <div key={i} className="flex flex-col items-center gap-1">
           <span className="text-[8px] text-[#5C5C6B]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
           {[1,2,3,4].map((pos) => (
-            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#8A2BE2] border-[#8A2BE2] shadow-[0_0_8px_rgba(138,43,226,0.5)]" : "border-white/10"}`} />
+            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_8px_rgba(138,43,226,0.5)]" : "border-white/10"}`} />
           ))}
         </div>
       ))}

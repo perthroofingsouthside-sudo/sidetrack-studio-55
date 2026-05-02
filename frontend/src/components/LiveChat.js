@@ -43,12 +43,12 @@ export default function LiveChat({ trackTitle }) {
   return (
     <div className="flex flex-col h-full retro-terminal rounded-xl overflow-hidden" data-testid="live-chat">
       {/* Toggle tabs */}
-      <div className="flex border-b border-[#00E5FF]/10" data-testid="live-chat-toggle">
+      <div className="flex border-b border-[#39FF14]/10" data-testid="live-chat-toggle">
         <button
           data-testid="chat-tab-live"
           onClick={() => setMode("live")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-all ${
-            mode === "live" ? "text-[#00E5FF] border-b-2 border-[#00E5FF]" : "text-[#5C5C6B] hover:text-[#8F8F9D]"
+            mode === "live" ? "text-[#39FF14] border-b-2 border-[#39FF14]" : "text-[#5C5C6B] hover:text-[#8F8F9D]"
           }`}
         >
           <Radio className="w-3 h-3" /> Live
@@ -57,7 +57,7 @@ export default function LiveChat({ trackTitle }) {
           data-testid="chat-tab-comments"
           onClick={() => setMode("comments")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-bold uppercase tracking-[0.15em] transition-all ${
-            mode === "comments" ? "text-[#00E5FF] border-b-2 border-[#00E5FF]" : "text-[#5C5C6B] hover:text-[#8F8F9D]"
+            mode === "comments" ? "text-[#39FF14] border-b-2 border-[#39FF14]" : "text-[#5C5C6B] hover:text-[#8F8F9D]"
           }`}
         >
           <MessageCircle className="w-3 h-3" /> Comments
@@ -74,7 +74,7 @@ export default function LiveChat({ trackTitle }) {
             {messages.map((msg) => (
               <div key={msg.id} className="animate-chat-in py-1" data-testid="live-message">
                 <span className="text-[10px] text-[#5C5C6B] mr-1.5">{fmtTime(msg.ts)}</span>
-                <span className="text-xs font-bold text-[#00E5FF]">{msg.user}</span>
+                <span className="text-xs font-bold text-[#39FF14]">{msg.user}</span>
                 <span className="text-xs text-[#8F8F9D] ml-1.5">{msg.text}</span>
               </div>
             ))}
@@ -87,8 +87,8 @@ export default function LiveChat({ trackTitle }) {
             {comments.map((c) => (
               <div key={c.id} className="bg-white/5 rounded-lg p-3" data-testid="comment-message">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-full bg-[#8A2BE2]/20 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-[#8A2BE2]">{c.user[0]}</span>
+                  <div className="w-5 h-5 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
+                    <span className="text-[8px] font-bold text-[#FF6B00]">{c.user[0]}</span>
                   </div>
                   <span className="text-xs font-bold text-white">{c.user}</span>
                   <span className="text-[10px] text-[#5C5C6B] flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{fmtTime(c.ts)}</span>
@@ -101,7 +101,7 @@ export default function LiveChat({ trackTitle }) {
       </div>
 
       {/* Input */}
-      <div className="px-3 pb-3 pt-2 border-t border-[#00E5FF]/10">
+      <div className="px-3 pb-3 pt-2 border-t border-[#39FF14]/10">
         <div className="flex gap-2">
           <Input
             data-testid="chat-input"
@@ -109,13 +109,13 @@ export default function LiveChat({ trackTitle }) {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder={mode === "live" ? "Say something..." : "Leave a comment..."}
-            className="h-9 bg-transparent border-white/20 text-white placeholder:text-[#5C5C6B] rounded-lg text-sm focus:border-[#8A2BE2]"
+            className="h-9 bg-transparent border-white/20 text-white placeholder:text-[#5C5C6B] rounded-lg text-sm focus:border-[#FF6B00]"
           />
           <Button
             data-testid="chat-send-btn"
             onClick={sendMessage}
             size="icon"
-            className="h-9 w-9 bg-[#8A2BE2] hover:bg-[#A64DFF] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] rounded-lg flex-shrink-0"
+            className="h-9 w-9 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] rounded-lg flex-shrink-0"
           >
             <Send className="w-3.5 h-3.5 text-white" />
           </Button>

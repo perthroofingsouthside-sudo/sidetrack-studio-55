@@ -90,25 +90,25 @@ export default function HomePage({ onSongRecognized }) {
     >
       {/* Background abstract */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#8A2BE2]/5 blur-[120px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/5 blur-[120px]" />
         <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#4B0082]/8 blur-[100px]" />
       </div>
 
       {/* Logo */}
       <div className="relative z-10 mb-12 animate-fade-in">
-        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#8A2BE2]/10 border border-[#8A2BE2]/30 flex items-center justify-center glow-violet">
+        <div className="w-20 h-20 mx-auto mb-4 rounded-2xl bg-[#FF6B00]/10 border border-[#FF6B00]/30 flex items-center justify-center glow-orange">
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <path d="M8 30V10L16 6V34L8 30Z" fill="#8A2BE2"/>
-            <path d="M18 28V12L26 8V32L18 28Z" fill="#00E5FF" opacity="0.8"/>
-            <path d="M28 26V14L34 11V29L28 26Z" fill="#8A2BE2" opacity="0.6"/>
-            <circle cx="12" cy="32" r="2" fill="#8A2BE2"/>
-            <circle cx="22" cy="30" r="2" fill="#00E5FF"/>
-            <circle cx="31" cy="28" r="2" fill="#8A2BE2" opacity="0.6"/>
+            <path d="M8 30V10L16 6V34L8 30Z" fill="#FF6B00"/>
+            <path d="M18 28V12L26 8V32L18 28Z" fill="#39FF14" opacity="0.8"/>
+            <path d="M28 26V14L34 11V29L28 26Z" fill="#FF6B00" opacity="0.6"/>
+            <circle cx="12" cy="32" r="2" fill="#FF6B00"/>
+            <circle cx="22" cy="30" r="2" fill="#39FF14"/>
+            <circle cx="31" cy="28" r="2" fill="#FF6B00" opacity="0.6"/>
           </svg>
         </div>
         <h1 className="font-['Outfit'] text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-center">
           <span className="text-white">SIDE</span>
-          <span className="text-[#8A2BE2] glow-text-violet">TRACK</span>
+          <span className="text-[#FF6B00] glow-text-orange">TRACK</span>
         </h1>
         <p className="text-[#606070] text-[10px] mt-1 text-center font-['Manrope'] uppercase tracking-[0.3em]">
           studios
@@ -123,9 +123,9 @@ export default function HomePage({ onSongRecognized }) {
         {/* Radar rings */}
         {isListening && (
           <>
-            <div className="absolute w-48 h-48 rounded-full border border-[#8A2BE2]/30 animate-pulse-ring" style={{ animationDelay: "0s" }} />
-            <div className="absolute w-64 h-64 rounded-full border border-[#8A2BE2]/20 animate-pulse-ring" style={{ animationDelay: "0.5s" }} />
-            <div className="absolute w-80 h-80 rounded-full border border-[#8A2BE2]/10 animate-pulse-ring" style={{ animationDelay: "1s" }} />
+            <div className="absolute w-48 h-48 rounded-full border border-[#FF6B00]/30 animate-pulse-ring" style={{ animationDelay: "0s" }} />
+            <div className="absolute w-64 h-64 rounded-full border border-[#FF6B00]/20 animate-pulse-ring" style={{ animationDelay: "0.5s" }} />
+            <div className="absolute w-80 h-80 rounded-full border border-[#FF6B00]/10 animate-pulse-ring" style={{ animationDelay: "1s" }} />
           </>
         )}
 
@@ -135,16 +135,16 @@ export default function HomePage({ onSongRecognized }) {
           disabled={isProcessing}
           className={`relative w-32 h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
             isListening
-              ? "bg-[#8A2BE2] glow-violet scale-110"
+              ? "bg-[#FF6B00] glow-orange scale-110"
               : isProcessing
               ? "bg-[#12121A] border border-white/10"
-              : "bg-[#12121A] border border-[#8A2BE2]/40 hover:border-[#8A2BE2] hover:glow-violet hover:-translate-y-1"
+              : "bg-[#12121A] border border-[#FF6B00]/40 hover:border-[#FF6B00] hover:glow-orange hover:-translate-y-1"
           }`}
         >
           {isProcessing ? (
-            <Loader2 className="w-10 h-10 text-[#8A2BE2] animate-spin" />
+            <Loader2 className="w-10 h-10 text-[#FF6B00] animate-spin" />
           ) : (
-            <Mic className={`w-10 h-10 ${isListening ? "text-white" : "text-[#8A2BE2]"}`} />
+            <Mic className={`w-10 h-10 ${isListening ? "text-white" : "text-[#FF6B00]"}`} />
           )}
         </Button>
       </div>
@@ -167,7 +167,7 @@ export default function HomePage({ onSongRecognized }) {
           {Array.from({ length: 20 }).map((_, i) => (
             <div
               key={i}
-              className="w-[3px] bg-[#8A2BE2] rounded-full waveform-bar"
+              className="w-[3px] bg-[#FF6B00] rounded-full waveform-bar"
               style={{
                 animation: `waveform 0.8s ease-in-out infinite`,
                 animationDelay: `${i * 0.05}s`,

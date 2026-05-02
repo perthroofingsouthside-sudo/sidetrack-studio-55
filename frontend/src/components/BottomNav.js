@@ -1,4 +1,4 @@
-import { Home, Music2, Mic2, Share2, Radio, Swords, ListMusic, Star } from "lucide-react";
+import { Home, Music2, Mic2, Share2, Radio, Swords, ListMusic, Star, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { key: "battle", icon: Swords, label: "Battle", alwaysEnabled: true },
   { key: "star", icon: Star, label: "Star", alwaysEnabled: true },
   { key: "playlists", icon: ListMusic, label: "Playlists", alwaysEnabled: true },
+  { key: "profile", icon: User, label: "Profile", alwaysEnabled: true },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
 ];
@@ -21,7 +22,6 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
         {NAV_ITEMS.map((item) => {
           const isActive = currentView === item.key;
           const isDisabled = !item.alwaysEnabled && item.key !== "home" && !hasSong;
-          const isStar = item.key === "star";
 
           return (
             <Button
@@ -31,19 +31,13 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
               onClick={() => !isDisabled && onNavigate(item.key)}
               className={`flex flex-col items-center gap-0.5 h-14 px-1.5 sm:px-2 rounded-xl transition-all min-w-0 ${
                 isActive
-                  ? isStar ? "text-[#FFD60A]" : "text-[#8A2BE2]"
+                  ? "text-[#FF6B00]"
                   : isDisabled
                   ? "text-[#606070]/40 cursor-not-allowed"
                   : "text-[#606070] hover:text-[#A0A0B0]"
               }`}
             >
-              <item.icon className={`w-4.5 h-4.5 ${
-                isActive
-                  ? isStar
-                    ? "drop-shadow-[0_0_8px_rgba(255,214,10,0.6)]"
-                    : "drop-shadow-[0_0_8px_rgba(138,43,226,0.6)]"
-                  : ""
-              }`} style={{ width: 18, height: 18 }} />
+              <item.icon className={`${isActive ? "drop-shadow-[0_0_8px_rgba(255,107,0,0.6)]" : ""}`} style={{ width: 18, height: 18 }} />
               <span className="text-[8px] sm:text-[9px] font-medium">{item.label}</span>
             </Button>
           );

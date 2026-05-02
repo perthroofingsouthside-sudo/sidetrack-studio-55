@@ -208,13 +208,13 @@ export default function PlayerStudio({ song, onRecord }) {
     <div className="min-h-screen bg-[#05050A] pb-4" data-testid="player-studio">
       {/* Song Header */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#8A2BE2]/10 to-[#05050A] z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF6B00]/10 to-[#05050A] z-0" />
         <div className="relative z-10 px-4 pt-6 pb-4 flex items-center gap-4">
           <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0">
             {song.cover_url ? (
               <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#8A2BE2] text-2xl font-bold">
+              <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF6B00] text-2xl font-bold">
                 {song.title?.[0] || "?"}
               </div>
             )}
@@ -230,7 +230,7 @@ export default function PlayerStudio({ song, onRecord }) {
               {song.artist}
             </p>
             {song.genre && (
-              <span className="text-xs text-[#8A2BE2] uppercase tracking-[0.2em] font-bold mt-1 inline-block">
+              <span className="text-xs text-[#FF6B00] uppercase tracking-[0.2em] font-bold mt-1 inline-block">
                 {song.genre}
               </span>
             )}
@@ -249,7 +249,7 @@ export default function PlayerStudio({ song, onRecord }) {
           }}
         >
           <div
-            className="absolute top-0 left-0 h-full bg-[#8A2BE2] rounded-full transition-all"
+            className="absolute top-0 left-0 h-full bg-[#FF6B00] rounded-full transition-all"
             style={{ width: `${progress}%` }}
           />
           <div
@@ -276,7 +276,7 @@ export default function PlayerStudio({ song, onRecord }) {
           <Button
             data-testid="play-pause-btn"
             onClick={togglePlay}
-            className="w-14 h-14 rounded-full bg-[#8A2BE2] hover:bg-[#9D4CDD] text-white glow-violet transition-all"
+            className="w-14 h-14 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white glow-orange transition-all"
           >
             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
           </Button>
@@ -285,7 +285,7 @@ export default function PlayerStudio({ song, onRecord }) {
             variant="ghost"
             size="icon"
             onClick={onRecord}
-            className="text-[#A0A0B0] hover:text-[#00E5FF]"
+            className="text-[#A0A0B0] hover:text-[#39FF14]"
           >
             <Mic className="w-5 h-5" />
           </Button>
@@ -312,7 +312,7 @@ export default function PlayerStudio({ song, onRecord }) {
                 data-testid="upload-for-separation-btn"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={separating}
-                className="h-8 px-3 text-xs rounded-xl bg-[#8A2BE2] hover:bg-[#9D4CDD] text-white gap-1.5 transition-all"
+                className="h-8 px-3 text-xs rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1.5 transition-all"
               >
                 {separating ? (
                   <><Loader2 className="w-3 h-3 animate-spin" /> Separating...</>
@@ -323,7 +323,7 @@ export default function PlayerStudio({ song, onRecord }) {
             </div>
           )}
           {hasRealStems && (
-            <span className="text-[10px] text-[#00E5FF] uppercase tracking-widest font-bold">Live Stems</span>
+            <span className="text-[10px] text-[#39FF14] uppercase tracking-widest font-bold">Live Stems</span>
           )}
         </div>
         <StemMixer

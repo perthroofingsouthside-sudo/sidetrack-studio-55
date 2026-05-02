@@ -437,20 +437,128 @@ async def get_stems(song_id: str):
 # Lyrics and Chords
 @api_router.get("/songs/{song_id}/lyrics")
 async def get_lyrics(song_id: str):
-    """Get lyrics and chord progressions for a song (MOCKED)."""
+    """Get synced lyrics for a song via LRCLIB API, with mock fallback."""
     song = await db.songs.find_one({"id": song_id}, {"_id": 0})
     if not song:
         raise HTTPException(status_code=404, detail="Song not found")
 
-    mock_data = get_mock_lyrics(song.get('title', ''), song.get('artist', ''))
+    title = song.get('title', '')
+    artist = song.get('artist', '')
+
+    # Try LRCLIB API first
+    try:
+        import httpx
+        params = {"track_name": title, "artist_name": artist}
+        async with httpx.AsyncClient(timeout=8) as client:
+            resp = await client.get("https://lrclib.net/api/get", params=params)
+            if resp.status_code == 200:
+                data = resp.json()
+                synced_raw = data.get("syncedLyrics") or ""
+                plain_raw = data.get("plainLyrics") or ""
+
+                if synced_raw:
+                    # Parse LRC format: [mm:ss.xx] text
+                    lyrics_lines = []
+                    for line in synced_raw.strip().split("\n"):
+                        line = line.strip()
+                        if not line:
+                            continue
+                        # Extract timestamp [mm:ss.xx]
+                        if line.startswith("[") and "]" in line:
+                            ts_end = line.index("]")
+                            ts_str = line[1:ts_end]
+                            text = line[ts_end + 1:].strip()
+                            try:
+                                parts = ts_str.split(":")
+                                minutes = int(parts[0])
+                                seconds = float(parts[1])
+                                time_s = minutes * 60 + seconds
+                            except (ValueError, IndexError):
+                                continue
+
+                            if not text:
+                                lyrics_lines.append({"time": time_s, "text": "", "type": "break"})
+                            elif text.startswith("[") and text.endswith("]"):
+                                lyrics_lines.append({"time": time_s, "text": text[1:-1], "type": "section"})
+                            else:
+                                lyrics_lines.append({"time": time_s, "text": text, "type": "line"})
+
+                    if lyrics_lines:
+                        mock_chords = get_mock_lyrics(title, artist).get("chords", [])
+                        return {
+                            "success": True,
+                            "song_id": song_id,
+                            "title": title,
+                            "artist": artist,
+                            "lyrics": lyrics_lines,
+                            "chords": mock_chords,
+                            "synced": True,
+                            "source": "lrclib"
+                        }
+
+                elif plain_raw:
+                    # Plain lyrics (no timing) — assign estimated timestamps
+                    lines = [ln.strip() for ln in plain_raw.strip().split("\n")]
+                    lyrics_lines = []
+                    t = 0
+                    for line in lines:
+                        if not line:
+                            lyrics_lines.append({"time": t, "text": "", "type": "break"})
+                        else:
+                            lyrics_lines.append({"time": t, "text": line, "type": "line"})
+                        t += 3.5
+
+                    if lyrics_lines:
+                        mock_chords = get_mock_lyrics(title, artist).get("chords", [])
+                        return {
+                            "success": True,
+                            "song_id": song_id,
+                            "title": title,
+                            "artist": artist,
+                            "lyrics": lyrics_lines,
+                            "chords": mock_chords,
+                            "synced": False,
+                            "source": "lrclib"
+                        }
+    except Exception as e:
+        logger.warning(f"LRCLIB fetch failed for '{title}' by '{artist}': {e}")
+
+    # Fallback to mock data
+    mock_data = get_mock_lyrics(title, artist)
     return {
         "success": True,
         "song_id": song_id,
-        "title": song.get('title', ''),
-        "artist": song.get('artist', ''),
+        "title": title,
+        "artist": artist,
         **mock_data,
-        "mocked": True
+        "synced": False,
+        "source": "mock"
     }
+
+@api_router.get("/lyrics/search")
+async def search_lyrics(track: str, artist: str = ""):
+    """Search LRCLIB directly by track name and artist."""
+    try:
+        import httpx
+        params = {"track_name": track}
+        if artist:
+            params["artist_name"] = artist
+        async with httpx.AsyncClient(timeout=8) as client:
+            resp = await client.get("https://lrclib.net/api/get", params=params)
+            if resp.status_code == 200:
+                data = resp.json()
+                return {
+                    "success": True,
+                    "has_synced": bool(data.get("syncedLyrics")),
+                    "has_plain": bool(data.get("plainLyrics")),
+                    "track_name": data.get("trackName", ""),
+                    "artist_name": data.get("artistName", ""),
+                    "album_name": data.get("albumName", ""),
+                    "duration": data.get("duration", 0),
+                }
+            return {"success": False, "message": "Not found on LRCLIB"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}
 
 # Recordings CRUD
 @api_router.post("/recordings")

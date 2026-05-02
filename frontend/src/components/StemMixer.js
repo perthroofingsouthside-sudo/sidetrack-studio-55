@@ -3,10 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX } from "lucide-react";
 
 const STEMS = [
-  { key: "vocals", label: "VOX", color: "#00E5FF", bgClass: "bg-[#00E5FF]" },
-  { key: "guitar", label: "GTR", color: "#8A2BE2", bgClass: "bg-[#8A2BE2]" },
+  { key: "vocals", label: "VOX", color: "#39FF14", bgClass: "bg-[#39FF14]" },
+  { key: "guitar", label: "GTR", color: "#FF6B00", bgClass: "bg-[#FF6B00]" },
   { key: "bass", label: "BAS", color: "#FF3B30", bgClass: "bg-[#FF3B30]" },
-  { key: "drums", label: "DRM", color: "#FFD60A", bgClass: "bg-[#FFD60A]" },
+  { key: "drums", label: "DRM", color: "#FF6B00", bgClass: "bg-[#FF6B00]" },
 ];
 
 export default function StemMixer({ volumes, muted, onVolumeChange, onMuteToggle }) {

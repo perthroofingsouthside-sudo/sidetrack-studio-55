@@ -97,7 +97,7 @@ h1, h2, h3, h4, h5, h6 {
   background: #05050A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #8A2BE2;
+  background: #FF6B00;
   border-radius: 4px;
 }
 
@@ -117,32 +117,32 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Neon glow utilities */
-.glow-violet {
-  box-shadow: 0 0 20px rgba(138, 43, 226, 0.4), 0 0 60px rgba(138, 43, 226, 0.15);
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4), 0 0 60px rgba(255, 107, 0, 0.15);
 }
 
 .glow-cyan {
-  box-shadow: 0 0 20px rgba(0, 229, 255, 0.4), 0 0 60px rgba(0, 229, 255, 0.15);
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.4), 0 0 60px rgba(57, 255, 20, 0.15);
 }
 
-.glow-text-violet {
-  text-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+.glow-text-orange {
+  text-shadow: 0 0 20px rgba(255, 107, 0, 0.6);
 }
 
-.glow-text-cyan {
-  text-shadow: 0 0 20px rgba(0, 229, 255, 0.6);
+.glow-text-green {
+  text-shadow: 0 0 20px rgba(57, 255, 20, 0.6);
 }
 
 /* Stem colors */
-.stem-vocals { color: #00E5FF; }
-.stem-guitar { color: #8A2BE2; }
+.stem-vocals { color: #39FF14; }
+.stem-guitar { color: #FF6B00; }
 .stem-bass { color: #FF3B30; }
-.stem-drums { color: #FFD60A; }
+.stem-drums { color: #FF6B00; }
 
-.bg-stem-vocals { background-color: #00E5FF; }
-.bg-stem-guitar { background-color: #8A2BE2; }
+.bg-stem-vocals { background-color: #39FF14; }
+.bg-stem-guitar { background-color: #FF6B00; }
 .bg-stem-bass { background-color: #FF3B30; }
-.bg-stem-drums { background-color: #FFD60A; }
+.bg-stem-drums { background-color: #FF6B00; }
 
 /* Animations */
 @keyframes pulse-ring {
@@ -198,7 +198,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Active lyric line */
 .lyric-active {
-  color: #00E5FF;
+  color: #39FF14;
   font-weight: 600;
   transform: scale(1.02);
   transition: all 0.3s ease;
@@ -211,10 +211,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Chord highlight */
 .chord-active {
-  color: #8A2BE2;
+  color: #FF6B00;
   font-size: 2rem;
   font-weight: 800;
-  text-shadow: 0 0 30px rgba(138, 43, 226, 0.6);
+  text-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
 }
 
 /* Surface card */
@@ -235,21 +235,21 @@ h1, h2, h3, h4, h5, h6 {
 
 .retro-terminal {
   background: #05050A;
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.15));
+  border: 1px solid rgba(57, 255, 20, 0.3);
+  filter: drop-shadow(0 0 8px rgba(57, 255, 20, 0.15));
 }
 
 /* Neon progress bar */
 .neon-progress {
-  background: linear-gradient(90deg, #8A2BE2, #00E5FF);
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.5);
+  background: linear-gradient(90deg, #FF6B00, #39FF14);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
   border-radius: 9999px;
   height: 3px;
 }
 
 /* Live stage ambient */
 .stage-ambient {
-  background: radial-gradient(ellipse at 50% 120%, rgba(138, 43, 226, 0.08) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 50% 120%, rgba(255, 107, 0, 0.08) 0%, transparent 60%);
 }
 
 /* Chat message fade-in */
@@ -263,7 +263,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Neon ambient glow for video */
 .neon-ambient-glow {
-  box-shadow: 0 0 60px rgba(138, 43, 226, 0.12), 0 0 120px rgba(0, 229, 255, 0.06);
+  box-shadow: 0 0 60px rgba(255, 107, 0, 0.12), 0 0 120px rgba(57, 255, 20, 0.06);
 }
 
 @layer base {

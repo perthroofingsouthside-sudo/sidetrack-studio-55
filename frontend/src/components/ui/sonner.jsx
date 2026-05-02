@@ -13,7 +13,7 @@ const Toaster = ({
             "group toast group-[.toaster]:bg-[#12121A] group-[.toaster]:text-white group-[.toaster]:border-white/10 group-[.toaster]:shadow-lg",
           description: "group-[.toast]:text-[#A0A0B0]",
           actionButton:
-            "group-[.toast]:bg-[#8A2BE2] group-[.toast]:text-white",
+            "group-[.toast]:bg-[#FF6B00] group-[.toast]:text-white",
           cancelButton:
             "group-[.toast]:bg-[#12121A] group-[.toast]:text-[#A0A0B0]",
         },

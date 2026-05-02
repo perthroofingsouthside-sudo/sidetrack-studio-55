@@ -80,7 +80,7 @@ export default function EditSharePage({ recording, song, onBack }) {
       <div className="min-h-screen bg-[#05050A] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#A0A0B0]">No recording to edit</p>
-          <Button data-testid="go-back-btn" onClick={onBack} className="mt-4 bg-[#8A2BE2]">
+          <Button data-testid="go-back-btn" onClick={onBack} className="mt-4 bg-[#FF6B00]">
             Go Back
           </Button>
         </div>
@@ -132,7 +132,7 @@ export default function EditSharePage({ recording, song, onBack }) {
       <div className="px-4 py-4" data-testid="waveform-editor">
         <div className="surface-card p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Scissors className="w-4 h-4 text-[#8A2BE2]" />
+            <Scissors className="w-4 h-4 text-[#FF6B00]" />
             <span className="text-sm font-['Outfit'] font-bold text-white">Trim</span>
           </div>
 
@@ -146,7 +146,7 @@ export default function EditSharePage({ recording, song, onBack }) {
                   <div
                     key={i}
                     className={`flex-1 rounded-full transition-colors ${
-                      inRange ? "bg-[#8A2BE2]" : "bg-white/10"
+                      inRange ? "bg-[#FF6B00]" : "bg-white/10"
                     }`}
                     style={{ height: `${h}%` }}
                   />
@@ -198,7 +198,7 @@ export default function EditSharePage({ recording, song, onBack }) {
             <Button
               data-testid="preview-trim-btn"
               onClick={handlePlayPreview}
-              className="flex-1 bg-[#12121A] border border-white/10 hover:border-[#8A2BE2]/40 text-white"
+              className="flex-1 bg-[#12121A] border border-white/10 hover:border-[#FF6B00]/40 text-white"
             >
               {isPlaying ? "Stop Preview" : "Preview Trim"}
             </Button>
@@ -220,7 +220,7 @@ export default function EditSharePage({ recording, song, onBack }) {
         <Button
           data-testid="download-btn"
           onClick={handleDownload}
-          className="w-full h-12 bg-[#8A2BE2] hover:bg-[#9D4CDD] text-white font-bold rounded-2xl glow-violet transition-all hover:-translate-y-0.5"
+          className="w-full h-12 bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold rounded-2xl glow-orange transition-all hover:-translate-y-0.5"
         >
           <Download className="w-5 h-5 mr-2" />
           Download Recording

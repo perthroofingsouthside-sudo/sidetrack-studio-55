@@ -38,7 +38,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
     <div className="grid grid-cols-2 gap-3" data-testid="split-screen">
       {/* Left: Guitar Chords */}
       <div className="surface-card p-4 flex flex-col" data-testid="chords-panel">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8A2BE2] mb-3">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#FF6B00] mb-3">
           Guitar Chords
         </span>
 
@@ -59,7 +59,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
           {nextChords.map((c, i) => (
             <span
               key={`${c.time}-${i}`}
-              className="text-sm font-['Outfit'] font-bold px-2 py-1 rounded-lg bg-[#8A2BE2]/10 text-[#8A2BE2]/60"
+              className="text-sm font-['Outfit'] font-bold px-2 py-1 rounded-lg bg-[#FF6B00]/10 text-[#FF6B00]/60"
             >
               {c.chord}
             </span>
@@ -69,7 +69,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
 
       {/* Right: Lyrics */}
       <div className="surface-card p-4" data-testid="lyrics-panel">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#00E5FF] mb-3 block">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#39FF14] mb-3 block">
           Lyrics
         </span>
         <ScrollArea className="h-[250px]">
@@ -80,7 +80,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
                   <p
                     key={i}
                     className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${
-                      i === activeLyricIdx ? "text-[#00E5FF]" : "text-[#606070]"
+                      i === activeLyricIdx ? "text-[#39FF14]" : "text-[#606070]"
                     }`}
                   >
                     {line.text}
@@ -136,7 +136,7 @@ function ChordDiagram({ chord }) {
                 key={f}
                 className={`w-3 h-3 rounded-full border ${
                   fret === f
-                    ? "bg-[#8A2BE2] border-[#8A2BE2]"
+                    ? "bg-[#FF6B00] border-[#FF6B00]"
                     : "border-white/10 bg-transparent"
                 }`}
               />

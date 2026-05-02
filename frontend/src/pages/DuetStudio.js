@@ -164,7 +164,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
       <div className="min-h-screen bg-[#05050A] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#A0A0B0]">No cover selected for duet</p>
-          <Button data-testid="duet-go-back-btn" onClick={onBack} className="mt-4 bg-[#8A2BE2]">Go Back</Button>
+          <Button data-testid="duet-go-back-btn" onClick={onBack} className="mt-4 bg-[#FF6B00]">Go Back</Button>
         </div>
       </div>
     );
@@ -179,7 +179,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
         </Button>
         <div className="flex-1 min-w-0">
           <h2 className="font-['Outfit'] text-base font-bold truncate flex items-center gap-1.5">
-            <Users className="w-4 h-4 text-[#00E5FF]" />
+            <Users className="w-4 h-4 text-[#39FF14]" />
             Duet Mode
           </h2>
           <p className="text-[10px] text-[#A0A0B0] truncate">with {cover.username} &bull; {battle.song_title}</p>
@@ -211,7 +211,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
             <div
               key={i}
               className={`flex-1 rounded-full transition-all duration-150 ${
-                coverPlaying ? "bg-[#00E5FF]" : "bg-[#00E5FF]/20"
+                coverPlaying ? "bg-[#39FF14]" : "bg-[#39FF14]/20"
               }`}
               style={{ height: `${coverPlaying ? h : 20}%` }}
             />
@@ -222,13 +222,13 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
           <p className="text-[10px] text-[#606070] mt-2 animate-pulse">Loading cover audio...</p>
         )}
         {coverAudioReady && !isRecording && (
-          <p className="text-[10px] text-[#00E5FF]/60 mt-2">Ready to duet</p>
+          <p className="text-[10px] text-[#39FF14]/60 mt-2">Ready to duet</p>
         )}
 
         {/* Countdown overlay */}
         {countdown && (
           <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-10">
-            <span className="text-7xl font-['Outfit'] font-extrabold text-[#00E5FF] glow-text-cyan animate-pulse">
+            <span className="text-7xl font-['Outfit'] font-extrabold text-[#39FF14] glow-text-green animate-pulse">
               {countdown}
             </span>
           </div>
@@ -248,7 +248,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
         />
         {!streamRef.current && !isRecording && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]">
-            <Camera className="w-10 h-10 text-[#8A2BE2]/40 mb-2" />
+            <Camera className="w-10 h-10 text-[#FF6B00]/40 mb-2" />
             <p className="text-xs text-[#606070]">Your camera activates when you start</p>
           </div>
         )}
@@ -266,7 +266,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
           data-testid="duet-mode-toggle"
           variant="ghost"
           onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
-          className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#00E5FF]" : "text-[#A0A0B0]"}`}
+          className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#39FF14]" : "text-[#A0A0B0]"}`}
         >
           <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
         </Button>
@@ -279,7 +279,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
           className={`w-16 h-16 rounded-full transition-all ${
             isRecording
               ? "bg-red-500 hover:bg-red-600 animate-pulse"
-              : "bg-gradient-to-br from-[#8A2BE2] to-[#00E5FF] hover:opacity-90 glow-violet"
+              : "bg-gradient-to-br from-[#FF6B00] to-[#39FF14] hover:opacity-90 glow-orange"
           }`}
         >
           {isRecording ? <Square className="w-7 h-7 text-white" /> : <Mic className="w-7 h-7 text-white" />}
