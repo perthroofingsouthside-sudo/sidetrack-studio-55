@@ -1,126 +1,143 @@
 {
-  "project_name": "AuraSplit",
-  "app_type": "mobile_web_app",
-  "theme": "dark",
-  "archetype": "Archetype 7: Electric & Neon (Sophisticated Variant)",
-  "design_philosophy": {
-    "core_principles": [
-      "Frictionless, familiar, brand-distinct experience",
-      "Slick and sharp design with black, indigo, and violet trims",
-      "High visual hierarchy focusing on the recording and mixing experience",
-      "Responsive grids, mobile-first, clear navigation hierarchy"
-    ],
-    "emotion": "Creative, modern, focused, and professional."
+  "theme_and_archetype": {
+    "domain": "Music Streaming & Studio",
+    "theme": "Dark",
+    "archetype": "Archetype 7: Electric & Neon",
+    "reasoning": "Explicitly requested neon purple and electric blue on dark theme. Requires an energetic, high-contrast, futuristic approach for a Live Stage."
   },
   "typography": {
     "headings": {
-      "family": "Outfit, sans-serif",
-      "weight": "800",
-      "tracking": "tracking-tighter",
+      "font": "Outfit",
+      "style": "tracking-tighter font-black",
       "sizes": {
         "h1": "text-4xl sm:text-5xl lg:text-6xl",
-        "h2": "text-2xl sm:text-3xl lg:text-4xl",
-        "h3": "text-xl sm:text-2xl"
-      }
+        "h2": "text-2xl sm:text-3xl lg:text-4xl"
+      },
+      "rules": "Never center by default. Use heavy weight for high tension. Left align for structural integrity."
     },
     "body": {
-      "family": "Manrope, sans-serif",
-      "weight": "400",
+      "font": "Manrope",
+      "style": "leading-relaxed tracking-normal",
       "sizes": {
-        "base": "text-base",
-        "small": "text-sm",
-        "tiny": "text-xs"
+        "default": "text-base",
+        "small": "text-sm text-gray-400"
       }
     },
     "labels": {
-      "style": "uppercase tracking-[0.2em] text-xs font-bold"
+      "style": "uppercase tracking-[0.2em] text-xs font-bold text-[#00E5FF]"
     }
   },
   "colors": {
-    "background": "#05050A",
-    "surface": "#12121A",
-    "surface_glass": "rgba(18, 18, 26, 0.6)",
-    "primary": "#8A2BE2",
-    "primary_hover": "#9D4CDD",
-    "secondary": "#4B0082",
-    "accent": "#00E5FF",
+    "base": {
+      "background": "#05050A",
+      "surface_1": "#0F0F16",
+      "surface_2": "#1A1A24"
+    },
+    "brand": {
+      "primary": "#8A2BE2",
+      "primary_hover": "#A64DFF",
+      "secondary": "#00E5FF",
+      "secondary_hover": "#33EEFF"
+    },
     "text": {
       "primary": "#FFFFFF",
-      "secondary": "#A0A0B0",
-      "muted": "#606070"
+      "secondary": "#8F8F9D",
+      "muted": "#5C5C6B"
     },
-    "stems": {
-      "vocals": "#00E5FF",
-      "guitar": "#8A2BE2",
-      "bass": "#FF3B30",
-      "drums": "#FFD60A"
-    },
-    "borders": "rgba(255, 255, 255, 0.1)"
+    "rules": "Avoid pure black, use #05050A. Never use pure #808080 gray, tint with blue. Ensure all text over neon backgrounds is pure white with text-shadow for APCA contrast. Primary CTA gets Purple, secondary action gets Cyan outline."
   },
   "layout_and_spacing": {
-    "scale": "Generous (p-4 to p-8 for containers)",
-    "grid_system": "Control Room Grid for mixers, Tetris Grid for libraries.",
-    "radius": "rounded-2xl for main cards, rounded-full for action buttons, sharp edges for inner elements.",
-    "borders": "1px solid border-white/10 to define surfaces against the dark background."
-  },
-  "surfaces": {
-    "glassmorphism": {
-      "usage": ["Sticky Headers", "Floating Player", "Stem Mixer Overlay"],
-      "classes": "backdrop-blur-xl bg-[#12121A]/60 border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.4)]"
+    "philosophy": "Generous Spacing, Optical Alignment, Negative Space.",
+    "bento_grid": {
+      "marketing": "grid-cols-1 md:grid-cols-12 gap-8",
+      "dashboard": "grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-6"
     },
-    "solid": {
-      "usage": ["Main Background", "Cards"],
-      "classes": "bg-[#12121A] border border-white/5"
+    "padding": "Containers with borders must use p-6 or p-8.",
+    "rules": "Mobile-first grids. Asymmetry is preferred. If an element has a round icon on the left, use optical alignment (extra padding on the left)."
+  },
+  "surface_strategies": {
+    "crystal_glass": {
+      "usage": "Now Playing Bar, Sticky Headers, Floating Video Controls",
+      "classes": "bg-[#05050A]/60 backdrop-blur-2xl border-t border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+    },
+    "retro_terminal": {
+      "usage": "Live Chat Container, Audio Level Meters",
+      "classes": "bg-[#05050A] border border-[#00E5FF]/30 drop-shadow-[0_0_8px_rgba(0,229,255,0.15)]"
+    },
+    "flat_neon": {
+      "usage": "Primary Buttons, Active State Indicators",
+      "classes": "bg-[#8A2BE2] text-white hover:bg-[#A64DFF] hover:shadow-[0_0_20px_rgba(138,43,226,0.6)] transition-all"
     }
   },
-  "components_strategy": {
-    "navigation": "Bottom tab bar for mobile with glassmorphic background, Top header with glassmorphism for settings/profile.",
-    "buttons": "Primary CTA (Record/Recognize) is a massive rounded-full button with layered neon drop-shadows. Secondary buttons have 1px solid borders with subtle hover lifts.",
-    "stem_mixer": "Vertical sliders utilizing Shadcn Slider primitive, custom-colored tracks mapped to stem colors (Cyan, Violet, Red, Yellow). Circular mute/solo toggles.",
-    "split_screen": "Flex container splitting view equally. Left: Guitar chords (large font, primary colored chords). Right: Lyrics (scrolling, active line highlighted).",
-    "waveform_editor": "Interactive visualizer/waveform with draggable trim handles (left and right), custom SVGs or recharts.",
-    "video_player": "Takes up upper half of screen or full background (with overlay), ensuring camera feed is visible while recording."
+  "core_pages": {
+    "main_dashboard_stream": {
+      "layout": "Mode A (Tetris Grid) combined with media scrolling.",
+      "hero_section": "Massive col-span-full card for 'Cover Battle Arena' or 'Become a Star'. Left aligned massive text. Background image with bg-gradient-to-r from-[#05050A] via-[#05050A]/80 to-transparent. Opacity max 40%.",
+      "music_shelves": "Horizontal scrollable rows (gap-6) for Top Albums, Top Songs. Hide scrollbars.",
+      "now_playing": "Fixed bottom bar (above mobile nav). Use 'crystal_glass' surface. Prominent album art, neon glowing progress bar (bg-[#00E5FF])."
+    },
+    "live_stage_recording": {
+      "layout": "Immersive full-bleed. Black background. grid-cols-12.",
+      "main_stage_view": "col-span-12 lg:col-span-9. Content fits in max-h-[80vh] container to avoid overflow. Video element has rounded-xl border border-white/5 and subtle neon ambient glow.",
+      "stage_modes": "4 Layouts (Camera, Split, Lyrics, Guitar). Switch seamlessly. If split, render dual video feeds with gap-4.",
+      "floating_controls": "Centered at the bottom of the video feed. Use 'crystal_glass' rounded-full pill shape. Record button is bright Neon Purple."
+    },
+    "live_chat": {
+      "layout": "col-span-12 lg:col-span-3. Can live in a side panel next to the Live Stage.",
+      "toggle": "Shadcn Tabs customized. Segmented control switching between 'Live' (real-time stream) and 'Comments' (threaded static).",
+      "live_mode": "Auto-scroll container, aria-live='polite'. Messages fade-in from bottom. Dense padding (py-1). No avatars, username colored in neon cyan.",
+      "comments_mode": "Standard scrolling, gap-4 between comments. Avatars present. bg-white/5 rounded-lg p-3.",
+      "input": "Sticky bottom input field inside chat. border-white/20 focus-within:border-[#8A2BE2] bg-transparent."
+    }
+  },
+  "components": {
+    "buttons": "Always include focus:ring-2 focus:ring-[#00E5FF] focus:ring-offset-2 focus:ring-offset-[#05050A].",
+    "tabs": "Override Shadcn h-9 fixed height. Use h-auto. Active state uses border-b-2 border-[#00E5FF] text-[#00E5FF].",
+    "cards": "Avoid Shadcn Card generic borders. Use border-white/5 hover:border-white/15 transition-colors duration-300.",
+    "testing": "All interactive elements MUST have data-testid (e.g., data-testid='live-chat-toggle', data-testid='record-start-button')."
+  },
+  "motion_and_interactions": {
+    "hover": "Explicit hover text color, slightly lighter hue for active elements.",
+    "transitions": "transition-transform duration-300 ease-out, opacity 300ms ease",
+    "accessibility": "Respect prefers-reduced-motion."
   },
   "media": {
-    "images": [
+    "image_urls": [
       {
-        "category": "app_logo",
-        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/9ff3f03723ec3dfaef56eca4f3f8c86df3e36e5553a4527f807c0cbe78f4fb7a.png",
-        "description": "Aura music app logo. Sharp geometric abstract soundwave."
+        "url": "https://images.unsplash.com/photo-1648237409808-aa4649c07ec8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjh8MHwxfHNlYXJjaHwzfHxzaW5nZXIlMjBtaWNyb3Bob25lJTIwbmVvbnxlbnwwfHx8fDE3Nzc2OTUxNzB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "Microphone in dark room with neon lights",
+        "category": "hero_dashboard",
+        "usage": "Use as the background for the main Dashboard hero section (Cover Battle Arena / Become a Star promo) with a dark left-to-right gradient overlay."
       },
       {
-        "category": "background_abstract",
-        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/010bdac35ab588a481a8fe0ff8a878dcb02d63ab3eebc1beef99b03a1a559b25.png",
-        "description": "Abstract deep space or dark studio background with neon violet soundwaves."
+        "url": "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Blue light beam illuminates dark background",
+        "category": "live_stage_ambient",
+        "usage": "Use as an ambient background or empty state for the Live Stage camera view when video is off."
       },
       {
-        "category": "audio_recording_bg",
-        "url": "https://static.prod-images.emergentagent.com/jobs/212f5936-3f99-48f1-ad8d-cd8638246626/images/36d41a6d21a45c93db59557cddf90c290588be4535923e962573bd1b1c411668.png",
-        "description": "High-end vintage microphone illuminated by moody neon violet and cyan lights."
+        "url": "https://images.unsplash.com/photo-1564492893770-559297ff3ee9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzMjh8MHwxfHNlYXJjaHw0fHxzaW5nZXIlMjBtaWNyb3Bob25lJTIwbmVvbnxlbnwwfHx8fDE3Nzc2OTUxNzB8MA&ixlib=rb-4.1.0&q=85",
+        "description": "A woman singing into a microphone on stage",
+        "category": "playlist_or_album_cover",
+        "usage": "Use as a placeholder for top albums or featured live performers in the stream page."
       },
       {
-        "category": "user_video_placeholder",
-        "url": "https://images.unsplash.com/photo-1748357641562-057e48a8ebd5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2ODl8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBwbGF5aW5nJTIwZWxlY3RyaWMlMjBndWl0YXIlMjBkYXJrJTIwc3R1ZGlvfGVufDB8fHx8MTc3NTYzOTYzNXww&ixlib=rb-4.1.0&q=85",
-        "description": "Person playing electric guitar in dark studio - to be used as placeholder for the camera video feed."
+        "url": "https://images.unsplash.com/photo-1765224747196-f4d8e34f5846?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHwzfHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85",
+        "description": "Silhouette of a musician playing guitar on stage",
+        "category": "cover_battle_arena",
+        "usage": "Use as the promotional card background for Cover Battle Arena module."
       }
     ],
-    "icons_library": "lucide-react for standard UI (play, pause, mic, video, share, trim, settings). Use react-icons (FaGuitar, FaDrum, FaMicrophone) for specific instrument icons if needed."
+    "rules": "ONLY use these provided URLs for media. Placeholders are strictly forbidden."
   },
-  "interactions_and_motion": {
-    "hover_states": "Buttons use `-translate-y-1` and intense box-shadow glows on hover.",
-    "transitions": "Smooth transitions on all interactive elements: `transition-all duration-300 ease-in-out`.",
-    "visualizer": "Pulsing animations for recognizing songs. Scrolling animations for lyrics and chords.",
-    "accessibility": "respect prefers-reduced-motion. High contrast on focus states."
-  },
-  "testing": {
-    "attributes": [
-      "All interactive elements MUST include data-testid attribute.",
-      "e.g., data-testid='shazam-button', data-testid='stem-vocal-mute', data-testid='record-video-toggle'"
-    ]
-  },
-  "views_breakdown": {
-    "home": "Center big 'Tap to Recognize' button with animated radar rings.",
-    "player_studio": "Top: Camera feed / Abstract bg. Middle: Stem Mixer (4 vertical sliders). Bottom: Split-screen (Chords | Lyrics). Floating Action Button: Record.",
-    "edit_share": "Waveform view. Trim handles. Social media share buttons."
-  }
+  "instructions_to_main_agent": [
+    "1. Start by updating Tailwind configuration to include the neon primary/secondary colors and custom fonts (Outfit and Manrope).",
+    "2. Implement the 'Main Dashboard' (Stream Page) first as the default landing route. Ensure heavy bento grid layout and horizontal scrolling lists.",
+    "3. Build the 'Live Stage' wrapper, ensuring it consumes full viewport height minus navigation to feel like a dedicated studio app. Apply glassmorphism on the floating record controls.",
+    "4. Build the 'Live Chat' component as a modular sidebar piece. Implement the Tabs for toggling between 'Live' and 'Comments' logic. Add `aria-live` regions.",
+    "5. Every button, input, and interactive UI piece MUST include a `data-testid` (e.g., `data-testid='live-chat-toggle'`).",
+    "6. Do not wrap raw HTML inside unnecessary containers if it breaks the CSS Grid layout (Direct Children Rule).",
+    "7. Never use Inter or generic sans for headings. Apply `font-outfit` and `font-black`.",
+    "8. Maintain extreme contrast. Neon elements must glow over `#05050A` background using shadow utilities."
+  ]
 }
