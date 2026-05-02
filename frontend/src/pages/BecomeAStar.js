@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Star, Mic, Square, Play, Pause, ThumbsUp, ArrowLeft, Search, Trophy, TrendingUp, Camera, Video, Type } from "lucide-react";
+import { Star, Mic, Square, Play, Pause, ThumbsUp, ArrowLeft, Search, Trophy, TrendingUp, Camera, Video, Type, Calendar, Crown, ChevronRight, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,9 +14,13 @@ const KARAOKE_LAYOUTS = [
 ];
 
 export default function BecomeAStar() {
-  const [view, setView] = useState("feed"); // feed | search | karaoke | leaderboard
+  const [view, setView] = useState("feed"); // feed | search | karaoke | challenge
   const [feed, setFeed] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [currentChallenge, setCurrentChallenge] = useState(null);
+  const [challengeEntries, setChallengeEntries] = useState([]);
+  const [challengeHistory, setChallengeHistory] = useState([]);
+  const [joinChallenge, setJoinChallenge] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
@@ -46,6 +50,7 @@ export default function BecomeAStar() {
   useEffect(() => {
     loadFeed();
     loadLeaderboard();
+    loadCurrentChallenge();
     return () => {
       stopAllStreams();
       if (timerRef.current) clearInterval(timerRef.current);
@@ -66,6 +71,33 @@ export default function BecomeAStar() {
       const res = await axios.get(`${API}/stars/leaderboard?limit=10`);
       if (res.data.success) setLeaderboard(res.data.leaderboard);
     } catch { /* empty */ }
+  };
+
+  const loadCurrentChallenge = async () => {
+    try {
+      const res = await axios.get(`${API}/challenges/current`);
+      if (res.data.success) setCurrentChallenge(res.data.challenge);
+    } catch { /* empty */ }
+  };
+
+  const loadChallengeEntries = async (challengeId) => {
+    try {
+      const res = await axios.get(`${API}/challenges/${challengeId}/entries`);
+      if (res.data.success) setChallengeEntries(res.data.entries);
+    } catch { /* empty */ }
+  };
+
+  const loadChallengeHistory = async () => {
+    try {
+      const res = await axios.get(`${API}/challenges/history?limit=8`);
+      if (res.data.success) setChallengeHistory(res.data.challenges);
+    } catch { /* empty */ }
+  };
+
+  const openChallenge = (challenge) => {
+    loadChallengeEntries(challenge.id);
+    loadChallengeHistory();
+    setView("challenge");
   };
 
   const handleSearch = async () => {
@@ -184,15 +216,20 @@ export default function BecomeAStar() {
       formData.append("song_id", selectedSong?.id || "");
       formData.append("title", `${username} sings ${selectedSong?.title || "a song"}`);
       formData.append("file", recordedBlob, "karaoke.webm");
+      if (joinChallenge && currentChallenge?.id) {
+        formData.append("challenge_id", currentChallenge.id);
+      }
 
       const res = await axios.post(`${API}/stars`, formData);
       if (res.data.success) {
-        toast.success("You're a star! Performance submitted!");
+        toast.success(joinChallenge ? "Submitted to this week's challenge!" : "You're a star! Performance submitted!");
         setView("feed");
         setRecordedBlob(null);
         setSelectedSong(null);
+        setJoinChallenge(false);
         loadFeed();
         loadLeaderboard();
+        loadCurrentChallenge();
       }
     } catch {
       toast.error("Submission failed. Try again.");
@@ -336,6 +373,17 @@ export default function BecomeAStar() {
 
         {/* Controls */}
         <div className="px-4 py-3 flex flex-col gap-2 flex-shrink-0 glass-heavy border-t border-white/5">
+          {/* Challenge join toggle */}
+          {currentChallenge && !isRecording && (
+            <button data-testid="challenge-join-toggle" onClick={() => setJoinChallenge(!joinChallenge)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-medium mx-auto transition-all border ${
+                joinChallenge ? "bg-[#FF6B2B]/10 border-[#FF6B2B]/40 text-[#FF6B2B]" : "bg-transparent border-white/10 text-[#606070]"
+              }`}>
+              <Flame className="w-3 h-3" />
+              {joinChallenge ? `Entering: ${currentChallenge.title}` : `Join this week: ${currentChallenge.title}`}
+            </button>
+          )}
+
           {/* Record / Submit */}
           <div className="flex items-center justify-center gap-4">
             <span className="text-sm font-mono text-[#606070] w-14 text-center">{fmtDur(duration)}</span>
@@ -353,7 +401,7 @@ export default function BecomeAStar() {
                 </Button>
                 <Button data-testid="karaoke-submit-btn" onClick={submitPerformance}
                   className="h-12 px-6 bg-[#FFD60A] hover:bg-[#FFD60A]/80 text-black font-bold rounded-2xl gap-2">
-                  <Star className="w-4 h-4" /> Become a Star!
+                  <Star className="w-4 h-4" /> {joinChallenge ? "Submit to Challenge!" : "Become a Star!"}
                 </Button>
               </div>
             )}
@@ -367,6 +415,144 @@ export default function BecomeAStar() {
               className="h-10 bg-[#12121A] border-white/10 text-white rounded-2xl text-center text-sm max-w-xs mx-auto" />
           )}
         </div>
+      </div>
+    );
+  }
+
+  // --- CHALLENGE DETAIL VIEW ---
+  if (view === "challenge" && currentChallenge) {
+    const daysLeft = (() => {
+      const end = new Date(currentChallenge.end_date);
+      const now = new Date();
+      const diff = Math.ceil((end - now) / (1000 * 60 * 60 * 24));
+      return Math.max(0, diff);
+    })();
+
+    return (
+      <div className="min-h-screen bg-[#05050A]" data-testid="challenge-detail">
+        {/* Header */}
+        <div className="glass-heavy px-3 py-2 flex items-center gap-2">
+          <Button data-testid="challenge-back-btn" variant="ghost" size="icon" onClick={() => setView("feed")} className="text-[#A0A0B0] hover:text-white w-8 h-8">
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-['Outfit'] text-base font-bold truncate flex items-center gap-1.5">
+              <Flame className="w-4 h-4 text-[#FF6B2B]" /> Weekly Challenge
+            </h2>
+          </div>
+          <Button data-testid="challenge-join-btn" onClick={() => { setJoinChallenge(true); setView("search"); }}
+            className="h-8 px-3 bg-[#FF6B2B] hover:bg-[#FF6B2B]/80 text-white rounded-2xl text-xs font-bold gap-1">
+            <Mic className="w-3 h-3" /> Enter
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-120px)]">
+          <div className="px-4 py-4 space-y-5 pb-24">
+            {/* Challenge Banner */}
+            <div className="rounded-2xl p-5 relative overflow-hidden" data-testid="challenge-banner"
+              style={{ background: "linear-gradient(135deg, #FF6B2B 0%, #FF3366 50%, #8A2BE2 100%)" }}>
+              <div className="relative z-10">
+                <p className="text-xs uppercase tracking-[0.2em] font-bold text-white/70 mb-1">This Week's Challenge</p>
+                <h3 className="font-['Outfit'] text-2xl font-extrabold text-white">{currentChallenge.title}</h3>
+                <p className="text-sm text-white/80 mt-1">{currentChallenge.description}</p>
+                <div className="flex items-center gap-4 mt-3">
+                  <span className="text-xs text-white/60 flex items-center gap-1"><Calendar className="w-3 h-3" /> {daysLeft} days left</span>
+                  <span className="text-xs text-white/60">{currentChallenge.entry_count || 0} entries</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Star of the Week */}
+            {currentChallenge.star_of_week && (
+              <div className="surface-card p-4" data-testid="star-of-week">
+                <h4 className="font-['Outfit'] text-sm uppercase tracking-[0.15em] font-bold text-[#FFD60A] mb-3 flex items-center gap-2">
+                  <Crown className="w-4 h-4" /> Star of the Week
+                </h4>
+                <div className="flex items-center gap-3">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FFD60A] to-[#FF6B2B] p-[2px]">
+                    <div className="w-full h-full rounded-2xl overflow-hidden">
+                      {currentChallenge.star_of_week.song_cover_url ? (
+                        <img src={currentChallenge.star_of_week.song_cover_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Crown className="w-6 h-6 text-[#FFD60A]" /></div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-base font-['Outfit'] font-bold text-white">{currentChallenge.star_of_week.username}</p>
+                    <p className="text-xs text-[#606070] truncate">{currentChallenge.star_of_week.song_title}</p>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <Star className="w-4 h-4 text-[#FFD60A]" />
+                    <span className="text-lg font-bold text-[#FFD60A]">{currentChallenge.star_of_week.votes}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Challenge Entries */}
+            <section data-testid="challenge-entries">
+              <h4 className="font-['Outfit'] text-sm uppercase tracking-[0.15em] font-bold text-[#A0A0B0] mb-3">
+                Entries ({challengeEntries.length})
+              </h4>
+              {challengeEntries.length === 0 && (
+                <div className="surface-card p-6 text-center">
+                  <Flame className="w-10 h-10 text-[#FF6B2B]/20 mx-auto mb-2" />
+                  <p className="text-sm text-[#606070]">No entries yet — be the first!</p>
+                </div>
+              )}
+              <div className="space-y-2">
+                {challengeEntries.map((perf, idx) => (
+                  <div key={perf.id} className="surface-card p-3 flex items-center gap-3" data-testid={`challenge-entry-${idx}`}>
+                    {idx === 0 && perf.votes > 0 && (
+                      <div className="w-6 flex-shrink-0"><Crown className="w-5 h-5 text-[#FFD60A]" /></div>
+                    )}
+                    {(idx !== 0 || perf.votes === 0) && (
+                      <div className="w-6 text-center flex-shrink-0"><span className="text-xs text-[#606070] font-bold">{idx + 1}</span></div>
+                    )}
+                    <Button variant="ghost" size="icon" onClick={() => playPerformanceAudio(perf)} className="flex-shrink-0 text-[#FF6B2B]">
+                      {playingId === perf.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="#FF6B2B" />}
+                    </Button>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">{perf.username}</p>
+                      <p className="text-xs text-[#606070] truncate">{perf.song_title}</p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <span className="text-sm font-bold text-[#FFD60A]">{perf.votes}</span>
+                      <Button onClick={() => votePerformance(perf.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#FFD60A] hover:bg-[#FFD60A]/10 rounded-full">
+                        <ThumbsUp className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Past Challenges */}
+            {challengeHistory.length > 1 && (
+              <section data-testid="past-challenges">
+                <h4 className="font-['Outfit'] text-sm uppercase tracking-[0.15em] font-bold text-[#A0A0B0] mb-3">
+                  Past Challenges
+                </h4>
+                <div className="space-y-2">
+                  {challengeHistory.slice(1).map((ch, idx) => (
+                    <div key={ch.id} className="surface-card p-3 flex items-center gap-3" data-testid={`past-challenge-${idx}`}>
+                      <div className="w-10 h-10 rounded-xl bg-[#8A2BE2]/10 flex items-center justify-center flex-shrink-0">
+                        <Trophy className="w-4 h-4 text-[#8A2BE2]" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{ch.title}</p>
+                        <p className="text-xs text-[#606070]">
+                          {ch.star_of_week ? `Winner: ${ch.star_of_week.username}` : "No winner"} &bull; {ch.entry_count} entries
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+          </div>
+        </ScrollArea>
       </div>
     );
   }
@@ -453,6 +639,30 @@ export default function BecomeAStar() {
 
       <ScrollArea className="h-[calc(100vh-160px)]">
         <div className="px-4 space-y-6 pb-24">
+          {/* Weekly Challenge Banner */}
+          {currentChallenge && (
+            <section data-testid="challenge-card">
+              <button onClick={() => openChallenge(currentChallenge)}
+                className="w-full rounded-2xl p-4 relative overflow-hidden text-left transition-all hover:scale-[1.01]"
+                style={{ background: "linear-gradient(135deg, #FF6B2B 0%, #FF3366 50%, #8A2BE2 100%)" }}>
+                <div className="relative z-10 flex items-center gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/60">Weekly Challenge</p>
+                    <h3 className="font-['Outfit'] text-lg font-extrabold text-white mt-0.5">{currentChallenge.title}</h3>
+                    <p className="text-xs text-white/70 mt-0.5">{currentChallenge.description}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="text-[10px] text-white/50">{currentChallenge.entry_count || 0} entries</span>
+                      {currentChallenge.star_of_week && (
+                        <span className="text-[10px] text-[#FFD60A] flex items-center gap-1"><Crown className="w-2.5 h-2.5" />{currentChallenge.star_of_week.username}</span>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-white/50 flex-shrink-0" />
+                </div>
+              </button>
+            </section>
+          )}
+
           {/* Leaderboard */}
           {leaderboard.length > 0 && (
             <section data-testid="star-leaderboard">

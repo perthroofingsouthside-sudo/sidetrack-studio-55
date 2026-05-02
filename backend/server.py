@@ -14,7 +14,7 @@ from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -914,6 +914,7 @@ class StarPerformance(BaseModel):
     song_id: str = ""
     title: str = ""
     audio_data: str = ""
+    challenge_id: str = ""
     votes: int = 0
     voters: List[str] = []
     status: str = "published"
@@ -927,6 +928,7 @@ async def submit_star_performance(
     song_cover_url: str = Form(""),
     song_id: str = Form(""),
     title: str = Form(""),
+    challenge_id: str = Form(""),
     file: UploadFile = File(...)
 ):
     """Submit a karaoke performance to Become a Star feed."""
@@ -943,6 +945,7 @@ async def submit_star_performance(
         song_id=song_id,
         title=title or f"{username} sings {song_title}",
         audio_data=audio_b64,
+        challenge_id=challenge_id,
     )
     doc = perf.model_dump()
     await db.stars.insert_one(doc)
@@ -999,6 +1002,106 @@ async def vote_star(perf_id: str, voter_id: str = Form(...)):
     )
     updated = await db.stars.find_one({"id": perf_id}, {"_id": 0, "audio_data": 0})
     return {"success": True, "performance": updated}
+
+# --- Star Challenges (Wednesday to Wednesday) ---
+
+CHALLENGE_THEMES = [
+    {"title": "90s Throwback", "desc": "Sing your favorite 90s hit!", "emoji": "cassette"},
+    {"title": "Power Ballads", "desc": "Belt out the biggest ballads of all time", "emoji": "fire"},
+    {"title": "Acoustic Vibes", "desc": "Strip it back — acoustic covers only", "emoji": "guitar"},
+    {"title": "Hip-Hop Classics", "desc": "Spit bars from the golden era", "emoji": "mic"},
+    {"title": "Pop Anthems", "desc": "Sing the catchiest pop songs ever made", "emoji": "star"},
+    {"title": "Rock Legends", "desc": "Channel your inner rock god", "emoji": "guitar"},
+    {"title": "R&B Grooves", "desc": "Smooth vocals and soulful melodies", "emoji": "music"},
+    {"title": "Country Roads", "desc": "Twang it out — country hits only", "emoji": "hat"},
+    {"title": "Movie Soundtracks", "desc": "Sing iconic songs from the silver screen", "emoji": "film"},
+    {"title": "Freestyle Friday", "desc": "Anything goes — surprise us!", "emoji": "sparkle"},
+    {"title": "Duet Anthems", "desc": "Songs made for two — solo or duo!", "emoji": "users"},
+    {"title": "One-Hit Wonders", "desc": "Celebrate the songs that defined a moment", "emoji": "flash"},
+]
+
+def get_current_challenge_dates():
+    """Get the current Wednesday-to-Wednesday window."""
+    now = datetime.now(timezone.utc)
+    days_since_wed = (now.weekday() - 2) % 7
+    start = (now - timedelta(days=days_since_wed)).replace(hour=0, minute=0, second=0, microsecond=0)
+    end = start + timedelta(days=7)
+    return start, end
+
+def get_week_number():
+    """Get a consistent week number for theme rotation."""
+    now = datetime.now(timezone.utc)
+    epoch = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    days = (now - epoch).days
+    return days // 7
+
+@api_router.get("/challenges/current")
+async def get_current_challenge():
+    """Get or create the current weekly challenge (Wed-Wed)."""
+    start, end = get_current_challenge_dates()
+    start_iso = start.isoformat()
+    end_iso = end.isoformat()
+
+    existing = await db.challenges.find_one({"start_date": start_iso}, {"_id": 0})
+    if existing:
+        # Count entries and find Star of the Week
+        entry_count = await db.stars.count_documents({"challenge_id": existing["id"]})
+        star_of_week = None
+        top = await db.stars.find(
+            {"challenge_id": existing["id"]}, {"_id": 0, "audio_data": 0}
+        ).sort("votes", -1).to_list(1)
+        if top and top[0].get("votes", 0) > 0:
+            star_of_week = top[0]
+        existing["entry_count"] = entry_count
+        existing["star_of_week"] = star_of_week
+        return {"success": True, "challenge": existing}
+
+    # Create new challenge
+    week_num = get_week_number()
+    theme = CHALLENGE_THEMES[week_num % len(CHALLENGE_THEMES)]
+    challenge = {
+        "id": str(uuid.uuid4()),
+        "title": theme["title"],
+        "description": theme["desc"],
+        "emoji": theme["emoji"],
+        "start_date": start_iso,
+        "end_date": end_iso,
+        "week_number": week_num,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.challenges.insert_one(challenge)
+    stored = await db.challenges.find_one({"id": challenge["id"]}, {"_id": 0})
+    stored["entry_count"] = 0
+    stored["star_of_week"] = None
+    return {"success": True, "challenge": stored}
+
+@api_router.get("/challenges/{challenge_id}/entries")
+async def get_challenge_entries(challenge_id: str, limit: int = 30):
+    """Get performances submitted to a specific challenge."""
+    challenge = await db.challenges.find_one({"id": challenge_id}, {"_id": 0})
+    if not challenge:
+        raise HTTPException(status_code=404, detail="Challenge not found")
+    entries = await db.stars.find(
+        {"challenge_id": challenge_id}, {"_id": 0, "audio_data": 0}
+    ).sort("votes", -1).to_list(limit)
+    return {"success": True, "challenge": challenge, "entries": entries}
+
+@api_router.get("/challenges/history")
+async def challenge_history(limit: int = 10):
+    """Get past challenges with their Star of the Week."""
+    challenges = await db.challenges.find(
+        {}, {"_id": 0}
+    ).sort("start_date", -1).to_list(limit)
+
+    results = []
+    for ch in challenges:
+        top = await db.stars.find(
+            {"challenge_id": ch["id"]}, {"_id": 0, "audio_data": 0}
+        ).sort("votes", -1).to_list(1)
+        ch["star_of_week"] = top[0] if top and top[0].get("votes", 0) > 0 else None
+        ch["entry_count"] = await db.stars.count_documents({"challenge_id": ch["id"]})
+        results.append(ch)
+    return {"success": True, "challenges": results}
 
 # Include router
 app.include_router(api_router)
