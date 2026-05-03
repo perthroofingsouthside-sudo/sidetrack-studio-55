@@ -1,0 +1,47 @@
+{
+  "summary": "Iteration 17 — SIDETRACK Final Production Push. Backend: 21/21 pytest tests PASS (100%) covering all three new features (music-theory chord engine /api/chords/lookup with key=C for pop, key=E for rock, key=F for jazz; band auto-downgrade /api/subscriptions/check-band-activity correctly downgrading inactive band subs and persisting status='downgraded'; real audio trim /api/trim with 200 valid + 400 invalid range + 400 out-of-bounds), plus regression on /api/health, /api/subscriptions/{tiers, select, status}, /api/lyrics/fetch (Hello/Adele returns synced lyrics + key + chords), /api/music/{search, top-songs}, /api/battles, /api/stars/feed, /api/social/{stats, follow toggle}, /api/sync/clock, /api/discover/for-you, /api/chat/lobby/history. Modular refactor (server.py 75 lines + 6 route modules) is wired up correctly — all previous endpoints remain functional. Frontend: Stream page renders, For You section is visible (data-testid='for-you-section'), search-input + Search button surface 12+ Hello/Adele results, track-row-0 click plays audio (now-playing-bar appears at bottom). However a 'Playback failed' toast appears on first click and the route did not transition to PlayerStudio via track-row click, double-click, or bottom-nav 'Studio' tab — preventing visual validation of chord-strip / chord-svg / lyrics-scroll-area / StemMixer presets through the public URL during this run. The iteration-16 design issue (BottomNav active-tab teal focus ring instead of brand orange) is still present.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Stream → PlayerStudio navigation", "issue": "Clicking [data-testid='track-row-0'] plays the audio in the mini player but does NOT navigate to /studio (PlayerStudio) — single-click, double-click, and bottom-nav 'Studio' tab all leave URL on /stream. Either the row needs an explicit 'Open Studio' affordance or the route should auto-open on track select. Could not visually verify chord-strip / chord-svg / StemMixer presets / Solo buttons in this run because of this nav blocker. (Note: iteration-16 confirmed these testids render correctly when studio is reached, and backend /api/chords/lookup + /api/lyrics/fetch are verified end-to-end at HTTP level.)", "selector": "[data-testid='track-row-0']", "priority": "HIGH"},
+      {"component": "Stream playback", "issue": "'Playback failed' toast appears immediately after clicking the first track-row. Mini-player still shows progress so this may be a benign warning, but the toast should not show on success.", "selector": "text=Playback failed", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "BottomNav", "issues": ["Active tab still renders the default shadcn cyan/teal focus-visible ring (rgb(34,211,238)-ish) instead of brand orange #FF6B00. Same finding as iter16 — appears unfixed. Suggest focus-visible:ring-[#FF6B00] focus-visible:ring-offset-0 on the BottomNav Button."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration17.py",
+    "/app/test_reports/pytest/iteration17_results.xml"
+  ],
+  "action_items": [
+    "FIX (HIGH): Wire Stream search-result row click (track-row-N) to navigate to PlayerStudio (/studio) after track loads, OR expose a clearly-testable open-studio button on each row (e.g., data-testid='open-studio-N'). Currently a user can play audio but cannot reach the studio surface where the new chord engine output is visible.",
+    "FIX (MEDIUM): Investigate 'Playback failed' toast that appears even when audio progresses normally — likely a rejected promise from HTMLAudioElement.play() that should be caught silently when the audio still plays.",
+    "DESIGN (MINOR): Override BottomNav active-tab focus-ring to brand orange (carry-over from iter16).",
+    "Optional cleanup (carry-over): /api/social/{user_id}/stats still returns {success, stats:{...}} — frontend should read d.stats.* (already done in iter16 test fix); consider flattening for consistency."
+  ],
+  "critical_code_review_comments": [
+    "Refactor is clean: server.py is now 75 lines, routes split into 6 modules. Good separation.",
+    "/api/trim uses metadata-only fallback when recording.audio_data is missing — this is documented mocked behaviour. Real pydub path returns trim_id + duration_ms + new audio_data which is good.",
+    "Chord engine in routes/lyrics.py uses static KEY_CHORDS x GENRE_PROGRESSIONS — output is deterministic and musically-valid; pop→C/I-V-vi-IV, rock→E with E/A/B/C#m, jazz→F all confirmed.",
+    "/api/subscriptions/check-band-activity correctly excludes already-downgraded subs ({status: {$ne: 'downgraded'}}). Good idempotency.",
+    "WebSocket route is now correctly under /api/ws/chat/{room} so ingress routing works (iteration 16 critical issue is FIXED).",
+    "Lingering: /api/discover/for-you still uses synchronous requests inside async handler (carry-over from iter16) — minor perf concern under load."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration17.py",
+    "/app/test_reports/pytest/iteration17_results.xml",
+    "/app/test_reports/iteration_17.json"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "60%"},
+  "test_credentials": "None — app is anonymous",
+  "seed_data_creation": "Created TEST_-prefixed users + adult_band subscriptions during pytest run; downgrade test exercises the auto-downgrade path. Battle docs prefixed TEST_Battle_*.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All 3 new endpoints (/api/chords/lookup, /api/subscriptions/check-band-activity, /api/trim) verified working via /app/backend/tests/test_iteration17.py — 21 tests, 100% pass. WebSocket fix from iter16 is deployed (route is /api/ws/chat/{room}). To re-test the PlayerStudio UI after main agent fixes navigation: run `await page.goto(URL+'/stream')`, fill [data-testid='search-input'] with 'Hello Adele', click button:has-text('Search'), then click the new open-studio affordance on track-row-0, then assert presence of [data-testid='player-studio'], [data-testid='chords-strip'] (should contain C/G/Am/F for pop/Hello), [data-testid='chord-svg'] (after toggling [data-testid='chords-toggle-btn']), [data-testid='lyrics-scroll-area'], and the four ARTIST_PRESETS (preset-vocal-focus, preset-band-only, preset-full-mix, preset-drums-&-bass) plus [data-testid$='-solo'] buttons inside StemMixer.",
+  "rca of the issue": "PlayerStudio navigation: clicking the search-result row [data-testid='track-row-0'] only triggers playback (sets the now-playing track) but does not push history to /studio. Bottom-nav 'Studio' link is wired but appears to require an existing studio-track context to render PlayerStudio; without it the route stays on /stream. Together this means a user reaching the studio surface from search is currently impossible without an explicit affordance. Mitigation: either (a) navigate to /studio?trackId=... on row select, or (b) add a visible 'Open in Studio' button (e.g., the music-note icon at row end) with data-testid='open-studio-{idx}'."
+}
