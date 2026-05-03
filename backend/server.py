@@ -1240,6 +1240,185 @@ async def challenge_history(limit: int = 10):
         results.append(ch)
     return {"success": True, "challenges": results}
 
+# --- Subscription / Pricing Tier Definitions ---
+
+SUBSCRIPTION_TIERS = [
+    {
+        "key": "stadium_vip",
+        "name": "Stadium VIP",
+        "tagline": "Fan Pass",
+        "price": 4.98,
+        "period": "month",
+        "features": [
+            "Save & share personal mixes to profile",
+            "Exclusive neon chat badges & emojis",
+            "Priority DM access to artists during live sessions",
+        ],
+        "category": "fan",
+        "highlight": True,
+    },
+    {
+        "key": "individual",
+        "name": "Individual",
+        "tagline": "Solo Artist",
+        "price": 11.98,
+        "period": "month",
+        "features": [
+            "Unlimited skips",
+            "Full stem separation",
+            "HD audio export",
+            "All karaoke features",
+        ],
+        "category": "creator",
+        "highlight": False,
+    },
+    {
+        "key": "student",
+        "name": "Student",
+        "tagline": "Study & Play",
+        "price": 9.98,
+        "period": "month",
+        "features": [
+            "All Individual features",
+            "Valid student email required",
+            "Discounted creator tools",
+        ],
+        "category": "creator",
+        "highlight": False,
+    },
+    {
+        "key": "couple_duo",
+        "name": "Couple / Duo",
+        "tagline": "Two Voices",
+        "price": 14.98,
+        "period": "month",
+        "features": [
+            "2 accounts",
+            "Shared duet workspace",
+            "Unlimited skips for both",
+            "Priority duet matching",
+        ],
+        "category": "creator",
+        "highlight": False,
+    },
+    {
+        "key": "family",
+        "name": "Family",
+        "tagline": "Up to 5 members",
+        "price": 20.98,
+        "period": "month",
+        "features": [
+            "5 individual accounts",
+            "Family mix playlists",
+            "Parental controls",
+            "All creator features",
+        ],
+        "category": "creator",
+        "highlight": False,
+    },
+    {
+        "key": "adult_band",
+        "name": "Adult Band",
+        "tagline": "Active Band",
+        "price": 17.98,
+        "period": "month",
+        "features": [
+            "Up to 8 members",
+            "Band collaboration room",
+            "Shared stem library",
+            "1 upload/week to stay active",
+        ],
+        "category": "band",
+        "highlight": False,
+    },
+    {
+        "key": "under18_band",
+        "name": "Under-18 Band",
+        "tagline": "Young Stars",
+        "price": 2.98,
+        "period": "month",
+        "features": [
+            "Up to 8 members",
+            "Band collaboration room",
+            "Shared stem library",
+            "Safe community features",
+        ],
+        "category": "band",
+        "highlight": False,
+    },
+]
+
+
+class SubscriptionSelect(BaseModel):
+    user_id: str
+    tier_key: str
+
+
+@api_router.get("/subscriptions/tiers")
+async def list_subscription_tiers():
+    """Return all available subscription tiers."""
+    return {"success": True, "tiers": SUBSCRIPTION_TIERS}
+
+
+@api_router.post("/subscriptions/select")
+async def select_subscription(payload: SubscriptionSelect):
+    """Select a subscription tier for a user (mock checkout — no real payment yet)."""
+    tier = next((t for t in SUBSCRIPTION_TIERS if t["key"] == payload.tier_key), None)
+    if not tier:
+        raise HTTPException(status_code=400, detail="Invalid tier key")
+
+    now = datetime.now(timezone.utc)
+    trial_end = (now + timedelta(days=30)).isoformat()
+
+    # Upsert subscription document
+    sub_doc = {
+        "user_id": payload.user_id,
+        "tier_key": tier["key"],
+        "tier_name": tier["name"],
+        "price": tier["price"],
+        "status": "trial",
+        "trial_end": trial_end,
+        "started_at": now.isoformat(),
+        "last_upload": None,
+        "active_band": tier["category"] == "band",
+        "reward_months": 0,
+    }
+
+    await db.subscriptions.update_one(
+        {"user_id": payload.user_id},
+        {"$set": sub_doc},
+        upsert=True,
+    )
+
+    stored = await db.subscriptions.find_one(
+        {"user_id": payload.user_id}, {"_id": 0}
+    )
+    return {"success": True, "subscription": stored}
+
+
+@api_router.get("/subscriptions/{user_id}/status")
+async def get_subscription_status(user_id: str):
+    """Check a user's current subscription status."""
+    sub = await db.subscriptions.find_one({"user_id": user_id}, {"_id": 0})
+    if not sub:
+        return {
+            "success": True,
+            "subscription": None,
+            "is_pro": False,
+            "is_vip": False,
+            "tier_key": "free",
+        }
+
+    tier_key = sub.get("tier_key", "free")
+    return {
+        "success": True,
+        "subscription": sub,
+        "is_pro": tier_key != "free",
+        "is_vip": tier_key == "stadium_vip",
+        "tier_key": tier_key,
+    }
+
+
 # Include router
 app.include_router(api_router)
 

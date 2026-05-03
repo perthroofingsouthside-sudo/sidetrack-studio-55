@@ -11,6 +11,7 @@ import PlaylistsPage from "@/pages/PlaylistsPage";
 import DuetStudio from "@/pages/DuetStudio";
 import BecomeAStar from "@/pages/BecomeAStar";
 import SocialProfile from "@/pages/SocialProfile";
+import PricingPage from "@/pages/PricingPage";
 import BottomNav from "@/components/BottomNav";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -58,8 +59,10 @@ function App() {
         return <PlaylistsPage onTrackSelect={handleTrackSelect} />;
       case "star":
         return <BecomeAStar />;
+      case "pricing":
+        return <PricingPage onBack={() => setCurrentView("profile")} />;
       case "profile":
-        return <SocialProfile />;
+        return <SocialProfile onNavigate={handleNavigate} />;
       case "duet":
         return (
           <DuetStudio

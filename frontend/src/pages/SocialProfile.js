@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
-import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2 } from "lucide-react";
+import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 
-export default function SocialProfile() {
+export default function SocialProfile({ onNavigate }) {
   const [username, setUsername] = useState(() => localStorage.getItem("sidetrack_username") || "");
   const [editing, setEditing] = useState(false);
   const [tempName, setTempName] = useState(username);
@@ -84,6 +84,23 @@ export default function SocialProfile() {
               <p className="text-xs text-[#5C5C6B]/60 mt-1">Record covers, enter battles, and create playlists to build your profile</p>
             </div>
           </section>
+
+          {/* Go Pro / VIP */}
+          <button
+            onClick={() => onNavigate && onNavigate("pricing")}
+            className="w-full rounded-2xl border border-[#FF6B00]/30 p-4 flex items-center gap-4 text-left transition-all hover:border-[#FF6B00]/50 group"
+            style={{ background: "rgba(255,107,0,0.06)" }}
+            data-testid="go-pro-btn"
+          >
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,107,0,0.15)", boxShadow: "0 0 16px rgba(255,107,0,0.25)" }}>
+              <Crown className="w-5 h-5 text-[#FF6B00]" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white group-hover:text-[#FF6B00] transition-colors">Stadium VIP &amp; Pro Plans</p>
+              <p className="text-[10px] text-[#5C5C6B] mt-0.5">Neon badges, priority DMs, unlimited skips & more</p>
+            </div>
+            <span className="text-[#FF6B00] text-xs font-bold shrink-0">From $2.98</span>
+          </button>
 
           {/* Share Profile */}
           <Button variant="ghost" className="w-full border border-white/5 text-[#5C5C6B] gap-2 rounded-2xl" data-testid="share-profile-btn">
