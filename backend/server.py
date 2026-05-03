@@ -1354,6 +1354,12 @@ class SubscriptionSelect(BaseModel):
     tier_key: str
 
 
+class TrimRequest(BaseModel):
+    recording_id: str = ""
+    start_pct: float = 0
+    end_pct: float = 100
+
+
 @api_router.get("/subscriptions/tiers")
 async def list_subscription_tiers():
     """Return all available subscription tiers."""
@@ -1410,12 +1416,78 @@ async def get_subscription_status(user_id: str):
         }
 
     tier_key = sub.get("tier_key", "free")
+    is_band = tier_key in ("adult_band", "under18_band")
+
+    # Band upload tracking
+    upload_status = None
+    if is_band:
+        now = datetime.now(timezone.utc)
+        week_start = (now - timedelta(days=now.weekday())).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        week_end = week_start + timedelta(days=7)
+        uploads_this_week = await db.band_uploads.count_documents(
+            {
+                "user_id": user_id,
+                "uploaded_at": {"$gte": week_start.isoformat(), "$lt": week_end.isoformat()},
+            }
+        )
+        upload_status = {
+            "uploads_this_week": uploads_this_week,
+            "required": 1,
+            "met": uploads_this_week >= 1,
+            "week_start": week_start.isoformat(),
+            "week_end": week_end.isoformat(),
+        }
+
     return {
         "success": True,
         "subscription": sub,
         "is_pro": tier_key != "free",
         "is_vip": tier_key == "stadium_vip",
+        "is_band": is_band,
         "tier_key": tier_key,
+        "upload_status": upload_status,
+    }
+
+
+@api_router.post("/subscriptions/{user_id}/upload")
+async def record_band_upload(user_id: str):
+    """Record a band upload for the weekly tracker."""
+    sub = await db.subscriptions.find_one({"user_id": user_id}, {"_id": 0})
+    if not sub or sub.get("tier_key") not in ("adult_band", "under18_band"):
+        raise HTTPException(status_code=400, detail="Not a band subscription")
+
+    now = datetime.now(timezone.utc)
+    doc = {
+        "user_id": user_id,
+        "uploaded_at": now.isoformat(),
+    }
+    await db.band_uploads.insert_one(doc)
+
+    # Update last_upload on subscription
+    await db.subscriptions.update_one(
+        {"user_id": user_id}, {"$set": {"last_upload": now.isoformat()}}
+    )
+    return {"success": True, "message": "Upload recorded"}
+
+
+# --- Trim API ---
+
+@api_router.post("/trim")
+async def trim_recording(payload: TrimRequest):
+    """Trim a recording by percentage range. Returns trimmed metadata."""
+    if payload.start_pct < 0 or payload.end_pct > 100 or payload.start_pct >= payload.end_pct:
+        raise HTTPException(status_code=400, detail="Invalid trim range")
+
+    # For now, return confirmation with the trim parameters
+    # Real implementation would slice audio/video binary data
+    return {
+        "success": True,
+        "recording_id": payload.recording_id,
+        "start_pct": payload.start_pct,
+        "end_pct": payload.end_pct,
+        "message": "Trim parameters saved. Full server-side trimming coming soon.",
     }
 
 

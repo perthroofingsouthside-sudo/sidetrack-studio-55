@@ -1,0 +1,42 @@
+{
+  "summary": "Tested iteration 15 features: Trim API, Band upload tracker, Subscription status, Pro Status indicator, Synced lyrics + Chords toggle in PlayerStudio. Backend 100% pass (10/10 tests). Frontend Profile (Pro indicator + Band tracker) verified end-to-end. PlayerStudio renders all required test-ids but synced-lyrics never load due to 404 from /api/songs/{id}/lyrics when song originates from Stream search (iTunes track id not present in songs DB). Chord toggle button exists but its visual effect (chords-strip) cannot render until lyrics load.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/subscriptions/{user_id}/status", "issue": "Response for users with no subscription omits 'upload_status' key entirely (other branches always include it). Minor inconsistency — frontend code does optional-chain so non-blocking."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "PlayerStudio synced lyrics", "issue": "When user opens Studio via Stream search (studio-btn-{idx}), the song is set in App state but is NOT persisted in /api/songs collection. PlayerStudio fetches GET /api/songs/{song.id}/lyrics which returns 404, so 'Loading lyrics...' persists forever. Active lyric highlighting and chords-strip never appear. Fix: StreamPage.handleSelectForStudio should POST a song create endpoint OR PlayerStudio's lyrics fetch should fall back to GET /api/lyrics/search?track=&artist= using song.title/song.artist when 404 is returned.", "affected_selectors": ["[data-testid='active-lyric-line']", "[data-testid='chords-strip']"]},
+      {"flow": "PlayerStudio chords toggle", "issue": "Toggle button click flips internal showChords state but chords-strip is rendered conditionally on (showChords && lyrics?.chords?.length > 0). Because lyrics never load from search-originated songs, the strip is invisible regardless of toggle state. Linked to the lyrics 404 issue above."}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration15.py",
+    "/app/test_reports/pytest/iteration15_results.xml"
+  ],
+  "action_items": [
+    "Fix PlayerStudio lyrics flow when song originates from Stream search: either persist the iTunes track to /api/songs on selection, or have GET /api/songs/{id}/lyrics gracefully fall back to LRCLIB lookup using title/artist passed by client (or add a POST /api/lyrics/by-track endpoint that frontend can call when 404). Without this, synced-lyrics + chord toggle features are effectively broken for any track selected from Stream.",
+    "(Optional) In /api/subscriptions/{user_id}/status: include 'upload_status': null in the no-subscription response for consistency.",
+    "Recording Studio trim modal flow could not be exercised in headless browser (mic + duration > 0 required). Backend /api/trim verified directly (4 tests pass). Main agent can self-test the modal by manually starting/stopping a recording in the UI, or by mounting RecordingStudio with a stub state (duration > 0)."
+  ],
+  "critical_code_review_comments": [
+    "PlayerStudio.fetchLyrics swallows 404 silently (just toast 'Failed to load lyrics' without falling back). Should retry via /api/lyrics/search using song.title/song.artist before showing infinite 'Loading lyrics...'.",
+    "server.py is now ~1500 lines — splitting into routers (subscriptions.py, trim.py, lyrics.py, recordings.py) is recommended for maintainability.",
+    "Trim API returns success but does not actually trim audio (mocked). README/UI should clarify or implement before launch.",
+    "BottomNav 'studio' tab is gated by hasSong but there is no visible feedback when disabled — users tapping it on mobile see nothing happen."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration15.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "70%"},
+  "test_credentials": "None — no auth in app",
+  "seed_data_creation": "Created TEST_-prefixed subscriptions in DB during pytest runs (band/individual). Recorded one band upload entry per test run.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend tests at /app/backend/tests/test_iteration15.py cover Trim API (valid/invalid), Band upload tracker, and Subscription tiers regression. To verify PlayerStudio features end-to-end, the main agent must first fix the lyrics 404 issue (see action_items). After fix, replay: Stream → Search 'hello' → hover track-row-0 → click studio-btn-0 → expect [data-testid='player-studio'], [data-testid='lyrics-scroll-area'] populated with lines, click [data-testid='chords-toggle-btn'] should toggle [data-testid='chords-strip'] visibility, click [data-testid='play-pause-btn'] then wait ~5s and expect [data-testid='active-lyric-line']. Profile flow (subscribe via API → reload → see pro-status-indicator + band-upload-tracker) is fully working.",
+  "rca of the issue": "Synced lyrics flow root cause: StreamPage.onTrackSelect passes an iTunes track object directly to App state. PlayerStudio.fetchLyrics calls GET /api/songs/{id}/lyrics, but the backend get_lyrics handler does `await db.songs.find_one({'id': song_id})` and raises 404 when not found. The flow only works when song was created via POST /api/recognize (which inserts into db.songs). Mitigation: either (a) StreamPage's handleSelectForStudio should call POST /api/songs to insert a song document before navigating, or (b) backend should accept title/artist query params on /api/songs/{id}/lyrics and bypass the DB lookup when the song doesn't exist."
+}
