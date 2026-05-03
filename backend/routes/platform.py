@@ -71,24 +71,131 @@ async def record_band_upload(user_id: str):
     return {"success": True, "message": "Upload recorded"}
 
 # ── Active Band Auto-Downgrade ──────────────────
-@router.post("/subscriptions/check-band-activity")
-async def check_band_activity():
-    """Check all band subscriptions and downgrade inactive ones (no upload in past 7 days)."""
+
+INDIVIDUAL_RATE = 11.98  # Downgrade target rate
+
+
+async def _run_band_activity_check(trigger: str = "manual"):
+    """Core logic: scan all band accounts, audit each, downgrade inactive ones.
+    
+    Business rules:
+    - Scans all subscriptions with tier_key in (adult_band, under18_band) that are NOT already downgraded
+    - Checks if the user uploaded at least 1 track/stem in the preceding 7 days
+    - If requirement NOT met → flag account as downgraded, adjust price to Individual rate ($11.98)
+    - Every check is logged to the `band_audit_log` collection for admin review
+    """
     now = datetime.now(timezone.utc)
     cutoff = (now - timedelta(days=7)).isoformat()
+    run_id = str(uuid.uuid4())[:12]
+
     band_subs = await db.subscriptions.find(
-        {"tier_key": {"$in": ["adult_band", "under18_band"]}, "status": {"$ne": "downgraded"}}, {"_id": 0}
-    ).to_list(500)
+        {"tier_key": {"$in": ["adult_band", "under18_band"]}, "status": {"$ne": "downgraded"}},
+        {"_id": 0},
+    ).to_list(1000)
+
+    checked = 0
+    compliant = []
     downgraded = []
+    audit_entries = []
+
     for sub in band_subs:
-        last = sub.get("last_upload")
-        if not last or last < cutoff:
+        checked += 1
+        user_id = sub["user_id"]
+        tier_key = sub.get("tier_key", "")
+        original_price = sub.get("price", 0)
+        last_upload = sub.get("last_upload")
+
+        # Count uploads in the 7-day window
+        uploads_count = await db.band_uploads.count_documents(
+            {"user_id": user_id, "uploaded_at": {"$gte": cutoff}}
+        )
+
+        met_requirement = uploads_count >= 1
+        action = "none"
+
+        if not met_requirement:
+            # Downgrade: flag account + adjust price to Individual rate
             await db.subscriptions.update_one(
-                {"user_id": sub["user_id"]},
-                {"$set": {"status": "downgraded", "downgraded_at": now.isoformat(), "downgrade_reason": "No upload in 7 days"}}
+                {"user_id": user_id},
+                {"$set": {
+                    "status": "downgraded",
+                    "downgraded_at": now.isoformat(),
+                    "downgrade_reason": "No upload in 7 days",
+                    "previous_tier": tier_key,
+                    "previous_price": original_price,
+                    "price": INDIVIDUAL_RATE,
+                }},
             )
-            downgraded.append(sub["user_id"])
-    return {"success": True, "checked": len(band_subs), "downgraded": len(downgraded), "downgraded_users": downgraded}
+            downgraded.append(user_id)
+            action = "downgraded_to_individual"
+        else:
+            compliant.append(user_id)
+            action = "compliant"
+
+        # Audit log entry for this user
+        audit_entries.append({
+            "run_id": run_id,
+            "trigger": trigger,
+            "user_id": user_id,
+            "tier_key": tier_key,
+            "original_price": original_price,
+            "last_upload": last_upload,
+            "uploads_in_window": uploads_count,
+            "cutoff": cutoff,
+            "met_requirement": met_requirement,
+            "action": action,
+            "new_price": INDIVIDUAL_RATE if not met_requirement else original_price,
+            "checked_at": now.isoformat(),
+        })
+
+    # Write all audit entries in bulk
+    if audit_entries:
+        await db.band_audit_log.insert_many(audit_entries)
+
+    # Write a summary record
+    summary = {
+        "run_id": run_id,
+        "trigger": trigger,
+        "checked_at": now.isoformat(),
+        "total_checked": checked,
+        "compliant_count": len(compliant),
+        "downgraded_count": len(downgraded),
+        "downgraded_users": downgraded,
+        "compliant_users": compliant,
+    }
+    await db.band_audit_log.insert_one({**summary, "type": "run_summary"})
+
+    logger.info(
+        f"[BandCron] run_id={run_id} trigger={trigger} "
+        f"checked={checked} compliant={len(compliant)} downgraded={len(downgraded)}"
+    )
+
+    return summary
+
+
+@router.post("/subscriptions/check-band-activity")
+async def check_band_activity():
+    """Manual trigger: scan all band accounts and downgrade inactive ones."""
+    result = await _run_band_activity_check(trigger="manual_api")
+    return {"success": True, **result}
+
+
+@router.get("/subscriptions/band-audit")
+async def get_band_audit_log(limit: int = 50):
+    """Admin endpoint: retrieve the band activity audit trail."""
+    entries = await db.band_audit_log.find(
+        {}, {"_id": 0}
+    ).sort("checked_at", -1).to_list(limit)
+    return {"success": True, "entries": entries, "count": len(entries)}
+
+
+@router.get("/subscriptions/band-audit/summary")
+async def get_band_audit_summaries(limit: int = 20):
+    """Admin endpoint: retrieve run summaries only."""
+    summaries = await db.band_audit_log.find(
+        {"type": "run_summary"}, {"_id": 0}
+    ).sort("checked_at", -1).to_list(limit)
+    return {"success": True, "summaries": summaries, "count": len(summaries)}
 
 # ── Real Audio Trimming ─────────────────────────
 @router.post("/trim")

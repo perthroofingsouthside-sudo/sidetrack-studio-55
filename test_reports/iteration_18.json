@@ -1,0 +1,38 @@
+{
+  "summary": "Iteration 18 — SIDETRACK band auto-downgrade cron + audit logging. Backend-only testing as requested. 10/10 pytest tests PASS (100%) covering the full enhanced flow: (1) regression on /api/subscriptions/tiers (7 tiers, prices: adult_band=17.98, under18_band=2.98, individual=11.98), /api/subscriptions/select, /api/subscriptions/{user_id}/status; (2) /api/subscriptions/check-band-activity correctly returns run_id/trigger/total_checked/compliant_count/downgraded_count/downgraded_users/compliant_users; (3) inactive adult_band user downgraded to status='downgraded', price=11.98, previous_tier='adult_band', previous_price=17.98, downgrade_reason='No upload in 7 days', downgraded_at set; (4) inactive under18_band user downgraded with previous_tier='under18_band', previous_price=2.98; (5) active band user (with /upload) stays compliant — price unchanged at 17.98, no previous_tier/downgrade_reason; (6) idempotency — re-running excludes already-downgraded users via status:{$ne:'downgraded'} filter, neither in downgraded_users nor compliant_users on second run; (7) /api/subscriptions/band-audit returns per-user entries with all 12 required fields (run_id, trigger, user_id, tier_key, original_price, last_upload, uploads_in_window, cutoff, met_requirement, action, new_price, checked_at), action ∈ {compliant, downgraded_to_individual, none}, downgraded entries have new_price=11.98 and uploads_in_window=0; (8) /api/subscriptions/band-audit/summary returns docs with type='run_summary' and trigger='manual_api'. Cron scheduler verified via backend logs: '[BandCron] Background task registered', '[BandCron] Scheduler started — will fire every Sunday 00:00 UTC', next-run computed as 2026-05-10T00:00:00+00:00 (current time Sun May 3 13:59 UTC, so next Sunday midnight is May 10 — correct, since the days_until_sunday==0 branch correctly bumps by 7 when past midnight on a Sunday).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration18.py",
+    "/app/test_reports/pytest/iteration18_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Cron next-run math is correct: days_until_sunday = (6 - now.weekday()) % 7 with the special case 'if 0 and past midnight → bump 7 days' — confirmed via log output 2026-05-10T00:00:00+00:00 on a Sunday afternoon.",
+    "_run_band_activity_check uses status:{$ne:'downgraded'} filter — correct idempotency guard, validated by re-running and observing already-downgraded users absent from both compliant_users and downgraded_users.",
+    "Audit log writes are bulk (insert_many) for per-user entries + a single insert_one for the run_summary with type='run_summary' — clean separation; the summary endpoint correctly filters on {type:'run_summary'}.",
+    "Note on tier_key on downgrade: the implementation keeps tier_key as the original (adult_band / under18_band) and only flips status='downgraded' + price=11.98 + sets previous_tier/previous_price. That is intentional for traceability but worth documenting — front-end should display Individual price ($11.98) when status=='downgraded' regardless of tier_key, and use previous_tier for the 'was a band' label.",
+    "_run_band_activity_check writes audit entries even when no band subs exist (audit_entries=[] short-circuits the insert_many); summary doc is always written. Acceptable for run-history.",
+    "No transaction guard between the subscriptions.update_one and the audit_log insert_many — if the DB drops between them an audit entry could be missing. For a low-traffic Sunday cron this is fine; flagging only for future hardening.",
+    "Cron error path correctly logs to band_audit_log with type='cron_error' — good observability."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration18.py",
+    "/app/test_reports/pytest/iteration18_results.xml",
+    "/app/test_reports/iteration_18.json"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "not tested (backend-only request)"},
+  "test_credentials": "None — app is anonymous. Test users are TEST_-prefixed UUIDs created per run.",
+  "seed_data_creation": "Per test run: created 3 TEST_iter18_* band users — 1 active adult_band (with recorded /upload), 1 inactive adult_band, 1 inactive under18_band — plus 2 individual subs for regression. All seeded via public POST /api/subscriptions/select and POST /api/subscriptions/{uid}/upload.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 18 fully validates the band auto-downgrade + audit logging path. Run `cd /app && set -a && source frontend/.env && set +a && python -m pytest backend/tests/test_iteration18.py -v` to re-execute (10 tests, ~1.3s). To verify the cron is still registered after a deploy: `grep BandCron /var/log/supervisor/backend.err.log | tail -3` should show 'Background task registered', 'Scheduler started', and 'Next run at <next Sunday>T00:00:00+00:00'. The cron runs as an asyncio.create_task() in @app.on_event('startup') — it cannot be triggered without sleeping until Sunday, but the same _run_band_activity_check() it calls is the one wired to POST /api/subscriptions/check-band-activity, so behavior is fully exercised. If future iterations add new tiers, update TestRegressionSubscriptions::test_tiers_returns_seven to expect the new count.",
+  "rca of the issue": "No issues found — feature is production-ready."
+}
