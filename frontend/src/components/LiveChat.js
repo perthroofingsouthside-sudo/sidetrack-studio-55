@@ -26,7 +26,7 @@ export default function LiveChat({ trackTitle }) {
   const connectWs = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     const backendUrl = (process.env.REACT_APP_BACKEND_URL || "").replace(/^https?/, "wss");
-    const wsUrl = `${backendUrl}/ws/chat/${room}`;
+    const wsUrl = `${backendUrl}/api/ws/chat/${room}`;
     try {
       const ws = new WebSocket(wsUrl);
       wsRef.current = ws;

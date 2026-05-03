@@ -1618,7 +1618,7 @@ class ChatManager:
 chat_mgr = ChatManager()
 
 
-@app.websocket("/ws/chat/{room}")
+@app.websocket("/api/ws/chat/{room}")
 async def ws_chat(ws: WebSocket, room: str):
     """WebSocket endpoint for live Stadium Chat."""
     await chat_mgr.connect(room, ws)

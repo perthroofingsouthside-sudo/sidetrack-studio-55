@@ -29,7 +29,7 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
               data-testid={`nav-${item.key}`}
               variant="ghost"
               onClick={() => !isDisabled && onNavigate(item.key)}
-              className={`flex flex-col items-center gap-0.5 h-14 px-1.5 sm:px-2 rounded-xl transition-all min-w-0 ${
+              className={`flex flex-col items-center gap-0.5 h-14 px-1.5 sm:px-2 rounded-xl transition-all min-w-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
                 isActive
                   ? "text-[#FF6B00]"
                   : isDisabled
