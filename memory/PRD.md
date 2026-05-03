@@ -1,55 +1,47 @@
-# SIDETRACK — Production-Ready PRD
+# SIDETRACK — Launch-Ready PRD
 
-## Original Problem Statement
-Build a music app like Shazam + Tidal called SIDETRACK. Full feature set: song recognition, streaming, stem separation, stem mixer, guitar chords + lyrics, recording, Cover Battles, Playlists, Duet Mode, Become a Star (karaoke), Star Challenges, Live Stage, Live Chat, Social Profiles, Pro Tiers with Stadium VIP.
-
-## Architecture (Refactored)
+## Architecture
 ```
 /app/backend/
-  server.py          # App setup, route registration, WebSocket, Band Cron scheduler
-  database.py         # MongoDB connection
-  config.py           # API keys, constants
-  models.py           # All Pydantic models
+  server.py           # App setup, routes, WebSocket, Band Cron
+  database.py          # MongoDB connection
+  config.py            # API keys, constants
+  models.py            # Pydantic models
   routes/
-    core.py           # Health, root
-    songs.py          # Recognition, stems, recordings
-    lyrics.py         # LRCLIB lyrics, chord engine, chord lookup
-    music.py          # iTunes streaming, skips
-    community.py      # Battles, playlists, duets, stars, challenges
-    platform.py       # Subscriptions, band downgrade, trim, chat, social, rewards, discovery, sync
+    core.py            # Health
+    songs.py           # Recognition, stems, recordings
+    lyrics.py          # LRCLIB, chord engine
+    music.py           # iTunes streaming, skips
+    community.py       # Battles, playlists, duets, stars, challenges
+    platform.py        # Subscriptions, band downgrade, trim, chat, social, rewards, discovery, sync
+    payments.py        # Stripe checkout, status polling, webhook
 ```
 
-## Band Auto-Downgrade Cron System
-- **Schedule**: Every Sunday at 00:00 UTC via asyncio background task
-- **Logic**: Scans all band subs (adult_band, under18_band) not already downgraded
-- **Requirement**: 1+ upload in preceding 7 days
-- **Action on failure**: status→"downgraded", price→$11.98 (Individual rate), stores previous_tier + previous_price + downgrade_reason
-- **Audit**: Every check logged to `band_audit_log` with per-user entries and run summaries
-- **Admin endpoints**: GET /api/subscriptions/band-audit, GET /api/subscriptions/band-audit/summary
-- **Idempotent**: Already-downgraded users excluded from subsequent runs
+## All Features (Complete)
+- Shazam recognition + Replicate Demucs AI stems
+- iTunes streaming + 50 skip/day limit
+- LRCLIB synced lyrics + music-theory chord engine + SVG diagrams
+- Interactive Fan Mixer: Mute/Solo/Artist Presets
+- Cover Battles + Duets + Become a Star + Weekly Challenges
+- Playlists + Live Stage + Stadium WebSocket Chat
+- Social profiles: follows, likes, live stats
+- 7 subscription tiers + Stadium VIP
+- **Stripe Checkout** (real payments via emergentintegrations)
+- Band Auto-Downgrade Cron (Sunday 00:00 UTC) + audit trail
+- Competition winner auto-credit
+- Real audio trimming (pydub/ffmpeg)
+- Vibe-Match personalized discovery
+- SIDETRACK Orange/Green/Dark branding (100%)
 
-## All Implemented Features
-- [x] Shazam song recognition + Replicate Demucs AI stem separation
-- [x] iTunes streaming with 50 skip/day limit
-- [x] LRCLIB synced lyrics with neon green glow + auto-scroll
-- [x] Music-theory chord engine (11 keys x 9 genres)
-- [x] SVG guitar chord diagrams
-- [x] Interactive Fan Mixer: Mute/Solo/Artist Presets
-- [x] Cover Battles with voting + leaderboard
-- [x] Duet Mode recording
-- [x] Become a Star karaoke + Weekly Challenges (Wed-Wed)
-- [x] Playlists (public/private CRUD)
-- [x] Live Stage with camera/lyrics/guitar/split layouts
-- [x] Stadium WebSocket Chat (real-time, persisted, VIP badges)
-- [x] Social profiles: follows, likes, live stats
-- [x] 7 subscription tiers including Stadium VIP ($4.98/mo)
-- [x] **Scheduled Band Auto-Downgrade Cron (Sunday 00:00 UTC)**
-- [x] **Full audit trail in band_audit_log collection**
-- [x] Competition winner auto-credit (1 month Pro)
-- [x] Real audio trimming via pydub/ffmpeg
-- [x] Vibe-Match personalized discovery
-- [x] Global Sync master clock + jam rooms
-- [x] SIDETRACK Orange/Green/Dark branding (100%)
+## Stripe Payment Flow
+1. User clicks tier → `POST /api/payments/checkout` (amount from server-side TIER_PRICES)
+2. Backend creates `payment_transactions` record (status=pending)
+3. User redirected to `checkout.stripe.com`
+4. After payment → redirected back with `?session_id=`
+5. App.js detects URL params → routes to PricingPage
+6. PricingPage polls `GET /api/payments/status/{session_id}` (8 attempts, 2s intervals)
+7. On paid → subscription activated, banner shown
+8. Webhook at `POST /api/webhook/stripe` as backup confirmation
 
-## Remaining
-- [ ] Stripe payments integration
+## Nothing Remaining
+All P0 items complete. App is launch-ready.

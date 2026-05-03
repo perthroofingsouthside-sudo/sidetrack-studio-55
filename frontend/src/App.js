@@ -19,7 +19,11 @@ export const API = `${BACKEND_URL}/api`;
 
 function App() {
   const [currentSong, setCurrentSong] = useState(null);
-  const [currentView, setCurrentView] = useState("stream");
+  const [currentView, setCurrentView] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("payment") || params.get("session_id")) return "pricing";
+    return "stream";
+  });
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
 
