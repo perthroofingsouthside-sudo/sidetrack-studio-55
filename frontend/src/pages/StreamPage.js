@@ -3,6 +3,7 @@ import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, Lis
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
@@ -21,12 +22,16 @@ export default function StreamPage({ onTrackSelect }) {
   const [showChat, setShowChat] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [addingTrack, setAddingTrack] = useState(null);
+  const [skipsRemaining, setSkipsRemaining] = useState(50);
+  const [skipLimit] = useState(50);
   const audioRef = useRef(null);
   const progressRef = useRef(null);
   const owner = localStorage.getItem("sidetrack_username") || "anonymous";
+  const userId = useRef(localStorage.getItem("sidetrack_voter_id") || (() => { const id = crypto.randomUUID(); localStorage.setItem("sidetrack_voter_id", id); return id; })());
 
   useEffect(() => {
     loadBrowseData();
+    loadSkipCount();
     return () => {
       if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
       if (progressRef.current) cancelAnimationFrame(progressRef.current);
@@ -42,6 +47,35 @@ export default function StreamPage({ onTrackSelect }) {
       if (songsRes?.data?.success) setTopSongs(songsRes.data.tracks);
       if (albumsRes?.data?.success) setTopAlbums(albumsRes.data.albums);
     } catch { /* empty */ }
+  };
+
+  const loadSkipCount = async () => {
+    try {
+      const res = await axios.get(`${API}/skips/${userId.current}`);
+      if (res.data.success) setSkipsRemaining(res.data.skips_remaining);
+    } catch { /* silent */ }
+  };
+
+  const skipTrack = async () => {
+    if (skipsRemaining <= 0) { toast.error("Daily skip limit reached! Resets at midnight UTC."); return; }
+    try {
+      const res = await axios.post(`${API}/skips/${userId.current}/use`);
+      if (res.data.success) {
+        setSkipsRemaining(res.data.skips_remaining);
+        // Skip to next track in current list
+        const list = activeTab === "search" ? searchResults : topSongs;
+        if (nowPlaying && list.length > 0) {
+          const idx = list.findIndex((t) => t.id === nowPlaying.id);
+          const next = list[(idx + 1) % list.length];
+          if (next) playTrack(next);
+        }
+      }
+    } catch (err) {
+      if (err.response?.status === 429) {
+        setSkipsRemaining(0);
+        toast.error("Daily skip limit reached! Resets at midnight UTC.");
+      }
+    }
   };
 
   const handleSearch = useCallback(async () => {
@@ -281,10 +315,43 @@ export default function StreamPage({ onTrackSelect }) {
                 <p className="text-xs font-semibold text-white truncate">{nowPlaying.title}</p>
                 <p className="text-[10px] text-[#5C5C6B] truncate">{nowPlaying.artist}</p>
               </div>
+
+              {/* Skip counter pill */}
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/5 bg-white/[0.03]" data-testid="skip-counter">
+                <SkipForward className="w-3 h-3 text-[#5C5C6B]" />
+                <span className={`text-[10px] font-bold font-mono ${skipsRemaining <= 5 ? "text-red-400" : skipsRemaining <= 15 ? "text-[#FF6B00]" : "text-[#39FF14]"}`} data-testid="skip-count-display">
+                  {skipsRemaining}
+                </span>
+                <span className="text-[10px] text-[#5C5C6B]">/ {skipLimit}</span>
+              </div>
+
               <Button data-testid="mini-play-pause" variant="ghost" size="icon" onClick={togglePlayPause}
                 className="text-white hover:text-[#39FF14] rounded-full transition-colors">
                 {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="white" />}
               </Button>
+
+              {/* Skip button with tooltip */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <span>
+                      <Button data-testid="skip-btn" variant="ghost" size="icon" onClick={skipTrack}
+                        disabled={skipsRemaining <= 0}
+                        className={`rounded-full transition-colors ${
+                          skipsRemaining <= 0
+                            ? "text-[#5C5C6B]/30 cursor-not-allowed"
+                            : "text-[#FF6B00] hover:text-[#39FF14] hover:bg-[#39FF14]/10"
+                        }`}>
+                        <SkipForward className="w-5 h-5" />
+                      </Button>
+                    </span>
+                  </TooltipTrigger>
+                  <TooltipContent side="top" className="bg-[#0F0F16] border-white/10 text-white text-xs">
+                    {skipsRemaining <= 0 ? "Skips exhausted — resets at midnight UTC" : `Skip (${skipsRemaining} left today)`}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               <Button data-testid="mini-studio-btn" variant="ghost" size="icon" onClick={() => handleSelectForStudio(nowPlaying)}
                 className="text-[#FF6B00] hover:text-[#39FF14] rounded-full transition-colors" title="Open in Studio">
                 <Music2 className="w-4 h-4" />

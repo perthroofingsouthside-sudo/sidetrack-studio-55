@@ -287,6 +287,35 @@ async def root():
 async def health():
     return {"status": "healthy", "shazam_configured": bool(RAPIDAPI_KEY)}
 
+# --- Daily Skip Limiter ---
+DAILY_SKIP_LIMIT = 50
+
+@api_router.get("/skips/{user_id}")
+async def get_skip_count(user_id: str):
+    """Get remaining skips for a user. Resets at midnight UTC daily."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    record = await db.skip_counters.find_one({"user_id": user_id, "date": today}, {"_id": 0})
+    if not record:
+        return {"success": True, "user_id": user_id, "skips_used": 0, "skips_remaining": DAILY_SKIP_LIMIT, "limit": DAILY_SKIP_LIMIT, "date": today}
+    used = record.get("skips_used", 0)
+    return {"success": True, "user_id": user_id, "skips_used": used, "skips_remaining": max(0, DAILY_SKIP_LIMIT - used), "limit": DAILY_SKIP_LIMIT, "date": today}
+
+@api_router.post("/skips/{user_id}/use")
+async def use_skip(user_id: str):
+    """Use one skip. Returns 429 if limit reached."""
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    record = await db.skip_counters.find_one({"user_id": user_id, "date": today})
+    used = record.get("skips_used", 0) if record else 0
+    if used >= DAILY_SKIP_LIMIT:
+        raise HTTPException(status_code=429, detail="Daily skip limit reached")
+    await db.skip_counters.update_one(
+        {"user_id": user_id, "date": today},
+        {"$inc": {"skips_used": 1}, "$setOnInsert": {"user_id": user_id, "date": today}},
+        upsert=True
+    )
+    new_used = used + 1
+    return {"success": True, "skips_used": new_used, "skips_remaining": max(0, DAILY_SKIP_LIMIT - new_used), "limit": DAILY_SKIP_LIMIT}
+
 # Song Recognition
 @api_router.post("/recognize")
 async def recognize_song(file: UploadFile = File(...)):
