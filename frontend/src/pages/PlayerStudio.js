@@ -48,12 +48,19 @@ export default function PlayerStudio({ song, onRecord }) {
   }, [stemVolumes, mutedStems]);
 
   const fetchLyrics = async () => {
+    // Try song-specific endpoint first (works when song is in DB)
     try {
       const res = await axios.get(`${API}/songs/${song.id}/lyrics`);
-      if (res.data.success) setLyrics(res.data);
-    } catch {
-      toast.error("Failed to load lyrics");
-    }
+      if (res.data.success) { setLyrics(res.data); return; }
+    } catch { /* fall through to direct fetch */ }
+
+    // Fallback: fetch lyrics directly by title + artist (for iTunes/stream tracks)
+    try {
+      const params = new URLSearchParams({ track: song.title || "" });
+      if (song.artist) params.set("artist", song.artist);
+      const res = await axios.get(`${API}/lyrics/fetch?${params}`);
+      if (res.data.success) { setLyrics(res.data); return; }
+    } catch { /* silent */ }
   };
 
   const checkExistingStems = async () => {

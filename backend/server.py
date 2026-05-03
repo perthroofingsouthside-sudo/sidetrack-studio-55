@@ -589,6 +589,92 @@ async def search_lyrics(track: str, artist: str = ""):
     except Exception as e:
         return {"success": False, "message": str(e)}
 
+
+@api_router.get("/lyrics/fetch")
+async def fetch_lyrics_direct(track: str, artist: str = ""):
+    """Fetch full parsed lyrics from LRCLIB by track name and artist (no DB lookup)."""
+    try:
+        import httpx
+        params = {"track_name": track}
+        if artist:
+            params["artist_name"] = artist
+        async with httpx.AsyncClient(timeout=8) as lrclib_client:
+            resp = await lrclib_client.get("https://lrclib.net/api/get", params=params)
+            if resp.status_code == 200:
+                data = resp.json()
+                synced_raw = data.get("syncedLyrics") or ""
+                plain_raw = data.get("plainLyrics") or ""
+
+                if synced_raw:
+                    lyrics_lines = []
+                    for line in synced_raw.strip().split("\n"):
+                        line = line.strip()
+                        if not line:
+                            continue
+                        if line.startswith("[") and "]" in line:
+                            ts_end = line.index("]")
+                            ts_str = line[1:ts_end]
+                            text = line[ts_end + 1:].strip()
+                            try:
+                                parts = ts_str.split(":")
+                                minutes = int(parts[0])
+                                seconds = float(parts[1])
+                                time_s = minutes * 60 + seconds
+                            except (ValueError, IndexError):
+                                continue
+                            if not text:
+                                lyrics_lines.append({"time": time_s, "text": "", "type": "break"})
+                            elif text.startswith("[") and text.endswith("]"):
+                                lyrics_lines.append({"time": time_s, "text": text[1:-1], "type": "section"})
+                            else:
+                                lyrics_lines.append({"time": time_s, "text": text, "type": "line"})
+                    if lyrics_lines:
+                        mock_chords = get_mock_lyrics(track, artist).get("chords", [])
+                        return {
+                            "success": True,
+                            "title": data.get("trackName", track),
+                            "artist": data.get("artistName", artist),
+                            "lyrics": lyrics_lines,
+                            "chords": mock_chords,
+                            "synced": True,
+                            "source": "lrclib",
+                        }
+
+                elif plain_raw:
+                    lines = [ln.strip() for ln in plain_raw.strip().split("\n")]
+                    lyrics_lines = []
+                    t = 0
+                    for ln in lines:
+                        if not ln:
+                            lyrics_lines.append({"time": t, "text": "", "type": "break"})
+                        else:
+                            lyrics_lines.append({"time": t, "text": ln, "type": "line"})
+                        t += 3.5
+                    if lyrics_lines:
+                        mock_chords = get_mock_lyrics(track, artist).get("chords", [])
+                        return {
+                            "success": True,
+                            "title": data.get("trackName", track),
+                            "artist": data.get("artistName", artist),
+                            "lyrics": lyrics_lines,
+                            "chords": mock_chords,
+                            "synced": False,
+                            "source": "lrclib",
+                        }
+    except Exception as e:
+        logger.warning(f"LRCLIB direct fetch failed for '{track}' by '{artist}': {e}")
+
+    # Fallback to mock lyrics
+    mock_data = get_mock_lyrics(track, artist)
+    return {
+        "success": True,
+        "title": track,
+        "artist": artist,
+        **mock_data,
+        "synced": False,
+        "source": "mock",
+    }
+
 # Recordings CRUD
 @api_router.post("/recordings")
 async def create_recording(recording: RecordingCreate):
@@ -1412,7 +1498,9 @@ async def get_subscription_status(user_id: str):
             "subscription": None,
             "is_pro": False,
             "is_vip": False,
+            "is_band": False,
             "tier_key": "free",
+            "upload_status": None,
         }
 
     tier_key = sub.get("tier_key", "free")
