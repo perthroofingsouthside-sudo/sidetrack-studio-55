@@ -28,6 +28,7 @@ from routes.lyrics import router as lyrics_router
 from routes.music import router as music_router
 from routes.community import router as community_router
 from routes.platform import router as platform_router, chat_mgr, _run_band_activity_check
+from routes.payments import router as payments_router
 
 # ── Register all route modules on the /api prefix ─
 api_router.include_router(core_router)
@@ -36,6 +37,7 @@ api_router.include_router(lyrics_router)
 api_router.include_router(music_router)
 api_router.include_router(community_router)
 api_router.include_router(platform_router)
+api_router.include_router(payments_router)
 
 app.include_router(api_router)
 

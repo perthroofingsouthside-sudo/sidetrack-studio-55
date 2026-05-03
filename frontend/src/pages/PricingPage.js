@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Crown,
   Zap,
@@ -14,6 +14,9 @@ import {
   MessageCircle,
   Palette,
   Send,
+  Loader2,
+  CheckCircle2,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -52,6 +55,7 @@ export default function PricingPage({ onBack }) {
   const [loading, setLoading] = useState(true);
   const [selecting, setSelecting] = useState(null);
   const [currentSub, setCurrentSub] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // null | "polling" | "paid" | "cancelled" | "expired"
   const userId = useRef(
     localStorage.getItem("sidetrack_voter_id") ||
       (() => {
@@ -64,7 +68,57 @@ export default function PricingPage({ onBack }) {
   useEffect(() => {
     loadTiers();
     loadStatus();
+    checkReturnFromStripe();
   }, []);
+
+  // Check if returning from Stripe checkout
+  const checkReturnFromStripe = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const sessionId = params.get("session_id");
+    const paymentResult = params.get("payment");
+
+    if (paymentResult === "cancelled") {
+      setPaymentStatus("cancelled");
+      toast.error("Payment cancelled. You can try again anytime.");
+      // Clean URL
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+
+    if (sessionId) {
+      setPaymentStatus("polling");
+      pollPaymentStatus(sessionId, 0);
+    }
+  }, []);
+
+  const pollPaymentStatus = async (sessionId, attempt) => {
+    const maxAttempts = 8;
+    if (attempt >= maxAttempts) {
+      setPaymentStatus("expired");
+      toast.error("Payment verification timed out. Check your profile for status.");
+      window.history.replaceState({}, "", window.location.pathname);
+      return;
+    }
+    try {
+      const res = await axios.get(`${API}/payments/status/${sessionId}`);
+      if (res.data.payment_status === "paid") {
+        setPaymentStatus("paid");
+        toast.success("Payment successful! Your Pro subscription is now active.");
+        window.history.replaceState({}, "", window.location.pathname);
+        loadStatus(); // Refresh subscription status
+        return;
+      } else if (res.data.status === "expired") {
+        setPaymentStatus("expired");
+        toast.error("Payment session expired. Please try again.");
+        window.history.replaceState({}, "", window.location.pathname);
+        return;
+      }
+      // Still pending — poll again
+      setTimeout(() => pollPaymentStatus(sessionId, attempt + 1), 2000);
+    } catch {
+      setTimeout(() => pollPaymentStatus(sessionId, attempt + 1), 2000);
+    }
+  };
 
   const loadTiers = async () => {
     try {
@@ -89,17 +143,17 @@ export default function PricingPage({ onBack }) {
   const selectTier = async (tierKey) => {
     setSelecting(tierKey);
     try {
-      const res = await axios.post(`${API}/subscriptions/select`, {
-        user_id: userId.current,
+      const res = await axios.post(`${API}/payments/checkout`, {
         tier_key: tierKey,
+        user_id: userId.current,
+        origin_url: window.location.origin,
       });
-      if (res.data.success) {
-        toast.success(`Subscribed to ${res.data.subscription.tier_name} — First month free!`);
-        loadStatus();
+      if (res.data.success && res.data.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = res.data.url;
       }
     } catch (err) {
-      toast.error(err.response?.data?.detail || "Failed to select tier");
-    } finally {
+      toast.error(err.response?.data?.detail || "Failed to create checkout session");
       setSelecting(null);
     }
   };
@@ -136,6 +190,32 @@ export default function PricingPage({ onBack }) {
               </p>
             </div>
           </div>
+
+          {/* Payment Status Banner */}
+          {paymentStatus === "polling" && (
+            <div className="rounded-2xl border border-[#FF6B00]/30 p-4 flex items-center gap-3 animate-pulse" style={{ background: "rgba(255,107,0,0.06)" }} data-testid="payment-polling">
+              <Loader2 className="w-5 h-5 text-[#FF6B00] animate-spin" />
+              <div>
+                <p className="text-sm font-bold text-white">Verifying your payment...</p>
+                <p className="text-[10px] text-[#5C5C6B]">Please wait while we confirm with Stripe</p>
+              </div>
+            </div>
+          )}
+          {paymentStatus === "paid" && (
+            <div className="rounded-2xl border border-[#39FF14]/30 p-4 flex items-center gap-3" style={{ background: "rgba(57,255,20,0.06)" }} data-testid="payment-success">
+              <CheckCircle2 className="w-5 h-5 text-[#39FF14]" />
+              <div>
+                <p className="text-sm font-bold text-white">Payment successful!</p>
+                <p className="text-[10px] text-[#39FF14]">Your Pro subscription is now active</p>
+              </div>
+            </div>
+          )}
+          {paymentStatus === "cancelled" && (
+            <div className="rounded-2xl border border-white/10 p-4 flex items-center gap-3" style={{ background: "rgba(255,255,255,0.02)" }} data-testid="payment-cancelled">
+              <XCircle className="w-5 h-5 text-[#5C5C6B]" />
+              <p className="text-sm text-[#5C5C6B]">Payment cancelled — choose a plan when you're ready</p>
+            </div>
+          )}
 
           {/* ── STADIUM VIP ─────────────────────────────── */}
           {vipTier && (

@@ -1,0 +1,48 @@
+{
+  "summary": "Iteration 19 — SIDETRACK Stripe payment integration. Backend 15/15 pytest tests PASS (100%). All 7 tier checkout sessions create real Stripe URLs (checkout.stripe.com), invalid tier_key returns 400, missing fields returns 422, payment_transactions DB record created with correct server-side amount + status='initiated' + payment_status='pending', server-side TIER_PRICES enforcement verified (frontend amount=0.01 in body is ignored — Stripe page shows real US$4.98 for stadium_vip), GET /api/payments/status/{session_id} returns success=True with tier_key from DB fallback for newly-created sessions, GET /api/payments/status/<unknown> returns 404, POST /api/webhook/stripe is reachable (returns 200 with error envelope on bad signature, NOT 404), regression /api/health and /api/subscriptions/tiers (7 tiers) PASS. Frontend: Profile → Go Pro → PricingPage navigation works, all 7 tiers render (1 VIP section + 6 cards), clicking 'Get Stadium VIP' (data-testid='vip-select-btn') triggers axios POST /api/payments/checkout and window.location.href redirect — confirmed real navigation to https://checkout.stripe.com/c/pay/cs_test_... with US$4.98 displayed. CRITICAL INTEGRATION BUG FOUND: Stripe success_url returns user to '${origin}?payment=success&session_id=...' which lands on root '/'. App.js default currentView is 'stream' (StreamPage), so PricingPage component never mounts and checkReturnFromStripe() never fires — the payment-polling, payment-success, and payment-cancelled banners (all data-testid present in PricingPage) are NEVER displayed after a real Stripe roundtrip. Verified by visiting '/?payment=cancelled' directly — StreamPage rendered, no banner shown.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Stripe return-from-checkout polling",
+        "issue": "Stripe success_url and cancel_url redirect to '${origin}/' (root) which mounts StreamPage by default. PricingPage is the only component that reads ?payment= and ?session_id= URL params (in checkReturnFromStripe useEffect), so it never fires after Stripe redirect. User pays → returns to home page → no polling banner, no toast, no subscription activation feedback.",
+        "affected_selectors": ["[data-testid='payment-polling']", "[data-testid='payment-success']", "[data-testid='payment-cancelled']"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration19_payments.py",
+    "/app/test_reports/pytest/iteration19_results.xml"
+  ],
+  "action_items": [
+    "FIX in App.js: On mount, parse window.location.search for 'payment' or 'session_id' URL params; if present, setCurrentView('pricing') BEFORE first render so PricingPage's checkReturnFromStripe() can fire. Example: const params = new URLSearchParams(window.location.search); const initial = (params.get('payment') || params.get('session_id')) ? 'pricing' : 'stream'; useState(initial). Without this, the entire post-checkout polling/success/cancelled UX is dead.",
+    "(Optional) Consider configuring Stripe success_url/cancel_url to include a path hint like '${origin}/?view=pricing&payment=success&session_id={CHECKOUT_SESSION_ID}' AND have App.js route based on that — but the simpler fix above works."
+  ],
+  "critical_code_review_comments": [
+    "payments.py correctly enforces server-side TIER_PRICES — CheckoutRequest only accepts tier_key/user_id/origin_url; any extra 'amount' or 'price' in the request body is ignored by Pydantic (extra='ignore' default). Verified: sending amount=0.01 still produces a $4.98 Stripe page.",
+    "payments.py inserts payment_transactions BEFORE returning the URL — good for crash-safety. Status='initiated', payment_status='pending', amount/currency/tier_key/user_id all recorded. _id is excluded on read via projection.",
+    "GET /api/payments/status/{session_id} has correct try/except around stripe_checkout.get_checkout_status() with DB fallback returning last-known status — covered the 'sk_test_emergent retrieve fails' case in tests. Idempotency on 'already paid' check (returns early with already_processed=true) prevents double-credit.",
+    "Webhook handler swallows verification errors and returns {'received':True,'error':...} with 200 — Stripe will retry on non-2xx, but this means signature failures are silent. Acceptable for now (logs at error level), but consider returning 400 on signature mismatch in production.",
+    "BUG (frontend integration): App.js default currentView='stream' means PricingPage's URL-param-handling useEffect never fires when user returns from Stripe. Stripe redirects to '${origin}?payment=success&session_id=...' — verified user lands on StreamPage, not PricingPage. This breaks the entire post-payment confirmation UX. Fix in action_items.",
+    "PricingPage.pollPaymentStatus has 8 attempts × 2s = 16s max polling. This is fine for a test session but could be too short for slow networks; consider exponential backoff + a 'check your email' fallback message.",
+    "PricingPage uses window.location.origin as origin_url — for a deployed app behind ingress this is correct, but if ever embedded in an iframe this would break. Not a blocker.",
+    "TIER_PRICES dict duplicated between routes/payments.py and routes/subscriptions (or wherever /api/subscriptions/tiers reads from). Suggest centralizing into a single source of truth (e.g., routes/payments.py exports TIER_PRICES and tiers route imports it) to prevent drift."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration19_payments.py",
+    "/app/test_reports/pytest/iteration19_results.xml",
+    "/app/test_reports/iteration_19.json"
+  ],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "80% — UI flows work + Stripe redirect works; return-from-Stripe banner integration broken at App.js routing level"},
+  "test_credentials": "None — app is anonymous. Test users prefixed TEST_iter19_*.",
+  "seed_data_creation": "Per test run: 11 payment_transactions created in MongoDB across all 7 tiers + status fixtures. Verified directly via motor: e.g., {user_id:'TEST_iter19_amount_60c405', tier_key:'stadium_vip', amount:4.98, status:'initiated', payment_status:'pending'}. Server-side amount enforcement confirmed by direct DB inspection. No cleanup performed (sessions are non-paid pending records, harmless).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Run `cd /app && set -a && source frontend/.env && set +a && python -m pytest backend/tests/test_iteration19_payments.py -v` (15 tests, ~5.5s). All backend tests are stable. The one open issue is FRONTEND-only: App.js needs to route to 'pricing' view when URL contains ?payment= or ?session_id=. After main agent fixes that, retest by: (1) navigate to pricing, click VIP, get redirected to Stripe (already working), (2) manually visit '/?payment=cancelled' and assert [data-testid='payment-cancelled'] is visible, (3) manually visit '/?session_id=cs_test_xxx' and assert [data-testid='payment-polling'] is visible. Stripe API key is sk_test_emergent in backend/.env — works against real Stripe sandbox. payment_transactions DB has live records from this run; do not flush during regression.",
+  "rca of the issue": "PricingPage.js correctly implements checkReturnFromStripe() in a useEffect that reads window.location.search on mount. However, because Stripe's success_url is built as `${origin}?payment=success&session_id={CHECKOUT_SESSION_ID}` where origin = window.location.origin (root, no path), the post-payment redirect lands on '/'. App.js initializes currentView='stream' (line 22) and routes to StreamPage — PricingPage is never mounted, so its useEffect never runs, so URL params are ignored. The polling/success/cancelled banners (which DO exist with correct data-testids in PricingPage.js lines 196,205,214) are dead code in production until App.js detects the URL params on cold-start and routes to pricing. Mitigation: in App.js, before useState('stream'), inspect URL params and pick 'pricing' if 'payment' or 'session_id' is present."
+}
