@@ -91,7 +91,7 @@ export default function HomePage({ onSongRecognized }) {
       {/* Background abstract */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/5 blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#4B0082]/8 blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#39FF14]/5 blur-[100px]" />
       </div>
 
       {/* Logo */}

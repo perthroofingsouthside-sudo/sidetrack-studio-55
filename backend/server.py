@@ -1,4 +1,4 @@
-from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form, BackgroundTasks
+from fastapi import FastAPI, APIRouter, UploadFile, File, HTTPException, Form, BackgroundTasks, WebSocket, WebSocketDisconnect
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -12,7 +12,7 @@ import asyncio
 import replicate
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Dict, Set
 import uuid
 from datetime import datetime, timezone, timedelta
 
@@ -1577,6 +1577,321 @@ async def trim_recording(payload: TrimRequest):
         "end_pct": payload.end_pct,
         "message": "Trim parameters saved. Full server-side trimming coming soon.",
     }
+
+
+# --- Stadium WebSocket Chat ---
+
+class ChatManager:
+    """Manages WebSocket connections for Stadium-scale live chat."""
+
+    def __init__(self):
+        self.rooms: Dict[str, Set[WebSocket]] = {}
+
+    async def connect(self, room: str, ws: WebSocket):
+        await ws.accept()
+        if room not in self.rooms:
+            self.rooms[room] = set()
+        self.rooms[room].add(ws)
+
+    def disconnect(self, room: str, ws: WebSocket):
+        if room in self.rooms:
+            self.rooms[room].discard(ws)
+            if not self.rooms[room]:
+                del self.rooms[room]
+
+    async def broadcast(self, room: str, message: dict):
+        if room not in self.rooms:
+            return
+        dead = []
+        for ws in self.rooms[room]:
+            try:
+                await ws.send_json(message)
+            except Exception:
+                dead.append(ws)
+        for ws in dead:
+            self.rooms[room].discard(ws)
+
+    def viewer_count(self, room: str) -> int:
+        return len(self.rooms.get(room, set()))
+
+
+chat_mgr = ChatManager()
+
+
+@app.websocket("/ws/chat/{room}")
+async def ws_chat(ws: WebSocket, room: str):
+    """WebSocket endpoint for live Stadium Chat."""
+    await chat_mgr.connect(room, ws)
+    # Announce join
+    join_msg = {
+        "type": "system",
+        "text": "A fan joined the stage",
+        "viewers": chat_mgr.viewer_count(room),
+        "ts": datetime.now(timezone.utc).isoformat(),
+    }
+    await chat_mgr.broadcast(room, join_msg)
+    try:
+        while True:
+            data = await ws.receive_json()
+            msg = {
+                "type": "message",
+                "user": data.get("user", "Fan"),
+                "text": data.get("text", ""),
+                "badge": data.get("badge", ""),
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "viewers": chat_mgr.viewer_count(room),
+            }
+            # Persist to DB (fire-and-forget)
+            await db.chat_messages.insert_one({
+                "room": room,
+                "user": msg["user"],
+                "text": msg["text"],
+                "badge": msg["badge"],
+                "ts": msg["ts"],
+            })
+            await chat_mgr.broadcast(room, msg)
+    except WebSocketDisconnect:
+        chat_mgr.disconnect(room, ws)
+        leave_msg = {
+            "type": "system",
+            "text": "A fan left the stage",
+            "viewers": chat_mgr.viewer_count(room),
+            "ts": datetime.now(timezone.utc).isoformat(),
+        }
+        await chat_mgr.broadcast(room, leave_msg)
+    except Exception:
+        chat_mgr.disconnect(room, ws)
+
+
+@api_router.get("/chat/{room}/history")
+async def chat_history(room: str, limit: int = 50):
+    """Get recent chat messages for a room."""
+    msgs = await db.chat_messages.find(
+        {"room": room}, {"_id": 0}
+    ).sort("ts", -1).to_list(limit)
+    msgs.reverse()
+    return {"success": True, "messages": msgs, "viewers": chat_mgr.viewer_count(room)}
+
+
+# --- Social: Follows, Likes, Profile Stats ---
+
+class FollowAction(BaseModel):
+    follower_id: str
+    following_id: str
+
+
+@api_router.post("/social/follow")
+async def follow_user(action: FollowAction):
+    """Follow a user."""
+    if action.follower_id == action.following_id:
+        raise HTTPException(status_code=400, detail="Cannot follow yourself")
+    existing = await db.follows.find_one({
+        "follower_id": action.follower_id,
+        "following_id": action.following_id,
+    })
+    if existing:
+        # Unfollow
+        await db.follows.delete_one({"_id": existing["_id"]})
+        return {"success": True, "action": "unfollowed"}
+    await db.follows.insert_one({
+        "follower_id": action.follower_id,
+        "following_id": action.following_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"success": True, "action": "followed"}
+
+
+@api_router.get("/social/{user_id}/stats")
+async def user_stats(user_id: str):
+    """Get live profile stats for a user."""
+    battles = await db.covers.count_documents({"username": user_id})
+    stars = await db.stars.count_documents({"username": user_id, "status": "published"})
+    playlists = await db.playlists.count_documents({"owner": user_id})
+    recordings = await db.recordings.count_documents({"song_id": {"$exists": True}})
+    followers = await db.follows.count_documents({"following_id": user_id})
+    following = await db.follows.count_documents({"follower_id": user_id})
+    total_votes = 0
+    user_covers = await db.covers.find({"username": user_id}, {"_id": 0, "votes": 1}).to_list(200)
+    for c in user_covers:
+        total_votes += c.get("votes", 0)
+    user_stars = await db.stars.find({"username": user_id}, {"_id": 0, "votes": 1}).to_list(200)
+    for s in user_stars:
+        total_votes += s.get("votes", 0)
+    return {
+        "success": True,
+        "stats": {
+            "battles": battles,
+            "stars": stars,
+            "playlists": playlists,
+            "recordings": recordings,
+            "followers": followers,
+            "following": following,
+            "total_votes": total_votes,
+        },
+    }
+
+
+@api_router.post("/social/{perf_id}/like")
+async def like_performance(perf_id: str, user_id: str = Form(...)):
+    """Like/unlike a star performance."""
+    existing = await db.likes.find_one({"perf_id": perf_id, "user_id": user_id})
+    if existing:
+        await db.likes.delete_one({"_id": existing["_id"]})
+        return {"success": True, "action": "unliked"}
+    await db.likes.insert_one({
+        "perf_id": perf_id,
+        "user_id": user_id,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {"success": True, "action": "liked"}
+
+
+# --- Competition Winner Auto-Credit ---
+
+@api_router.post("/rewards/credit-winner")
+async def credit_competition_winner(battle_id: str = Form(...)):
+    """Auto-credit 1 month Pro to the top-voted cover in a battle."""
+    covers = await db.covers.find(
+        {"battle_id": battle_id}, {"_id": 0, "audio_data": 0}
+    ).sort("votes", -1).to_list(1)
+    if not covers or covers[0].get("votes", 0) == 0:
+        return {"success": False, "message": "No qualifying winner"}
+    winner = covers[0]
+    winner_username = winner.get("username", "")
+    # Find user subscription
+    sub = await db.subscriptions.find_one({"user_id": winner_username})
+    if sub:
+        await db.subscriptions.update_one(
+            {"user_id": winner_username},
+            {"$inc": {"reward_months": 1}},
+        )
+    else:
+        # Grant a free month of Individual tier
+        await db.subscriptions.insert_one({
+            "user_id": winner_username,
+            "tier_key": "individual",
+            "tier_name": "Individual",
+            "price": 0,
+            "status": "reward",
+            "trial_end": (datetime.now(timezone.utc) + timedelta(days=30)).isoformat(),
+            "started_at": datetime.now(timezone.utc).isoformat(),
+            "last_upload": None,
+            "active_band": False,
+            "reward_months": 1,
+        })
+    # Record reward
+    await db.rewards.insert_one({
+        "battle_id": battle_id,
+        "winner_username": winner_username,
+        "cover_id": winner.get("id", ""),
+        "reward": "1_month_pro",
+        "granted_at": datetime.now(timezone.utc).isoformat(),
+    })
+    return {
+        "success": True,
+        "winner": winner_username,
+        "reward": "1 month Pro credited",
+    }
+
+
+# --- Vibe-Match: Personalized Recommendations ---
+
+@api_router.get("/discover/for-you")
+async def discover_for_you(user_id: str = "", limit: int = 15):
+    """Personalized recommendations based on listening/interaction history."""
+    # Gather user's preferred genres from playlists and battle interactions
+    preferred_genres = set()
+    preferred_artists = set()
+
+    # From playlist tracks
+    playlists = await db.playlists.find({"owner": user_id}, {"_id": 0, "tracks": 1}).to_list(20)
+    for pl in playlists:
+        for t in pl.get("tracks", []):
+            if t.get("artist"):
+                preferred_artists.add(t["artist"])
+
+    # From battle interactions (covers the user submitted)
+    covers = await db.covers.find({"username": user_id}, {"_id": 0, "battle_id": 1}).to_list(20)
+    for c in covers:
+        battle = await db.battles.find_one({"id": c["battle_id"]}, {"_id": 0})
+        if battle:
+            if battle.get("song_artist"):
+                preferred_artists.add(battle["song_artist"])
+
+    # Build search query from preferences
+    search_terms = list(preferred_artists)[:3]
+    if not search_terms:
+        search_terms = ["pop hits", "trending"]
+
+    # Fetch recommendations from iTunes
+    recommendations = []
+    for term in search_terms[:2]:
+        try:
+            resp = requests.get(
+                "https://itunes.apple.com/search",
+                params={"term": term, "media": "music", "entity": "song", "limit": min(limit, 8)},
+                timeout=6,
+            )
+            if resp.status_code == 200:
+                for item in resp.json().get("results", []):
+                    recommendations.append({
+                        "id": str(item.get("trackId", "")),
+                        "title": item.get("trackName", ""),
+                        "artist": item.get("artistName", ""),
+                        "album": item.get("collectionName", ""),
+                        "cover_url": item.get("artworkUrl100", "").replace("100x100", "600x600"),
+                        "preview_url": item.get("previewUrl", ""),
+                        "duration_ms": item.get("trackTimeMillis", 0),
+                        "genre": item.get("primaryGenreName", ""),
+                        "reason": f"Because you like {term}",
+                    })
+        except Exception:
+            continue
+
+    # De-duplicate by track id
+    seen = set()
+    unique = []
+    for r in recommendations:
+        if r["id"] not in seen:
+            seen.add(r["id"])
+            unique.append(r)
+
+    return {
+        "success": True,
+        "tracks": unique[:limit],
+        "preferred_artists": list(preferred_artists)[:5],
+    }
+
+
+# --- Master Clock Sync ---
+
+@api_router.get("/sync/clock")
+async def sync_clock():
+    """Return server UTC timestamp for Global Real-Time Sync."""
+    now = datetime.now(timezone.utc)
+    return {
+        "success": True,
+        "server_time": now.isoformat(),
+        "epoch_ms": int(now.timestamp() * 1000),
+    }
+
+
+@api_router.post("/sync/room")
+async def create_sync_room(room_name: str = Form(""), host_id: str = Form("")):
+    """Create a jam sync room with a master clock reference."""
+    room_id = str(uuid.uuid4())[:8]
+    now = datetime.now(timezone.utc)
+    room = {
+        "id": room_id,
+        "name": room_name or f"Jam-{room_id}",
+        "host_id": host_id,
+        "created_at": now.isoformat(),
+        "bpm": 120,
+        "started_at": now.isoformat(),
+    }
+    await db.sync_rooms.insert_one(room)
+    stored = await db.sync_rooms.find_one({"id": room_id}, {"_id": 0})
+    return {"success": True, "room": stored}
 
 
 # Include router

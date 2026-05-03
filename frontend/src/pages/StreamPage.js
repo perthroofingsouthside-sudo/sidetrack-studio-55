@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, SkipForward, Volume2 } from "lucide-react";
+import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, SkipForward, Volume2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -14,6 +14,7 @@ export default function StreamPage({ onTrackSelect }) {
   const [searchResults, setSearchResults] = useState([]);
   const [topSongs, setTopSongs] = useState([]);
   const [topAlbums, setTopAlbums] = useState([]);
+  const [forYou, setForYou] = useState([]);
   const [searching, setSearching] = useState(false);
   const [activeTab, setActiveTab] = useState("browse");
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -40,12 +41,14 @@ export default function StreamPage({ onTrackSelect }) {
 
   const loadBrowseData = async () => {
     try {
-      const [songsRes, albumsRes] = await Promise.all([
+      const [songsRes, albumsRes, forYouRes] = await Promise.all([
         axios.get(`${API}/music/top-songs?limit=20`).catch(() => null),
         axios.get(`${API}/music/top-albums?limit=12`).catch(() => null),
+        axios.get(`${API}/discover/for-you?user_id=${owner}&limit=10`).catch(() => null),
       ]);
       if (songsRes?.data?.success) setTopSongs(songsRes.data.tracks);
       if (albumsRes?.data?.success) setTopAlbums(albumsRes.data.albums);
+      if (forYouRes?.data?.success && forYouRes.data.tracks?.length) setForYou(forYouRes.data.tracks);
     } catch { /* empty */ }
   };
 
@@ -229,6 +232,30 @@ export default function StreamPage({ onTrackSelect }) {
                     <p className="text-sm text-[#8F8F9D] mt-1">Millions of tracks at your fingertips</p>
                   </div>
                 </div>
+
+                {/* For You — Vibe-Match Recommendations */}
+                {forYou.length > 0 && (
+                  <section data-testid="for-you-section">
+                    <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-4 flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#FF6B00]" /> For You
+                    </h3>
+                    <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 scrollbar-hide">
+                      {forYou.map((track) => (
+                        <div key={track.id} className="flex-shrink-0 w-36 group cursor-pointer" onClick={() => handleSelectForStudio(track)}>
+                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.25)] transition-all duration-300 relative">
+                            <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
+                              <Play className="w-5 h-5 text-white" />
+                            </div>
+                          </div>
+                          <p className="text-xs font-medium text-white truncate">{track.title}</p>
+                          <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}</p>
+                          {track.reason && <p className="text-[8px] text-[#FF6B00]/60 truncate mt-0.5">{track.reason}</p>}
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
 
                 {/* Top Albums */}
                 {topAlbums.length > 0 && (

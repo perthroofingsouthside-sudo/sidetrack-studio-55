@@ -1,0 +1,44 @@
+{
+  "summary": "Iteration 16 testing of SIDETRACK Final Product (8 integrations). Backend: 11/11 pytest tests PASS (100%) covering /api/sync/clock, /api/sync/room, /api/chat/{room}/history, /api/social/follow + stats + like, /api/rewards/credit-winner (full flow with battle/cover/vote), /api/discover/for-you, /api/lyrics/fetch (LRCLIB Hello/Adele returns real synced lyrics). Frontend: For You section, PlayerStudio (synced lyrics now load via fallback - iteration 15 issue is FIXED), Chord toggle + ChordDots SVG, StemMixer artist presets (Vocal Focus/Band Only/Full Mix/Drums & Bass), per-stem Solo buttons, SocialProfile follow-counts and live profile-stats all verified end-to-end. Brand color audit (no purple/violet/blue dominant pixels) PASSES. ONE CRITICAL INFRA ISSUE: WebSocket /ws/chat/{room} works on localhost:8001 but TIMES OUT through the public Kubernetes ingress (wss://...preview.emergentagent.com/ws/chat/lobby) — only /api/* paths are routed to backend. LiveChat falls back to ws-disconnected gracefully but real-time chat is non-functional in production. HTTP fallback /api/chat/lobby/history works perfectly.",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "WebSocket /ws/chat/{room}", "issue": "Kubernetes ingress does not route /ws/* path to backend port 8001. Connection times out from public URL. Local ws://localhost:8001/ws/chat/lobby connects successfully, so backend code is correct. Fix options: (a) move endpoint under /api/ws/chat/{room} (since /api/* is already routed to 8001) and update LiveChat.js websocket URL accordingly, (b) request ingress config to add /ws path routing.", "priority": "CRITICAL"}
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {"flow": "LiveChat WebSocket", "issue": "Frontend connects to wss://host/ws/chat/lobby which is not routed by ingress (see backend critical above). LiveChat shows ws-disconnected indicator and 'CONNECTING...' badge indefinitely. Send-message form posts only via WS, so it appears non-functional through public URL.", "affected_selectors": ["[data-testid='ws-disconnected']", "[data-testid='viewer-count']"]}
+    ],
+    "design_issues": [
+      {"screen": "BottomNav", "issues": ["After clicking a tab, the shadcn Button focus-visible ring renders a cyan/teal background (~rgb(34,211,238)-ish) on the active tab. Brand requires Orange/Green/Dark only. This is the default shadcn ring color leaking through. Fix: add focus-visible:ring-[#FF6B00] focus-visible:ring-offset-0 (or focus:bg-transparent) on the BottomNav Button. Functional behavior is fine — text/icon color is correct orange #FF6B00; only the focus ring is off-brand."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration16.py",
+    "/app/test_reports/pytest/iteration16_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix WebSocket routing for /ws/chat/{room}. Recommended: rename FastAPI route to @app.websocket('/api/ws/chat/{room}') and change frontend LiveChat.js to wss://host/api/ws/chat/{room} so the existing ingress /api/* rule covers it. Verify with: python -c 'import websocket; websocket.create_connection(\"wss://vocal-studio-55.preview.emergentagent.com/api/ws/chat/lobby\", timeout=5)'",
+    "MINOR (design): Override BottomNav active-tab focus ring to brand orange to remove cyan focus background.",
+    "OPTIONAL (cleanup): Battle/Star/Stream pages don't currently render LiveChat by default on mobile (lg:block only). On Stream desktop, the 'Chat' header toggle works."
+  ],
+  "critical_code_review_comments": [
+    "server.py is 1910 lines — should be split into routers (sync.py, social.py, chat.py, rewards.py, discover.py) for maintainability.",
+    "/api/social/{user_id}/stats counts recordings using {song_id: {$exists: True}} not filtered by username — returns global recording count, not per-user. Likely a bug. Should filter by username/owner.",
+    "/api/rewards/credit-winner relies on Form battle_id only; should also validate that the battle is closed/expired before crediting (currently credits any active battle's top cover).",
+    "/api/discover/for-you makes synchronous requests.get to iTunes inside async handler — should use httpx.AsyncClient to avoid blocking the event loop.",
+    "ARTIST_PRESETS testid 'preset-drums-&-bass' contains an unescaped '&' which is brittle in selectors; consider naming it 'drums-bass'."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration16.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "85%"},
+  "test_credentials": "None — app is anonymous",
+  "seed_data_creation": "Created TEST_-prefixed sync rooms, follows, likes, battles, covers, votes, rewards/subscriptions during pytest run. All cleaned by username/id prefix conventions.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration 15's PlayerStudio lyrics 404 fallback is now WORKING — Hello/Adele and other iTunes-originated tracks load synced LRCLIB lyrics via /api/lyrics/fetch. Backend test file at /app/backend/tests/test_iteration16.py covers all 8 new integration endpoints (11 tests, 100% pass). The only blocker is WebSocket ingress: re-test by running `python -c \"import websocket; ws=websocket.create_connection('wss://vocal-studio-55.preview.emergentagent.com/api/ws/chat/lobby', timeout=5); print('OK')\"` after main agent moves the WS route. Frontend test-ids confirmed working: for-you-section, player-studio, chords-toggle-btn, chords-strip, chord-svg, lyrics-scroll-area, preset-vocal-focus, preset-band-only, preset-full-mix, preset-drums-&-bass, stem-vocals-solo, follow-counts, profile-stats, ws-connected/ws-disconnected, viewer-count, chat-sidebar.",
+  "rca of the issue": "WebSocket failure RCA: The Kubernetes ingress in this preview environment is configured to route only /api/* requests to the backend service on port 8001. Paths like /ws/* are sent to the frontend container (port 3000) which has no WS handler, so the connection times out / closes immediately. Verified by: (1) `python websocket-client` connect to ws://localhost:8001/ws/chat/lobby → SUCCESS; (2) same connect to wss://<public-host>/ws/chat/lobby → TIMEOUT. Mitigation: change FastAPI decorator from `@app.websocket('/ws/chat/{room}')` to `@app.websocket('/api/ws/chat/{room}')` AND update LiveChat.js URL builder from `${proto}://${host}/ws/chat/${room}` to `${proto}://${host}/api/ws/chat/${room}`. No infra change needed."
+}
