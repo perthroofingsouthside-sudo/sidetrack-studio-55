@@ -21,19 +21,16 @@ export default function BottomNav({ currentView, onNavigate, hasSong }) {
       <div className="flex items-center justify-around max-w-2xl mx-auto h-16 px-1">
         {NAV_ITEMS.map((item) => {
           const isActive = currentView === item.key;
-          const isDisabled = !item.alwaysEnabled && item.key !== "home" && !hasSong;
 
           return (
             <Button
               key={item.key}
               data-testid={`nav-${item.key}`}
               variant="ghost"
-              onClick={() => !isDisabled && onNavigate(item.key)}
+              onClick={() => onNavigate(item.key)}
               className={`flex flex-col items-center gap-0.5 h-14 px-1.5 sm:px-2 rounded-xl transition-all min-w-0 focus-visible:ring-0 focus-visible:ring-offset-0 ${
                 isActive
                   ? "text-[#FF6B00]"
-                  : isDisabled
-                  ? "text-[#606070]/40 cursor-not-allowed"
                   : "text-[#606070] hover:text-[#A0A0B0]"
               }`}
             >

@@ -217,7 +217,13 @@ export default function PlayerStudio({ song, onRecord }) {
     }
   }, [activeLyricIdx]);
 
-  if (!song) return null;
+  if (!song) return (
+    <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center px-6" data-testid="player-studio-empty">
+      <Play className="w-14 h-14 text-[#FF6B00]/20 mb-4" />
+      <h2 className="font-['Outfit'] text-xl font-bold text-white mb-2">No Track Selected</h2>
+      <p className="text-sm text-[#5C5C6B] text-center max-w-xs">Search for a song on the Stream tab, or use Discover to recognize a track — then come back here to remix it.</p>
+    </div>
+  );
 
   const hasRealStems = stems && stems.vocals_url?.startsWith("http");
   const duration = hasRealStems ? (audioRefs.current.vocals?.duration || 92) : 92;

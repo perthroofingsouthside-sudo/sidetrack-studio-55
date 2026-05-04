@@ -117,6 +117,14 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
   const showLyrics = layout === "lyrics" || layout === "split";
   const showGuitar = layout === "guitar";
 
+  if (!song) return (
+    <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center px-6" data-testid="recording-studio-empty">
+      <Mic className="w-14 h-14 text-[#39FF14]/20 mb-4" />
+      <h2 className="font-['Outfit'] text-xl font-bold text-white mb-2">No Track Loaded</h2>
+      <p className="text-sm text-[#5C5C6B] text-center max-w-xs">Pick a song from Stream or Discover first, open it in Studio, then hit Record to start your live session.</p>
+    </div>
+  );
+
   return (
     <div className="bg-[#05050A] flex flex-col max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
       {/* Header bar */}
