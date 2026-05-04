@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2 } from "lucide-react";
+import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2, Search, Play, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
@@ -23,7 +24,7 @@ const SOCIAL_LINKS = [
   { key: "youtube", label: "YT Live", color: "#FF0000", url: "https://studio.youtube.com/channel/UC/livestreaming", icon: "m10 15 5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73Z" },
 ];
 
-export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
+export default function RecordingStudio({ song, onSongSelect, onRecordingComplete, onBack }) {
   const [mode, setMode] = useState("audio");
   const [layout, setLayout] = useState("split");
   const [isRecording, setIsRecording] = useState(false);
@@ -117,13 +118,7 @@ export default function RecordingStudio({ song, onRecordingComplete, onBack }) {
   const showLyrics = layout === "lyrics" || layout === "split";
   const showGuitar = layout === "guitar";
 
-  if (!song) return (
-    <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center px-6" data-testid="recording-studio-empty">
-      <Mic className="w-14 h-14 text-[#39FF14]/20 mb-4" />
-      <h2 className="font-['Outfit'] text-xl font-bold text-white mb-2">No Track Loaded</h2>
-      <p className="text-sm text-[#5C5C6B] text-center max-w-xs">Pick a song from Stream or Discover first, open it in Studio, then hit Record to start your live session.</p>
-    </div>
-  );
+  if (!song) return <RecordSearchScreen onSongSelect={onSongSelect} />;
 
   return (
     <div className="bg-[#05050A] flex flex-col max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
@@ -391,6 +386,103 @@ function TrimModal({ duration, trimStart, trimEnd, setTrimStart, setTrimEnd, tri
             {trimming ? "Trimming..." : <><Share2 className="w-4 h-4 mr-1.5" /> Trim & Share</>}
           </Button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function RecordSearchScreen({ onSongSelect }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  const doSearch = async () => {
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const res = await axios.get(`${API}/music/search?q=${encodeURIComponent(query)}&limit=15`);
+      if (res.data?.success) setResults(res.data.tracks);
+    } catch { toast.error("Search failed"); }
+    finally { setSearching(false); }
+  };
+
+  const selectTrack = (track) => {
+    if (onSongSelect) onSongSelect({
+      id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
+      album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
+      preview_url: track.preview_url || "",
+    });
+  };
+
+  return (
+    <div className="min-h-screen bg-[#05050A] flex flex-col" data-testid="record-search-screen">
+      {/* Top section — vertically centered search */}
+      <div className={`flex-1 flex flex-col items-center px-6 ${results.length ? "pt-8" : "justify-center"}`}>
+        <Mic className="w-12 h-12 text-[#FF6B00]/30 mb-3" />
+        <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1" data-testid="record-search-title">
+          What do you want to <span className="text-[#FF6B00]">record</span>?
+        </h2>
+        <p className="text-sm text-[#5C5C6B] mb-6 text-center">Find a song, then jump straight into the Live Stage</p>
+
+        <div className="w-full max-w-lg flex gap-2 mb-6">
+          <Input
+            ref={inputRef}
+            data-testid="record-search-input"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && doSearch()}
+            placeholder="Search songs, artists, albums..."
+            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#FF6B00] focus:ring-[#FF6B00]/20"
+          />
+          <Button
+            data-testid="record-search-btn"
+            onClick={doSearch}
+            disabled={searching}
+            className="h-12 px-6 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-sm shrink-0"
+            style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}
+          >
+            {searching ? <span className="animate-pulse">...</span> : <><Search className="w-4 h-4 mr-1.5" /> Search</>}
+          </Button>
+        </div>
+
+        {/* Results */}
+        {results.length > 0 && (
+          <div className="w-full max-w-lg space-y-1 pb-24" data-testid="record-search-results">
+            {results.map((track, idx) => (
+              <button
+                key={track.id || idx}
+                data-testid={`record-track-${idx}`}
+                onClick={() => selectTrack(track)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF6B00]/8 transition-all text-left group"
+              >
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF6B00]/30 relative">
+                  {track.cover_url ? (
+                    <img src={track.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
+                      <Music2 className="w-5 h-5 text-[#5C5C6B]" />
+                    </div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Mic className="w-5 h-5 text-[#FF6B00]" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00] transition-colors">{track.title}</p>
+                  <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}{track.album ? ` — ${track.album}` : ""}</p>
+                </div>
+                <span className="text-[10px] text-[#FF6B00] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Record</span>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {results.length === 0 && !searching && query && (
+          <p className="text-sm text-[#5C5C6B]">No results found. Try a different search.</p>
+        )}
       </div>
     </div>
   );

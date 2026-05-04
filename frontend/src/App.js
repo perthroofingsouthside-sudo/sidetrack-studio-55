@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import "@/App.css";
 import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import HomePage from "@/pages/HomePage";
 import PlayerStudio from "@/pages/PlayerStudio";
 import RecordingStudio from "@/pages/RecordingStudio";
@@ -13,6 +14,7 @@ import BecomeAStar from "@/pages/BecomeAStar";
 import SocialProfile from "@/pages/SocialProfile";
 import PricingPage from "@/pages/PricingPage";
 import BottomNav from "@/components/BottomNav";
+import GlobalPlayer from "@/components/GlobalPlayer";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -27,6 +29,52 @@ function App() {
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
 
+  // ── Global Audio Player State ──────────────────
+  const [nowPlaying, setNowPlaying] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const audioRef = useRef(null);
+  const progressRef = useRef(null);
+
+  const trackProgress = useCallback((audio) => {
+    const update = () => {
+      if (audio && audio.duration) {
+        setProgress((audio.currentTime / audio.duration) * 100);
+      }
+      if (!audio.paused) progressRef.current = requestAnimationFrame(update);
+    };
+    progressRef.current = requestAnimationFrame(update);
+  }, []);
+
+  const playTrack = useCallback((track) => {
+    if (!track.preview_url) { toast.info("No preview available"); return; }
+    if (audioRef.current) audioRef.current.pause();
+    if (progressRef.current) cancelAnimationFrame(progressRef.current);
+    const audio = new Audio(track.preview_url);
+    audio.volume = 0.8;
+    audio.play().catch(() => toast.error("Playback failed"));
+    audioRef.current = audio;
+    setNowPlaying(track);
+    setIsPlaying(true);
+    setProgress(0);
+    trackProgress(audio);
+    audio.onended = () => { setIsPlaying(false); setProgress(0); };
+  }, [trackProgress]);
+
+  const togglePlayPause = useCallback(() => {
+    if (!audioRef.current) return;
+    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
+    else { audioRef.current.play().catch(() => {}); setIsPlaying(true); trackProgress(audioRef.current); }
+  }, [isPlaying, trackProgress]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      if (progressRef.current) cancelAnimationFrame(progressRef.current);
+    };
+  }, []);
+
   const handleSongRecognized = useCallback((song) => {
     setCurrentSong(song);
     setCurrentView("studio");
@@ -35,6 +83,11 @@ function App() {
   const handleTrackSelect = useCallback((song) => {
     setCurrentSong(song);
     setCurrentView("studio");
+  }, []);
+
+  const handleTrackSelectForRecord = useCallback((song) => {
+    setCurrentSong(song);
+    setCurrentView("record");
   }, []);
 
   const handleRecordingComplete = useCallback((recording) => {
@@ -51,12 +104,31 @@ function App() {
     setCurrentView("duet");
   }, []);
 
+  const openInStudio = useCallback((track) => {
+    setCurrentSong({
+      id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
+      album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
+      preview_url: track.preview_url || "",
+    });
+    setCurrentView("studio");
+  }, []);
+
   const renderView = () => {
     switch (currentView) {
       case "home":
         return <HomePage onSongRecognized={handleSongRecognized} />;
       case "stream":
-        return <StreamPage onTrackSelect={handleTrackSelect} />;
+        return (
+          <StreamPage
+            onTrackSelect={handleTrackSelect}
+            nowPlaying={nowPlaying}
+            isPlaying={isPlaying}
+            playTrack={playTrack}
+            togglePlayPause={togglePlayPause}
+            progress={progress}
+            openInStudio={openInStudio}
+          />
+        );
       case "battle":
         return <BattleArena currentSong={currentSong} onStartDuet={handleStartDuet} />;
       case "playlists":
@@ -90,6 +162,7 @@ function App() {
         return (
           <RecordingStudio
             song={currentSong}
+            onSongSelect={handleTrackSelectForRecord}
             onRecordingComplete={handleRecordingComplete}
             onBack={() => setCurrentView("studio")}
           />
@@ -103,15 +176,35 @@ function App() {
           />
         );
       default:
-        return <StreamPage onTrackSelect={handleTrackSelect} />;
+        return (
+          <StreamPage
+            onTrackSelect={handleTrackSelect}
+            nowPlaying={nowPlaying}
+            isPlaying={isPlaying}
+            playTrack={playTrack}
+            togglePlayPause={togglePlayPause}
+            progress={progress}
+            openInStudio={openInStudio}
+          />
+        );
     }
   };
 
   return (
     <div className="min-h-screen bg-[#05050A] text-white">
-      <div className="pb-20">
+      <div className={nowPlaying ? "pb-36" : "pb-20"}>
         {renderView()}
       </div>
+      {/* Global Now Playing Bar — persists across all tabs */}
+      {nowPlaying && (
+        <GlobalPlayer
+          nowPlaying={nowPlaying}
+          isPlaying={isPlaying}
+          progress={progress}
+          onTogglePlayPause={togglePlayPause}
+          onOpenStudio={openInStudio}
+        />
+      )}
       <BottomNav
         currentView={currentView}
         onNavigate={handleNavigate}

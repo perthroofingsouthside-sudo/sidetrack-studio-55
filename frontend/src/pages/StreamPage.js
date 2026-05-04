@@ -1,15 +1,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, SkipForward, Volume2, Sparkles } from "lucide-react";
+import { Search, Play, Pause, Music2, Disc3, Clock, TrendingUp, Album, Plus, ListMusic, SkipForward, Sparkles, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import LiveChat from "@/components/LiveChat";
 
-export default function StreamPage({ onTrackSelect }) {
+export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playTrack, togglePlayPause, progress, openInStudio }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [topSongs, setTopSongs] = useState([]);
@@ -17,26 +16,17 @@ export default function StreamPage({ onTrackSelect }) {
   const [forYou, setForYou] = useState([]);
   const [searching, setSearching] = useState(false);
   const [activeTab, setActiveTab] = useState("browse");
-  const [nowPlaying, setNowPlaying] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
   const [showChat, setShowChat] = useState(false);
   const [playlists, setPlaylists] = useState([]);
   const [addingTrack, setAddingTrack] = useState(null);
   const [skipsRemaining, setSkipsRemaining] = useState(50);
   const [skipLimit] = useState(50);
-  const audioRef = useRef(null);
-  const progressRef = useRef(null);
   const owner = localStorage.getItem("sidetrack_username") || "anonymous";
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || (() => { const id = crypto.randomUUID(); localStorage.setItem("sidetrack_voter_id", id); return id; })());
 
   useEffect(() => {
     loadBrowseData();
     loadSkipCount();
-    return () => {
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-      if (progressRef.current) cancelAnimationFrame(progressRef.current);
-    };
   }, []);
 
   const loadBrowseData = async () => {
@@ -95,39 +85,9 @@ export default function StreamPage({ onTrackSelect }) {
     finally { setSearching(false); }
   }, [searchQuery]);
 
-  const trackProgress = (audio) => {
-    const update = () => {
-      if (audio && audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
-      }
-      if (!audio.paused) progressRef.current = requestAnimationFrame(update);
-    };
-    progressRef.current = requestAnimationFrame(update);
-  };
-
-  const playTrack = (track) => {
-    if (!track.preview_url) { toast.info("No preview available"); return; }
-    if (audioRef.current) audioRef.current.pause();
-    if (progressRef.current) cancelAnimationFrame(progressRef.current);
-    const audio = new Audio(track.preview_url);
-    audio.volume = 0.8;
-    audio.play().catch(() => toast.error("Playback failed"));
-    audioRef.current = audio;
-    setNowPlaying(track);
-    setIsPlaying(true);
-    setProgress(0);
-    trackProgress(audio);
-    audio.onended = () => { setIsPlaying(false); setProgress(0); };
-  };
-
-  const togglePlayPause = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
-    else { audioRef.current.play().catch(() => {}); setIsPlaying(true); trackProgress(audioRef.current); }
-  };
-
   const handleSelectForStudio = (track) => {
-    onTrackSelect({
+    if (openInStudio) openInStudio(track);
+    else onTrackSelect({
       id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
       album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
       preview_url: track.preview_url || "",
@@ -183,7 +143,7 @@ export default function StreamPage({ onTrackSelect }) {
             </div>
             <Button data-testid="toggle-chat-btn" onClick={() => setShowChat(!showChat)} variant="ghost"
               className={`hidden lg:flex h-9 px-3 rounded-full text-xs gap-1.5 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>
-              <Volume2 className="w-3.5 h-3.5" /> Chat
+              <MessageCircle className="w-3.5 h-3.5" /> Chat
             </Button>
           </div>
 
@@ -325,68 +285,6 @@ export default function StreamPage({ onTrackSelect }) {
           </div>
         )}
       </div>
-
-      {/* Now Playing Bar */}
-      {nowPlaying && (
-        <div className="fixed bottom-16 left-0 right-0 crystal-glass z-40" data-testid="now-playing-bar">
-          {/* Progress bar */}
-          <div className="w-full h-[3px] bg-white/5">
-            <div className="neon-progress" style={{ width: `${progress}%`, transition: "width 0.1s linear" }} />
-          </div>
-          <div className="px-4 py-2">
-            <div className="flex items-center gap-3 max-w-2xl mx-auto">
-              <div className="w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-white/10 neon-ambient-glow">
-                <img src={nowPlaying.cover_url || nowPlaying.cover_thumb || ""} alt="" className="w-full h-full object-cover" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white truncate">{nowPlaying.title}</p>
-                <p className="text-[10px] text-[#5C5C6B] truncate">{nowPlaying.artist}</p>
-              </div>
-
-              {/* Skip counter pill */}
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/5 bg-white/[0.03]" data-testid="skip-counter">
-                <SkipForward className="w-3 h-3 text-[#5C5C6B]" />
-                <span className={`text-[10px] font-bold font-mono ${skipsRemaining <= 5 ? "text-red-400" : skipsRemaining <= 15 ? "text-[#FF6B00]" : "text-[#39FF14]"}`} data-testid="skip-count-display">
-                  {skipsRemaining}
-                </span>
-                <span className="text-[10px] text-[#5C5C6B]">/ {skipLimit}</span>
-              </div>
-
-              <Button data-testid="mini-play-pause" variant="ghost" size="icon" onClick={togglePlayPause}
-                className="text-white hover:text-[#39FF14] rounded-full transition-colors">
-                {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="white" />}
-              </Button>
-
-              {/* Skip button with tooltip */}
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span>
-                      <Button data-testid="skip-btn" variant="ghost" size="icon" onClick={skipTrack}
-                        disabled={skipsRemaining <= 0}
-                        className={`rounded-full transition-colors ${
-                          skipsRemaining <= 0
-                            ? "text-[#5C5C6B]/30 cursor-not-allowed"
-                            : "text-[#FF6B00] hover:text-[#39FF14] hover:bg-[#39FF14]/10"
-                        }`}>
-                        <SkipForward className="w-5 h-5" />
-                      </Button>
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-[#0F0F16] border-white/10 text-white text-xs">
-                    {skipsRemaining <= 0 ? "Skips exhausted — resets at midnight UTC" : `Skip (${skipsRemaining} left today)`}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-
-              <Button data-testid="mini-studio-btn" variant="ghost" size="icon" onClick={() => handleSelectForStudio(nowPlaying)}
-                className="text-[#FF6B00] hover:text-[#39FF14] rounded-full transition-colors" title="Open in Studio">
-                <Music2 className="w-4 h-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Add to Playlist Modal */}
       {addingTrack && (
