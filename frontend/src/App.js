@@ -13,6 +13,7 @@ import DuetStudio from "@/pages/DuetStudio";
 import BecomeAStar from "@/pages/BecomeAStar";
 import SocialProfile from "@/pages/SocialProfile";
 import PricingPage from "@/pages/PricingPage";
+import ConnectPage from "@/pages/ConnectPage";
 import BottomNav from "@/components/BottomNav";
 import GlobalPlayer from "@/components/GlobalPlayer";
 
@@ -159,6 +160,8 @@ function App() {
         return <PlaylistsPage onTrackSelect={handleTrackSelect} />;
       case "star":
         return <BecomeAStar />;
+      case "connect":
+        return <ConnectPage />;
       case "pricing":
         return <PricingPage onBack={() => setCurrentView("profile")} />;
       case "profile":

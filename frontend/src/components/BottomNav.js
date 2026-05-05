@@ -1,13 +1,14 @@
-import { Home, Music2, Mic2, Share2, Radio, Swords, ListMusic, Star, User } from "lucide-react";
+import { Home, Music2, Mic2, Radio, Swords, ListMusic, Star, User, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
-  { key: "stream", icon: Radio, label: "Stream", alwaysEnabled: true },
-  { key: "home", icon: Home, label: "Discover", alwaysEnabled: true },
-  { key: "battle", icon: Swords, label: "Battle", alwaysEnabled: true },
-  { key: "star", icon: Star, label: "Star", alwaysEnabled: true },
-  { key: "playlists", icon: ListMusic, label: "Playlists", alwaysEnabled: true },
-  { key: "profile", icon: User, label: "Profile", alwaysEnabled: true },
+  { key: "stream", icon: Radio, label: "Stream" },
+  { key: "home", icon: Home, label: "Discover" },
+  { key: "battle", icon: Swords, label: "Battle" },
+  { key: "star", icon: Star, label: "Star" },
+  { key: "connect", icon: MessageSquare, label: "Connect" },
+  { key: "playlists", icon: ListMusic, label: "Playlists" },
+  { key: "profile", icon: User, label: "Profile" },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
 ];
