@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2, Search, Play, Music2 } from "lucide-react";
+import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2, Search, Play, Music2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -427,7 +427,7 @@ function RecordSearchScreen({ onSongSelect }) {
         </h2>
         <p className="text-sm text-[#5C5C6B] mb-6 text-center">Find a song, then jump straight into the Live Stage</p>
 
-        <div className="w-full max-w-lg flex gap-2 mb-6">
+        <div className="w-full max-w-lg flex gap-2 mb-4">
           <Input
             ref={inputRef}
             data-testid="record-search-input"
@@ -447,6 +447,14 @@ function RecordSearchScreen({ onSongSelect }) {
             {searching ? <span className="animate-pulse">...</span> : <><Search className="w-4 h-4 mr-1.5" /> Search</>}
           </Button>
         </div>
+
+        {/* Original Music Button */}
+        <Button onClick={() => {
+          if (onSongSelect) onSongSelect({ id: "original_" + crypto.randomUUID(), title: "Original Session", artist: localStorage.getItem("sidetrack_username") || "You", album: "", cover_url: "", genre: "Original", preview_url: "" });
+        }} variant="ghost" data-testid="record-original-btn"
+          className="mb-6 h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
+          <Sparkles className="w-3.5 h-3.5" /> Start Original — Record from Scratch
+        </Button>
 
         {/* Results */}
         {results.length > 0 && (

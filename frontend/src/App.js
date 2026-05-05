@@ -67,6 +67,12 @@ function App() {
     else { audioRef.current.play().catch(() => {}); setIsPlaying(true); trackProgress(audioRef.current); }
   }, [isPlaying, trackProgress]);
 
+  const handleSeek = useCallback((pct) => {
+    if (!audioRef.current || !audioRef.current.duration) return;
+    audioRef.current.currentTime = pct * audioRef.current.duration;
+    setProgress(pct * 100);
+  }, []);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
@@ -116,7 +122,7 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case "home":
-        return <HomePage onSongRecognized={handleSongRecognized} />;
+        return <HomePage onSongRecognized={handleSongRecognized} nowPlaying={nowPlaying} />;
       case "stream":
         return (
           <StreamPage
@@ -156,6 +162,7 @@ function App() {
           <PlayerStudio
             song={currentSong}
             onRecord={() => setCurrentView("record")}
+            onSongSelect={handleTrackSelect}
           />
         );
       case "record":
@@ -203,6 +210,7 @@ function App() {
           progress={progress}
           onTogglePlayPause={togglePlayPause}
           onOpenStudio={openInStudio}
+          onSeek={handleSeek}
         />
       )}
       <BottomNav

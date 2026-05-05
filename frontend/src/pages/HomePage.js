@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 
-export default function HomePage({ onSongRecognized }) {
+export default function HomePage({ onSongRecognized, nowPlaying }) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const mediaRecorderRef = useRef(null);
@@ -172,6 +172,26 @@ export default function HomePage({ onSongRecognized }) {
               }}
             />
           ))}
+        </div>
+      )}
+
+      {/* Now Playing — Album Art Display (right side) */}
+      {nowPlaying && !isListening && !isProcessing && (
+        <div className="absolute right-4 sm:right-12 top-1/2 -translate-y-1/2 z-10 hidden sm:block" data-testid="discover-album-art">
+          <div className="w-48 h-48 lg:w-64 lg:h-64 rounded-3xl overflow-hidden border border-[#FF6B00]/20 shadow-[0_0_60px_rgba(255,107,0,0.15)] animate-float">
+            {nowPlaying.cover_url || nowPlaying.cover_thumb ? (
+              <img src={nowPlaying.cover_url || nowPlaying.cover_thumb} alt={nowPlaying.title}
+                className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
+                <Mic className="w-16 h-16 text-[#FF6B00]/20" />
+              </div>
+            )}
+          </div>
+          <div className="mt-3 text-center">
+            <p className="text-xs font-bold text-white truncate max-w-48 lg:max-w-64">{nowPlaying.title}</p>
+            <p className="text-[10px] text-[#5C5C6B] truncate max-w-48 lg:max-w-64">{nowPlaying.artist}</p>
+          </div>
         </div>
       )}
     </div>

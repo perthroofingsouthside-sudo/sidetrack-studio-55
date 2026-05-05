@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import { Play, Pause, SkipBack, Mic, Upload, Loader2, Guitar, AlignLeft, ChevronDown } from "lucide-react";
+import { Play, Pause, SkipBack, Mic, Upload, Loader2, Guitar, AlignLeft, ChevronDown, Search, Music2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import StemMixer from "@/components/StemMixer";
 
-export default function PlayerStudio({ song, onRecord }) {
+export default function PlayerStudio({ song, onRecord, onSongSelect }) {
   const [lyrics, setLyrics] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -217,13 +218,7 @@ export default function PlayerStudio({ song, onRecord }) {
     }
   }, [activeLyricIdx]);
 
-  if (!song) return (
-    <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center px-6" data-testid="player-studio-empty">
-      <Play className="w-14 h-14 text-[#FF6B00]/20 mb-4" />
-      <h2 className="font-['Outfit'] text-xl font-bold text-white mb-2">No Track Selected</h2>
-      <p className="text-sm text-[#5C5C6B] text-center max-w-xs">Search for a song on the Stream tab, or use Discover to recognize a track — then come back here to remix it.</p>
-    </div>
-  );
+  if (!song) return <StudioSearchScreen onSongSelect={onSongSelect} />;
 
   const hasRealStems = stems && stems.vocals_url?.startsWith("http");
   const duration = hasRealStems ? (audioRefs.current.vocals?.duration || 92) : 92;
@@ -409,6 +404,142 @@ function formatTime(seconds) {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+/* ── Studio Search + Original Screen ────────── */
+function StudioSearchScreen({ onSongSelect }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [showOriginal, setShowOriginal] = useState(false);
+  const [uploading, setUploading] = useState(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => { if (!showOriginal) inputRef.current?.focus(); }, [showOriginal]);
+
+  const doSearch = async () => {
+    if (!query.trim()) return;
+    setSearching(true);
+    try {
+      const res = await axios.get(`${API}/music/search?q=${encodeURIComponent(query)}&limit=15`);
+      if (res.data?.success) setResults(res.data.tracks);
+    } catch { toast.error("Search failed"); }
+    finally { setSearching(false); }
+  };
+
+  const selectTrack = (track) => {
+    if (onSongSelect) onSongSelect({
+      id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
+      album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
+      preview_url: track.preview_url || "",
+    });
+  };
+
+  const handleStemUpload = async (stemType, file) => {
+    if (!file) return;
+    setUploading(stemType);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("stem_type", stemType);
+      formData.append("username", localStorage.getItem("sidetrack_username") || "anonymous");
+      await axios.post(`${API}/recordings`, { song_id: "original", title: `Original ${stemType}`, recording_type: stemType });
+      toast.success(`${stemType} stem uploaded!`);
+    } catch { toast.error(`Failed to upload ${stemType}`); }
+    finally { setUploading(null); }
+  };
+
+  if (showOriginal) {
+    return (
+      <div className="min-h-screen bg-[#05050A] flex flex-col items-center px-6 pt-12" data-testid="original-mode">
+        <Sparkles className="w-10 h-10 text-[#39FF14]/40 mb-3" />
+        <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1">
+          Create <span className="text-[#39FF14]">Original</span> Music
+        </h2>
+        <p className="text-sm text-[#5C5C6B] mb-8 text-center">Upload your stems so other artists can cover your track</p>
+
+        <div className="w-full max-w-md space-y-3" data-testid="stem-upload-section">
+          {["Vocals", "Guitar", "Bass", "Drums"].map((stem) => (
+            <label key={stem} className="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:border-[#39FF14]/30 transition-all cursor-pointer group" data-testid={`upload-stem-${stem.toLowerCase()}`}>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: "rgba(57,255,20,0.08)" }}>
+                <Upload className="w-4 h-4 text-[#39FF14]" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-bold text-white group-hover:text-[#39FF14] transition-colors">{stem}</p>
+                <p className="text-[10px] text-[#5C5C6B]">Upload {stem.toLowerCase()} stem (.wav, .mp3)</p>
+              </div>
+              {uploading === stem.toLowerCase() ? (
+                <Loader2 className="w-4 h-4 text-[#39FF14] animate-spin" />
+              ) : (
+                <span className="text-[10px] text-[#5C5C6B] uppercase tracking-wider font-bold opacity-0 group-hover:opacity-100">Choose File</span>
+              )}
+              <input type="file" accept="audio/*" className="hidden" onChange={(e) => handleStemUpload(stem.toLowerCase(), e.target.files?.[0])} />
+            </label>
+          ))}
+        </div>
+
+        <Button onClick={() => setShowOriginal(false)} variant="ghost" className="mt-6 text-[#5C5C6B]" data-testid="back-to-search">
+          Back to Search
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#05050A] flex flex-col" data-testid="studio-search-screen">
+      <div className={`flex-1 flex flex-col items-center px-6 ${results.length ? "pt-8" : "justify-center"}`}>
+        <Music2 className="w-12 h-12 text-[#FF6B00]/30 mb-3" />
+        <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1" data-testid="studio-search-title">
+          What do you want to <span className="text-[#FF6B00]">remix</span>?
+        </h2>
+        <p className="text-sm text-[#5C5C6B] mb-6 text-center">Find a track to open in the Studio, or create original music</p>
+
+        <div className="w-full max-w-lg flex gap-2 mb-4">
+          <Input ref={inputRef} data-testid="studio-search-input" value={query}
+            onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && doSearch()}
+            placeholder="Search songs, artists, albums..."
+            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#FF6B00] focus:ring-[#FF6B00]/20" />
+          <Button data-testid="studio-search-btn" onClick={doSearch} disabled={searching}
+            className="h-12 px-6 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-sm shrink-0"
+            style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}>
+            {searching ? "..." : <><Search className="w-4 h-4 mr-1.5" /> Search</>}
+          </Button>
+        </div>
+
+        {/* Original Music Button */}
+        <Button onClick={() => setShowOriginal(true)} variant="ghost" data-testid="original-music-btn"
+          className="mb-6 h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
+          <Sparkles className="w-3.5 h-3.5" /> Start Original — Upload Your Stems
+        </Button>
+
+        {/* Results */}
+        {results.length > 0 && (
+          <div className="w-full max-w-lg space-y-1 pb-24" data-testid="studio-search-results">
+            {results.map((track, idx) => (
+              <button key={track.id || idx} data-testid={`studio-track-${idx}`} onClick={() => selectTrack(track)}
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF6B00]/8 transition-all text-left group">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF6B00]/30 relative">
+                  {track.cover_url ? (
+                    <img src={track.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                  ) : (
+                    <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Music2 className="w-5 h-5 text-[#5C5C6B]" /></div>
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Play className="w-5 h-5 text-[#FF6B00]" />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00] transition-colors">{track.title}</p>
+                  <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}</p>
+                </div>
+                <span className="text-[10px] text-[#FF6B00] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Open</span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 function ChordDots({ chord }) {

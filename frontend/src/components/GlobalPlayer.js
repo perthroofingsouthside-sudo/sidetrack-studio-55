@@ -1,12 +1,33 @@
 import { Play, Pause, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRef } from "react";
 
-export default function GlobalPlayer({ nowPlaying, isPlaying, progress, onTogglePlayPause, onOpenStudio }) {
+export default function GlobalPlayer({ nowPlaying, isPlaying, progress, onTogglePlayPause, onOpenStudio, onSeek }) {
+  const barRef = useRef(null);
+
   if (!nowPlaying) return null;
+
+  const handleSeek = (e) => {
+    if (!barRef.current || !onSeek) return;
+    const rect = barRef.current.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    onSeek(pct);
+  };
+
   return (
     <div className="fixed bottom-16 left-0 right-0 crystal-glass z-40" data-testid="global-now-playing">
-      <div className="w-full h-[3px] bg-white/5">
-        <div className="neon-progress" style={{ width: `${progress}%`, transition: "width 0.1s linear" }} />
+      {/* Interactive seek bar */}
+      <div
+        ref={barRef}
+        className="w-full h-[6px] bg-white/5 cursor-pointer group relative"
+        onClick={handleSeek}
+        data-testid="global-seek-bar"
+      >
+        <div className="neon-progress h-full" style={{ width: `${progress}%`, transition: "width 0.1s linear" }} />
+        <div
+          className="absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-[0_0_8px_rgba(255,107,0,0.6)] opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ left: `${progress}%`, transform: `translate(-50%, -50%)` }}
+        />
       </div>
       <div className="px-4 py-2">
         <div className="flex items-center gap-3 max-w-2xl mx-auto">
