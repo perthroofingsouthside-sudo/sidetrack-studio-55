@@ -34,38 +34,53 @@ function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef(null);
-  const progressRef = useRef(null);
 
-  const trackProgress = useCallback((audio) => {
-    const update = () => {
-      if (audio && audio.duration) {
+  // Use audio element's native timeupdate event — no rAF loops, no accumulation
+  const attachProgressListener = useCallback((audio) => {
+    const onTimeUpdate = () => {
+      if (audio.duration) {
         setProgress((audio.currentTime / audio.duration) * 100);
       }
-      if (!audio.paused) progressRef.current = requestAnimationFrame(update);
     };
-    progressRef.current = requestAnimationFrame(update);
+    audio.addEventListener("timeupdate", onTimeUpdate);
+    audio.addEventListener("ended", () => {
+      setIsPlaying(false);
+      setProgress(0);
+    });
+    // Store cleanup ref
+    audio._cleanupProgress = () => {
+      audio.removeEventListener("timeupdate", onTimeUpdate);
+    };
   }, []);
 
   const playTrack = useCallback((track) => {
     if (!track.preview_url) { toast.info("No preview available"); return; }
-    if (audioRef.current) audioRef.current.pause();
-    if (progressRef.current) cancelAnimationFrame(progressRef.current);
+    // Clean up previous audio completely
+    if (audioRef.current) {
+      audioRef.current.pause();
+      if (audioRef.current._cleanupProgress) audioRef.current._cleanupProgress();
+      audioRef.current = null;
+    }
     const audio = new Audio(track.preview_url);
     audio.volume = 0.8;
-    audio.play().catch(() => toast.error("Playback failed"));
     audioRef.current = audio;
     setNowPlaying(track);
     setIsPlaying(true);
     setProgress(0);
-    trackProgress(audio);
-    audio.onended = () => { setIsPlaying(false); setProgress(0); };
-  }, [trackProgress]);
+    attachProgressListener(audio);
+    audio.play().catch(() => toast.error("Playback failed"));
+  }, [attachProgressListener]);
 
   const togglePlayPause = useCallback(() => {
     if (!audioRef.current) return;
-    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false); }
-    else { audioRef.current.play().catch(() => {}); setIsPlaying(true); trackProgress(audioRef.current); }
-  }, [isPlaying, trackProgress]);
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
+    }
+  }, [isPlaying]);
 
   const handleSeek = useCallback((pct) => {
     if (!audioRef.current || !audioRef.current.duration) return;
@@ -76,8 +91,11 @@ function App() {
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
-      if (progressRef.current) cancelAnimationFrame(progressRef.current);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        if (audioRef.current._cleanupProgress) audioRef.current._cleanupProgress();
+        audioRef.current = null;
+      }
     };
   }, []);
 
