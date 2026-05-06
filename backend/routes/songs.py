@@ -3,7 +3,12 @@ from fastapi import APIRouter, UploadFile, File, HTTPException
 from database import db
 from models import SongResult, StemStatus, Recording, RecordingCreate
 from config import RAPIDAPI_KEY, RAPIDAPI_HOST, REPLICATE_API_TOKEN, DEMUCS_MODEL
-import base64, os, tempfile, logging, threading, requests
+import base64
+import os
+import tempfile
+import logging
+import threading
+import requests
 import replicate
 import pymongo
 

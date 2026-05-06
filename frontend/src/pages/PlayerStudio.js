@@ -37,6 +37,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
       if (pollRef.current) clearInterval(pollRef.current);
       Object.values(audioRefs.current).forEach((a) => { if (a) { a.pause(); a.src = ""; } });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song?.id]);
 
   useEffect(() => {
@@ -331,10 +332,11 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
           <div className="overflow-y-auto h-full px-4 py-3 space-y-1" ref={lyricsScrollRef} data-testid="lyrics-scroll-area">
             {lyrics?.lyrics ? (
               lyrics.lyrics.map((line, i) => {
+                const lineKey = `${line.time}-${line.type}-${i}`;
                 if (line.type === "section") {
                   return (
                     <p
-                      key={i}
+                      key={lineKey}
                       data-lyric-idx={i}
                       className={`text-[10px] uppercase tracking-[0.2em] font-bold pt-3 pb-1 transition-colors duration-300 ${
                         i === activeLyricIdx ? "text-[#FF6B00]" : "text-[#5C5C6B]"
@@ -344,12 +346,12 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
                     </p>
                   );
                 }
-                if (line.type === "break") return <div key={i} data-lyric-idx={i} className="h-3" />;
+                if (line.type === "break") return <div key={lineKey} data-lyric-idx={i} className="h-3" />;
                 const isActive = i === activeLyricIdx;
                 const isPast = i < activeLyricIdx;
                 return (
                   <p
-                    key={i}
+                    key={lineKey}
                     data-lyric-idx={i}
                     data-testid={isActive ? "active-lyric-line" : undefined}
                     className={`text-base leading-relaxed transition-all duration-300 ${

@@ -1,7 +1,8 @@
 """Lyrics, Chords engine — LRCLIB + music-theory chord generation."""
 from fastapi import APIRouter, HTTPException
 from database import db
-import logging, httpx
+import logging
+import httpx
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

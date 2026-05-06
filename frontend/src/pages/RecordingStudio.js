@@ -45,6 +45,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   useEffect(() => {
     if (song?.id) fetchLyrics();
     return () => { stopAllStreams(); if (timerRef.current) clearInterval(timerRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [song?.id]);
 
   const fetchLyrics = async () => {
@@ -198,7 +199,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                     {lyrics?.chords && (
                       <div className="flex gap-3 mt-6 justify-center flex-wrap">
                         {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
-                          <span key={i} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
+                          <span key={`${c.time}-${c.chord}`} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
                         ))}
                       </div>
                     )}
@@ -220,12 +221,13 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                       </div>
                     )}
                     {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                      const lk = `${line.time}-${line.type}-${i}`;
                       if (line.type === "section") return (
-                        <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>
+                        <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>
                       );
-                      if (line.type === "break") return <div key={i} className="h-2" />;
+                      if (line.type === "break") return <div key={lk} className="h-2" />;
                       return (
-                        <p key={i} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
+                        <p key={lk} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
                           i === activeLyricIdx ? "text-[#39FF14] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"
                         }`}>{line.text}</p>
                       );

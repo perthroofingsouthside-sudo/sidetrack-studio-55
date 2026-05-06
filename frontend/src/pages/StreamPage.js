@@ -27,6 +27,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
   useEffect(() => {
     loadBrowseData();
     loadSkipCount();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadBrowseData = async () => {

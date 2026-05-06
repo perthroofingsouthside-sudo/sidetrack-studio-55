@@ -75,10 +75,11 @@ export default function SplitScreen({ lyrics, currentTime }) {
         <ScrollArea className="h-[250px]">
           <div className="space-y-2 pr-2">
             {lyrics.lyrics.map((line, i) => {
+              const lk = `${line.time}-${line.type}-${i}`;
               if (line.type === "section") {
                 return (
                   <p
-                    key={i}
+                    key={lk}
                     className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${
                       i === activeLyricIdx ? "text-[#39FF14]" : "text-[#606070]"
                     }`}
@@ -87,10 +88,10 @@ export default function SplitScreen({ lyrics, currentTime }) {
                   </p>
                 );
               }
-              if (line.type === "break") return <div key={i} className="h-2" />;
+              if (line.type === "break") return <div key={lk} className="h-2" />;
               return (
                 <p
-                  key={i}
+                  key={lk}
                   className={`text-sm leading-relaxed transition-all duration-300 ${
                     i === activeLyricIdx
                       ? "lyric-active"
@@ -130,7 +131,7 @@ function ChordDiagram({ chord }) {
     <div className="mt-2 flex justify-center">
       <div className="grid grid-cols-6 gap-[3px]">
         {frets.map((fret, i) => (
-          <div key={i} className="flex flex-col items-center gap-[2px]">
+          <div key={`string-${i}`} className="flex flex-col items-center gap-[2px]">
             {[1, 2, 3].map((f) => (
               <div
                 key={f}

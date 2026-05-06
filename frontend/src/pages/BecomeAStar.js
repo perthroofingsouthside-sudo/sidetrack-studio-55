@@ -349,12 +349,13 @@ export default function BecomeAStar() {
               <ScrollArea className="h-full">
                 <div className="p-4 space-y-2">
                   {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                    const lk = `${line.time}-${line.type}-${i}`;
                     if (line.type === "section") return (
-                      <p key={i} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#FF6B00]" : "text-[#606070]"}`}>{line.text}</p>
+                      <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#FF6B00]" : "text-[#606070]"}`}>{line.text}</p>
                     );
-                    if (line.type === "break") return <div key={i} className="h-2" />;
+                    if (line.type === "break") return <div key={lk} className="h-2" />;
                     return (
-                      <p key={i} className={`text-lg leading-relaxed transition-all duration-300 ${
+                      <p key={lk} className={`text-lg leading-relaxed transition-all duration-300 ${
                         i === activeLyricIdx ? "text-[#FF6B00] font-bold scale-[1.02]" : i < activeLyricIdx ? "text-[#606070]/40" : "text-[#A0A0B0]"
                       }`}>{line.text}</p>
                     );

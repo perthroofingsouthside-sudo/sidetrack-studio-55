@@ -2,7 +2,11 @@
 from fastapi import APIRouter, HTTPException, Form, WebSocket, WebSocketDisconnect
 from database import db
 from models import SubscriptionSelect, TrimRequest, FollowAction
-import uuid, base64, io, logging, requests
+import uuid
+import base64
+import io
+import logging
+import requests
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Set
 
@@ -249,7 +253,7 @@ class ChatManager:
         dead = []
         for ws in self.rooms[room]:
             try: await ws.send_json(message)
-            except: dead.append(ws)
+            except Exception: dead.append(ws)
         for ws in dead: self.rooms[room].discard(ws)
     def viewer_count(self, room: str) -> int:
         return len(self.rooms.get(room, set()))
@@ -340,7 +344,7 @@ async def discover_for_you(user_id: str = "", limit: int = 15):
                             "cover_url": item.get("artworkUrl100", "").replace("100x100", "600x600"),
                             "preview_url": item.get("previewUrl", ""), "duration_ms": item.get("trackTimeMillis", 0),
                             "genre": item.get("primaryGenreName", ""), "reason": f"Because you like {term}"})
-            except: continue
+            except Exception: continue
     seen = set()
     unique = [r for r in recommendations if r["id"] not in seen and not seen.add(r["id"])]
     return {"success": True, "tracks": unique[:limit], "preferred_artists": list(preferred_artists)[:5]}

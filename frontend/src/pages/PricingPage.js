@@ -69,6 +69,7 @@ export default function PricingPage({ onBack }) {
     loadTiers();
     loadStatus();
     checkReturnFromStripe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Check if returning from Stripe checkout
@@ -80,7 +81,6 @@ export default function PricingPage({ onBack }) {
     if (paymentResult === "cancelled") {
       setPaymentStatus("cancelled");
       toast.error("Payment cancelled. You can try again anytime.");
-      // Clean URL
       window.history.replaceState({}, "", window.location.pathname);
       return;
     }
@@ -89,6 +89,7 @@ export default function PricingPage({ onBack }) {
       setPaymentStatus("polling");
       pollPaymentStatus(sessionId, 0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const pollPaymentStatus = async (sessionId, attempt) => {

@@ -2,7 +2,8 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from database import db
 from models import Battle, BattleCreate, Cover, Playlist, PlaylistCreate, PlaylistAddTrack, DuetRecord, StarPerformance
-import base64, uuid
+import base64
+import uuid
 from datetime import datetime, timezone, timedelta
 from typing import List
 
