@@ -36,7 +36,9 @@ export default function GlobalPlayer({ nowPlaying, isPlaying, progress, onToggle
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-xs font-semibold text-white truncate" data-testid="global-track-title">{nowPlaying.title}</p>
-            <p className="text-[10px] text-[#5C5C6B] truncate">{nowPlaying.artist}</p>
+            <p className="text-[10px] text-[#5C5C6B] truncate">{nowPlaying.artist}
+              <span className="ml-1.5 text-[#FF6B00]/60 uppercase tracking-wider text-[8px] font-bold">30s Preview</span>
+            </p>
           </div>
           <Button data-testid="global-play-pause" variant="ghost" size="icon" onClick={onTogglePlayPause}
             className="text-white hover:text-[#39FF14] rounded-full transition-colors">
