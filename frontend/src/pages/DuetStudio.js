@@ -51,7 +51,8 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
         };
         audio.load();
       }
-    } catch {
+    } catch (err) {
+      console.error("Duet load cover audio failed:", err);
       toast.error("Failed to load cover audio");
     }
   };
@@ -138,7 +139,8 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
       setDuration(0);
       animateWave();
       timerRef.current = setInterval(() => setDuration((p) => p + 1), 1000);
-    } catch {
+    } catch (err) {
+      console.error("Duet recording failed:", err);
       toast.error("Camera/microphone access denied");
     }
   };
@@ -209,7 +211,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
         <div className="flex items-end gap-[2px] h-16 w-full max-w-xs" data-testid="duet-waveform">
           {waveHeights.map((h, i) => (
             <div
-              key={i}
+              key={`wave-${i}`}
               className={`flex-1 rounded-full transition-all duration-150 ${
                 coverPlaying ? "bg-[#39FF14]" : "bg-[#39FF14]/20"
               }`}

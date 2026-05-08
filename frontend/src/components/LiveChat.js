@@ -43,14 +43,15 @@ export default function LiveChat({ trackTitle }) {
           } else if (msg.type === "system") {
             setMessages((prev) => [...prev.slice(-200), { id: Date.now() + Math.random(), ...msg, user: "SYSTEM" }]);
           }
-        } catch { /* ignore parse errors */ }
+        } catch (err) { console.error("Chat parse error:", err); }
       };
       ws.onclose = () => {
         setConnected(false);
         reconnectRef.current = setTimeout(connectWs, 3000);
       };
       ws.onerror = () => { ws.close(); };
-    } catch {
+    } catch (err) {
+      console.error("WebSocket connection failed:", err);
       setConnected(false);
       reconnectRef.current = setTimeout(connectWs, 3000);
     }
@@ -65,7 +66,7 @@ export default function LiveChat({ trackTitle }) {
           setMessages(res.data.messages.map((m, i) => ({ id: i, ...m })));
           setViewers(res.data.viewers || 0);
         }
-      } catch { /* silent */ }
+      } catch (err) { console.error("Chat history load error:", err); }
     };
     loadHistory();
     connectWs();

@@ -37,7 +37,7 @@ export default function SocialProfile({ onNavigate }) {
     try {
       const res = await axios.get(`${API}/subscriptions/${userId.current}/status`);
       if (res.data.success) setSubStatus(res.data);
-    } catch { /* silent */ }
+    } catch (err) { console.error("Load failed:", err); }
   };
 
   const loadLiveStats = async () => {
@@ -45,7 +45,7 @@ export default function SocialProfile({ onNavigate }) {
     try {
       const res = await axios.get(`${API}/social/${uname}/stats`);
       if (res.data.success) setLiveStats(res.data.stats);
-    } catch { /* silent */ }
+    } catch (err) { console.error("Load failed:", err); }
   };
 
   const saveName = () => {

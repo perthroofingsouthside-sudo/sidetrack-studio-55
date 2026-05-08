@@ -52,7 +52,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
     try {
       const res = await axios.get(`${API}/songs/${song.id}/lyrics`);
       if (res.data.success) setLyrics(res.data);
-    } catch { /* mock data will be used */ }
+    } catch (err) { console.error("Recording lyrics fetch failed:", err); }
   };
 
   const stopAllStreams = () => {
@@ -356,7 +356,7 @@ function TrimModal({ duration, trimStart, trimEnd, setTrimStart, setTrimEnd, tri
               const pct = (i / bars.length) * 100;
               const inRange = pct >= trimStart && pct <= trimEnd;
               return (
-                <div key={i} className={`flex-1 rounded-full transition-colors ${inRange ? "bg-[#FF6B00]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
+                <div key={`bar-${i}`} className={`flex-1 rounded-full transition-colors ${inRange ? "bg-[#FF6B00]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
               );
             })}
           </div>
@@ -509,7 +509,7 @@ function GuitarDiagram({ chord }) {
   return (
     <div className="mt-4 flex justify-center gap-1">
       {frets.map((f, i) => (
-        <div key={i} className="flex flex-col items-center gap-1">
+        <div key={`string-${i}`} className="flex flex-col items-center gap-1">
           <span className="text-[8px] text-[#5C5C6B]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
           {[1,2,3,4].map((pos) => (
             <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.5)]" : "border-white/10"}`} />

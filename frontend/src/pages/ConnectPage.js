@@ -39,14 +39,14 @@ export default function ConnectPage() {
     try {
       const res = await axios.get(`${API}/messages/conversations/${username || userId.current}`);
       if (res.data.success) setConversations(res.data.conversations);
-    } catch { /* silent */ }
+    } catch (err) { console.error("Connect load error:", err); }
   };
 
   const loadJamInvites = async () => {
     try {
       const res = await axios.get(`${API}/jam/invites/${username || userId.current}`);
       if (res.data.success) setJamInvites(res.data.received || []);
-    } catch { /* silent */ }
+    } catch (err) { console.error("Connect load error:", err); }
   };
 
   const openConversation = async (convo) => {
@@ -56,7 +56,7 @@ export default function ConnectPage() {
       const res = await axios.get(`${API}/messages/${convo.convo_id}?limit=50`);
       if (res.data.success) setMessages(res.data.messages);
       await axios.post(`${API}/messages/${convo.convo_id}/read`, `user_id=${username || userId.current}`, { headers: { "Content-Type": "application/x-www-form-urlencoded" } });
-    } catch { /* silent */ }
+    } catch (err) { console.error("Connect load error:", err); }
   };
 
   const sendMessage = async () => {
@@ -93,7 +93,8 @@ export default function ConnectPage() {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
-    } catch {
+    } catch (err) {
+      console.error("Camera/mic access error:", err);
       toast.error("Camera/mic access denied");
     }
   };

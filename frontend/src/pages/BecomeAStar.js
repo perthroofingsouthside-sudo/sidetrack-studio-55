@@ -63,35 +63,35 @@ export default function BecomeAStar() {
     try {
       const res = await axios.get(`${API}/stars/feed?limit=30`);
       if (res.data.success) setFeed(res.data.performances);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Star load error:", err); }
   };
 
   const loadLeaderboard = async () => {
     try {
       const res = await axios.get(`${API}/stars/leaderboard?limit=10`);
       if (res.data.success) setLeaderboard(res.data.leaderboard);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Star load error:", err); }
   };
 
   const loadCurrentChallenge = async () => {
     try {
       const res = await axios.get(`${API}/challenges/current`);
       if (res.data.success) setCurrentChallenge(res.data.challenge);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Star load error:", err); }
   };
 
   const loadChallengeEntries = async (challengeId) => {
     try {
       const res = await axios.get(`${API}/challenges/${challengeId}/entries`);
       if (res.data.success) setChallengeEntries(res.data.entries);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Star load error:", err); }
   };
 
   const loadChallengeHistory = async () => {
     try {
       const res = await axios.get(`${API}/challenges/history?limit=8`);
       if (res.data.success) setChallengeHistory(res.data.challenges);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Star load error:", err); }
   };
 
   const openChallenge = (challenge) => {
@@ -106,7 +106,8 @@ export default function BecomeAStar() {
     try {
       const res = await axios.get(`${API}/music/search?q=${encodeURIComponent(searchQuery)}&limit=15`);
       if (res.data?.success) setSearchResults(res.data.tracks);
-    } catch {
+    } catch (err) {
+      console.error("Star search failed:", err);
       toast.error("Search failed");
     } finally {
       setSearching(false);
@@ -124,8 +125,8 @@ export default function BecomeAStar() {
       try {
         const res = await axios.get(`${API}/songs/${track.id}/lyrics`);
         if (res.data.success) setLyrics(res.data);
-      } catch {
-        // Use a generic placeholder
+      } catch (err) {
+        console.error("Star lyrics load failed:", err);
         setLyrics(null);
       }
     }
@@ -185,7 +186,8 @@ export default function BecomeAStar() {
         setDuration((p) => p + 1);
         setCurrentTime((p) => p + 1);
       }, 1000);
-    } catch {
+    } catch (err) {
+      console.error("Camera/mic access denied:", err);
       toast.error("Camera/microphone access denied");
     }
   };
@@ -231,7 +233,8 @@ export default function BecomeAStar() {
         loadLeaderboard();
         loadCurrentChallenge();
       }
-    } catch {
+    } catch (err) {
+      console.error("Star submission failed:", err);
       toast.error("Submission failed. Try again.");
     }
   };

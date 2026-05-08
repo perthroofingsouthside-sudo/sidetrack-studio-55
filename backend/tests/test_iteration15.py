@@ -20,7 +20,7 @@ class TestSubscriptionTiers:
         r = client.get(f"{BASE_URL}/api/subscriptions/tiers")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert len(data["tiers"]) == 7
         keys = {t["key"] for t in data["tiers"]}
         assert {"stadium_vip", "individual", "student", "couple_duo", "family", "adult_band", "under18_band"} <= keys
@@ -32,7 +32,7 @@ class TestTrimAPI:
         r = client.post(f"{BASE_URL}/api/trim", json={"recording_id": "rec_test", "start_pct": 10, "end_pct": 80})
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert data["start_pct"] == 10
         assert data["end_pct"] == 80
         assert data["recording_id"] == "rec_test"
@@ -59,32 +59,32 @@ class TestBandUploadTracker:
         assert r.status_code == 200
         sub = r.json()["subscription"]
         assert sub["tier_key"] == "adult_band"
-        assert sub["active_band"] is True
+        assert sub["active_band"] == True
 
         # Status with upload_status before any upload
         r = client.get(f"{BASE_URL}/api/subscriptions/{user_id}/status")
         assert r.status_code == 200
         s = r.json()
-        assert s["is_band"] is True
-        assert s["is_pro"] is True
+        assert s["is_band"] == True
+        assert s["is_pro"] == True
         assert s["upload_status"] is not None
         us = s["upload_status"]
         assert us["uploads_this_week"] == 0
         assert us["required"] == 1
-        assert us["met"] is False
+        assert us["met"] == False
         assert "week_start" in us and "week_end" in us
 
         # Record one upload
         r = client.post(f"{BASE_URL}/api/subscriptions/{user_id}/upload")
         assert r.status_code == 200
-        assert r.json()["success"] is True
+        assert r.json()["success"] == True
 
         # Status now should show met=True
         r = client.get(f"{BASE_URL}/api/subscriptions/{user_id}/status")
         assert r.status_code == 200
         us2 = r.json()["upload_status"]
         assert us2["uploads_this_week"] >= 1
-        assert us2["met"] is True
+        assert us2["met"] == True
 
     def test_non_band_upload_rejected(self, client):
         user_id = f"TEST_solo_{uuid.uuid4().hex[:8]}"
@@ -103,8 +103,8 @@ class TestBandUploadTracker:
         r = client.get(f"{BASE_URL}/api/subscriptions/{user_id}/status")
         assert r.status_code == 200
         s = r.json()
-        assert s["is_band"] is False
-        assert s["is_pro"] is True
+        assert s["is_band"] == False
+        assert s["is_pro"] == True
         assert s["upload_status"] is None
 
     def test_no_subscription_status(self, client):
@@ -112,7 +112,7 @@ class TestBandUploadTracker:
         r = client.get(f"{BASE_URL}/api/subscriptions/{user_id}/status")
         assert r.status_code == 200
         s = r.json()
-        assert s["is_pro"] is False
+        assert s["is_pro"] == False
         assert s["tier_key"] == "free"
         # Note: upload_status key is not present in no-subscription response (minor inconsistency)
         assert s.get("upload_status") is None

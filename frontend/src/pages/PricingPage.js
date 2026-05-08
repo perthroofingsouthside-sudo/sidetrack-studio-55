@@ -116,7 +116,7 @@ export default function PricingPage({ onBack }) {
       }
       // Still pending — poll again
       setTimeout(() => pollPaymentStatus(sessionId, attempt + 1), 2000);
-    } catch {
+    } catch (err) { console.error("Pricing load error:", err);
       setTimeout(() => pollPaymentStatus(sessionId, attempt + 1), 2000);
     }
   };
@@ -125,7 +125,7 @@ export default function PricingPage({ onBack }) {
     try {
       const res = await axios.get(`${API}/subscriptions/tiers`);
       if (res.data.success) setTiers(res.data.tiers);
-    } catch {
+    } catch (err) { console.error("Pricing load error:", err);
       /* silent */
     } finally {
       setLoading(false);
@@ -136,7 +136,7 @@ export default function PricingPage({ onBack }) {
     try {
       const res = await axios.get(`${API}/subscriptions/${userId.current}/status`);
       if (res.data.success) setCurrentSub(res.data);
-    } catch {
+    } catch (err) { console.error("Pricing load error:", err);
       /* silent */
     }
   };

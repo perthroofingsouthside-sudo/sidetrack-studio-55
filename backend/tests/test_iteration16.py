@@ -42,7 +42,7 @@ class TestSync:
         r = session.get(f"{API}/sync/clock", timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert "server_time" in data
         assert "epoch_ms" in data
         assert isinstance(data["epoch_ms"], int)
@@ -56,7 +56,7 @@ class TestSync:
         )
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         room = data["room"]
         assert room["name"] == "TEST_jamroom"
         assert room["host_id"] == "TEST_host_user"
@@ -70,7 +70,7 @@ class TestChat:
         r = session.get(f"{API}/chat/lobby/history?limit=20", timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert isinstance(data["messages"], list)
         assert "viewers" in data
         assert isinstance(data["viewers"], int)
@@ -85,7 +85,7 @@ class TestSocial:
         r = session.get(f"{API}/social/{self.user_a}/stats", timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         stats = data["stats"]
         for key in ["battles", "stars", "playlists", "recordings",
                     "followers", "following", "total_votes"]:
@@ -101,7 +101,7 @@ class TestSocial:
         )
         assert r1.status_code == 200
         d1 = r1.json()
-        assert d1["success"] is True
+        assert d1["success"] == True
         assert d1["action"] == "followed"
 
         # Verify followers count via stats
@@ -155,7 +155,7 @@ class TestRewards:
         )
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is False
+        assert data["success"] == False
 
     def test_credit_winner_full_flow(self, session):
         # Create a battle
@@ -201,7 +201,7 @@ class TestRewards:
         )
         assert r_credit.status_code == 200
         d = r_credit.json()
-        assert d["success"] is True
+        assert d["success"] == True
         assert d["winner"] == username
         assert "1 month Pro" in d["reward"]
 
@@ -219,7 +219,7 @@ class TestDiscover:
         )
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert isinstance(data["tracks"], list)
         # Fallback should return at least some tracks (pop hits / trending)
         assert len(data["tracks"]) > 0

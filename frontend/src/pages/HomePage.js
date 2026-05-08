@@ -163,7 +163,7 @@ export default function HomePage({ onSongRecognized, nowPlaying }) {
         <div className="relative z-10 flex items-end gap-[3px] mt-6 h-8" data-testid="waveform-visual">
           {Array.from({ length: 20 }).map((_, i) => (
             <div
-              key={i}
+              key={`wave-${i}`}
               className="w-[3px] bg-[#FF6B00] rounded-full waveform-bar"
               style={{
                 animation: `waveform 0.8s ease-in-out infinite`,

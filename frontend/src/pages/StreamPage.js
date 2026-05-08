@@ -40,14 +40,14 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
       if (songsRes?.data?.success) setTopSongs(songsRes.data.tracks);
       if (albumsRes?.data?.success) setTopAlbums(albumsRes.data.albums);
       if (forYouRes?.data?.success && forYouRes.data.tracks?.length) setForYou(forYouRes.data.tracks);
-    } catch { /* empty */ }
+    } catch (err) { console.error("Load browse data failed:", err); }
   };
 
   const loadSkipCount = async () => {
     try {
       const res = await axios.get(`${API}/skips/${userId.current}`);
       if (res.data.success) setSkipsRemaining(res.data.skips_remaining);
-    } catch { /* silent */ }
+    } catch (err) { console.error("Load skip count failed:", err); }
   };
 
   const skipTrack = async () => {
@@ -106,7 +106,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
     try {
       const res = await axios.get(`${API}/playlists?owner=${owner}`);
       if (res.data?.success) setPlaylists(res.data.playlists);
-    } catch { /* ignore */ }
+    } catch (err) { console.error("Failed to load playlists:", err); }
   };
 
   const addToPlaylist = async (playlistId, track) => {

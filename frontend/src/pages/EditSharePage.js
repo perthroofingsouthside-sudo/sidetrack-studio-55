@@ -144,7 +144,7 @@ export default function EditSharePage({ recording, song, onBack }) {
                 const inRange = pct >= trimStart && pct <= trimEnd;
                 return (
                   <div
-                    key={i}
+                    key={`bar-${i}`}
                     className={`flex-1 rounded-full transition-colors ${
                       inRange ? "bg-[#FF6B00]" : "bg-white/10"
                     }`}

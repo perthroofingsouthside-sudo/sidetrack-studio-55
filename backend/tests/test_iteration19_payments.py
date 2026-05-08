@@ -50,7 +50,7 @@ class TestRegression:
         r = session.get(f"{API}/subscriptions/tiers", timeout=15)
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data.get("success") is True
+        assert data.get("success") == True
         tiers = data.get("tiers", [])
         assert len(tiers) == 7, f"Expected 7 tiers, got {len(tiers)}"
         keys = {t["key"] for t in tiers}
@@ -87,7 +87,7 @@ class TestCheckout:
         r = session.post(f"{API}/payments/checkout", json=payload, timeout=30)
         assert r.status_code == 200, f"{tier_key}: {r.status_code} {r.text}"
         data = r.json()
-        assert data.get("success") is True
+        assert data.get("success") == True
         assert data.get("session_id"), f"missing session_id: {data}"
         url = data.get("url", "")
         assert "checkout.stripe.com" in url, f"expected real Stripe URL, got {url}"
@@ -137,7 +137,7 @@ class TestStatus:
         r = session.get(f"{API}/payments/status/{sid}", timeout=20)
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data.get("success") is True
+        assert data.get("success") == True
         # newly created session should not be paid
         assert data.get("payment_status") in (
             "pending", "unpaid", "no_payment_required", "unknown", "open", "initiated"

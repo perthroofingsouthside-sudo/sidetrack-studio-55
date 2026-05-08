@@ -192,7 +192,7 @@ export default function BattleArena({ currentSong, onStartDuet }) {
             {isRecording && <div className="absolute inset-0 w-32 h-32 rounded-full border border-red-500/30 animate-pulse-ring" />}
           </div>
           <span className="text-2xl font-mono font-bold" data-testid="rec-duration">{fmtDur(duration)}</span>
-          {isRecording && <div className="flex items-center gap-[2px] h-8">{Array.from({ length: 25 }).map((_, i) => (<div key={i} className="w-[3px] bg-red-500 rounded-full" style={{ animation: "waveform 0.6s ease-in-out infinite", animationDelay: `${i * 0.04}s`, height: "4px" }} />))}</div>}
+          {isRecording && <div className="flex items-center gap-[2px] h-8">{Array.from({ length: 25 }).map((_, i) => (<div key={`wave-${i}`} className="w-[3px] bg-red-500 rounded-full" style={{ animation: "waveform 0.6s ease-in-out infinite", animationDelay: `${i * 0.04}s`, height: "4px" }} />))}</div>}
           <Button data-testid="rec-toggle-btn" onClick={isRecording ? stopRecording : startRecording} className={`w-20 h-20 rounded-full ${isRecording ? "bg-red-500 hover:bg-red-600" : "bg-[#FF6B00] hover:bg-[#FF8533] glow-orange"}`}>
             {isRecording ? <Square className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white" />}
           </Button>

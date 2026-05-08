@@ -54,7 +54,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
     try {
       const res = await axios.get(`${API}/songs/${song.id}/lyrics`);
       if (res.data.success) { setLyrics(res.data); return; }
-    } catch { /* fall through to direct fetch */ }
+    } catch (err) { console.error("Lyrics DB fetch failed, trying direct:", err); }
 
     // Fallback: fetch lyrics directly by title + artist (for iTunes/stream tracks)
     try {
@@ -62,7 +62,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
       if (song.artist) params.set("artist", song.artist);
       const res = await axios.get(`${API}/lyrics/fetch?${params}`);
       if (res.data.success) { setLyrics(res.data); return; }
-    } catch { /* silent */ }
+    } catch (err) { console.error("Direct lyrics fetch failed:", err); }
   };
 
   const checkExistingStems = async () => {
@@ -72,7 +72,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
         setStems(res.data.stems);
         initAudioPlayers(res.data.stems);
       }
-    } catch { /* No existing stems */ }
+    } catch (err) { console.error("Stems check failed:", err); }
   };
 
   const initAudioPlayers = (stemData) => {
@@ -119,7 +119,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
                 setSeparating(false);
                 toast.error("Separation failed: " + (pollRes.data.stems?.error || "Unknown error"));
               }
-            } catch { /* keep polling */ }
+            } catch (err) { console.error("Stem poll error:", err); }
           }, 5000);
         }
       }
@@ -569,7 +569,7 @@ function ChordDots({ chord }) {
       {frets.map((f, i) => {
         if (f <= 0) return null;
         const cx = sx + i * gx, cy = sy + (f - 0.5) * gy;
-        return <circle key={i} cx={cx} cy={cy} r={4} fill="#FF6B00" filter="url(#glow)" />;
+        return <circle key={`dot-${i}`} cx={cx} cy={cy} r={4} fill="#FF6B00" filter="url(#glow)" />;
       })}
       {/* Open / muted indicators */}
       {frets.map((f, i) => {

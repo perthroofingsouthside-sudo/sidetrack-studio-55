@@ -36,7 +36,7 @@ class TestRegressionSubscriptions:
         r = session.get(f"{API}/subscriptions/tiers")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert len(data["tiers"]) == 7
         keys = {t["key"] for t in data["tiers"]}
         assert {"adult_band", "under18_band", "individual"}.issubset(keys)
@@ -52,7 +52,7 @@ class TestRegressionSubscriptions:
                          json={"user_id": uid, "tier_key": "individual"})
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert data["subscription"]["tier_key"] == "individual"
         assert data["subscription"]["price"] == 11.98
 
@@ -63,8 +63,8 @@ class TestRegressionSubscriptions:
         r = session.get(f"{API}/subscriptions/{uid}/status")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
-        assert data["is_band"] is True
+        assert data["success"] == True
+        assert data["is_band"] == True
         assert data["tier_key"] == "adult_band"
         assert data["upload_status"] is not None
         assert data["upload_status"]["required"] == 1
@@ -106,7 +106,7 @@ class TestBandAutoDowngrade:
         r = session.post(f"{API}/subscriptions/check-band-activity")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         # Required summary keys
         for key in ("run_id", "trigger", "checked_at", "total_checked",
                     "compliant_count", "downgraded_count", "downgraded_users",
@@ -167,7 +167,7 @@ class TestBandAuditEndpoints:
         r = session.get(f"{API}/subscriptions/band-audit?limit=200")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert "entries" in data and "count" in data
         assert isinstance(data["entries"], list)
         assert data["count"] >= 1
@@ -193,14 +193,14 @@ class TestBandAuditEndpoints:
         dg = [e for e in per_user if e["action"] == "downgraded_to_individual"]
         if dg:
             assert dg[0]["new_price"] == 11.98
-            assert dg[0]["met_requirement"] is False
+            assert dg[0]["met_requirement"] == False
             assert dg[0]["uploads_in_window"] == 0
 
     def test_band_audit_summary_returns_run_summaries(self, session):
         r = session.get(f"{API}/subscriptions/band-audit/summary?limit=20")
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"] == True
         assert "summaries" in data and "count" in data
         assert data["count"] >= 1
 
