@@ -385,6 +385,69 @@ h1, h2, h3, h4, h5, h6 {
   border-bottom-right-radius: 16px;
 }
 
+/* ── Avatar Ring System ── */
+
+/* Orange ring (default) */
+.avatar-ring {
+  position: relative;
+  border-radius: 50%;
+  border: 3px solid #FF6B00;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.3), inset 0 0 8px rgba(255, 107, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+/* Green glow ring (active — voice/instrument detected) */
+.avatar-ring-active {
+  border-color: #FF6B00;
+  box-shadow:
+    0 0 12px rgba(255, 107, 0, 0.3),
+    0 0 0 4px rgba(57, 255, 20, 0.15),
+    0 0 0 6px rgba(57, 255, 20, 0.08),
+    0 0 25px rgba(57, 255, 20, 0.4),
+    0 0 50px rgba(57, 255, 20, 0.15);
+  animation: avatar-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes avatar-pulse {
+  0%, 100% {
+    box-shadow:
+      0 0 12px rgba(255, 107, 0, 0.3),
+      0 0 0 4px rgba(57, 255, 20, 0.15),
+      0 0 0 6px rgba(57, 255, 20, 0.08),
+      0 0 25px rgba(57, 255, 20, 0.4),
+      0 0 50px rgba(57, 255, 20, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(255, 107, 0, 0.4),
+      0 0 0 5px rgba(57, 255, 20, 0.25),
+      0 0 0 8px rgba(57, 255, 20, 0.12),
+      0 0 35px rgba(57, 255, 20, 0.6),
+      0 0 70px rgba(57, 255, 20, 0.2);
+  }
+}
+
+/* Dynamic intensity — driven by JS via CSS variable --glow-intensity */
+.avatar-ring-dynamic {
+  border-color: #FF6B00;
+  box-shadow:
+    0 0 12px rgba(255, 107, 0, 0.3),
+    0 0 0 calc(3px + var(--glow-intensity, 0) * 4px) rgba(57, 255, 20, calc(0.05 + var(--glow-intensity, 0) * 0.25)),
+    0 0 calc(15px + var(--glow-intensity, 0) * 40px) rgba(57, 255, 20, calc(var(--glow-intensity, 0) * 0.5));
+  transition: box-shadow 0.1s ease;
+}
+
+/* Small avatar variant for collab slots */
+.avatar-ring-sm {
+  border-width: 2px;
+}
+.avatar-ring-sm.avatar-ring-active {
+  box-shadow:
+    0 0 8px rgba(255, 107, 0, 0.2),
+    0 0 0 3px rgba(57, 255, 20, 0.12),
+    0 0 18px rgba(57, 255, 20, 0.3);
+}
+
 @layer base {
   [data-debug-wrapper="true"] {
     display: contents !important;
