@@ -266,6 +266,125 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: 0 0 60px rgba(255, 107, 0, 0.12), 0 0 120px rgba(57, 255, 20, 0.06);
 }
 
+/* ── Premium Stage Effects ── */
+
+/* Glass frame for video panels */
+.stage-glass {
+  background: rgba(10, 10, 15, 0.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Orange neon frame with glow pulse */
+.neon-frame-orange {
+  border: 2px solid rgba(255, 107, 0, 0.4);
+  box-shadow:
+    0 0 20px rgba(255, 107, 0, 0.12),
+    0 0 60px rgba(255, 107, 0, 0.06),
+    inset 0 0 40px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.neon-frame-orange:hover {
+  border-color: rgba(255, 107, 0, 0.7);
+  box-shadow:
+    0 0 30px rgba(255, 107, 0, 0.25),
+    0 0 80px rgba(255, 107, 0, 0.1),
+    inset 0 0 40px rgba(0, 0, 0, 0.4);
+}
+
+/* Green neon frame with glow pulse */
+.neon-frame-green {
+  border: 1px solid rgba(57, 255, 20, 0.2);
+  box-shadow:
+    0 0 12px rgba(57, 255, 20, 0.06),
+    0 0 40px rgba(57, 255, 20, 0.03),
+    inset 0 0 30px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.neon-frame-green:hover {
+  border-color: rgba(57, 255, 20, 0.5);
+  box-shadow:
+    0 0 20px rgba(57, 255, 20, 0.15),
+    0 0 60px rgba(57, 255, 20, 0.06),
+    inset 0 0 30px rgba(0, 0, 0, 0.4);
+}
+
+/* Arena glow — cinematic viewer frame */
+.arena-glow {
+  box-shadow:
+    0 0 40px rgba(255, 107, 0, 0.15),
+    0 0 100px rgba(255, 107, 0, 0.06),
+    0 0 200px rgba(255, 107, 0, 0.03),
+    inset 0 0 80px rgba(0, 0, 0, 0.6);
+  transition: box-shadow 0.5s ease;
+}
+.arena-glow:hover {
+  box-shadow:
+    0 0 60px rgba(255, 107, 0, 0.2),
+    0 0 140px rgba(255, 107, 0, 0.08),
+    0 0 240px rgba(255, 107, 0, 0.04),
+    inset 0 0 80px rgba(0, 0, 0, 0.5);
+}
+
+/* Smooth layout transition wrapper */
+.layout-transition {
+  animation: layout-morph 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes layout-morph {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Badge glass pill */
+.badge-glass {
+  background: rgba(5, 5, 10, 0.5);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Neon scan line overlay */
+.scan-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.4), transparent);
+  animation: scan-move 4s linear infinite;
+  z-index: 25;
+  pointer-events: none;
+}
+@keyframes scan-move {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+/* Neon corner brackets */
+.neon-corners::before,
+.neon-corners::after {
+  content: "";
+  position: absolute;
+  z-index: 20;
+  pointer-events: none;
+}
+.neon-corners-orange::before {
+  top: 0; left: 0;
+  width: 24px; height: 24px;
+  border-top: 2px solid rgba(255, 107, 0, 0.6);
+  border-left: 2px solid rgba(255, 107, 0, 0.6);
+  border-top-left-radius: 16px;
+}
+.neon-corners-orange::after {
+  bottom: 0; right: 0;
+  width: 24px; height: 24px;
+  border-bottom: 2px solid rgba(255, 107, 0, 0.6);
+  border-right: 2px solid rgba(255, 107, 0, 0.6);
+  border-bottom-right-radius: 16px;
+}
+
 @layer base {
   [data-debug-wrapper="true"] {
     display: contents !important;

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2, Search, Play, Music2, Sparkles } from "lucide-react";
+import { Mic, Video, Square, ArrowLeft, Camera, SplitSquareVertical, Type, Guitar, ExternalLink, MessageCircle, Scissors, X, Share2, Search, Play, Music2, Sparkles, Users, Wand2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -12,7 +12,8 @@ import LiveChat from "@/components/LiveChat";
 const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
 const LAYOUTS = [
-  { key: "camera", label: "Camera", icon: Camera, desc: "Full selfie view" },
+  { key: "stadium", label: "Stadium", icon: Camera, desc: "Performer 1+4 band view" },
+  { key: "viewer", label: "Viewer", icon: Eye, desc: "Fan arena — cinematic master feed" },
   { key: "split", label: "Split", icon: SplitSquareVertical, desc: "Camera + Lyrics" },
   { key: "lyrics", label: "Lyrics", icon: Type, desc: "Full lyrics view" },
   { key: "guitar", label: "Guitar", icon: Guitar, desc: "Full guitar tabs" },
@@ -26,7 +27,7 @@ const SOCIAL_LINKS = [
 
 export default function RecordingStudio({ song, onSongSelect, onRecordingComplete, onBack }) {
   const [mode, setMode] = useState("audio");
-  const [layout, setLayout] = useState("split");
+  const [layout, setLayout] = useState("stadium");
   const [isRecording, setIsRecording] = useState(false);
   const [duration, setDuration] = useState(0);
   const [lyrics, setLyrics] = useState(null);
@@ -36,6 +37,13 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(100);
   const [trimming, setTrimming] = useState(false);
+  const [aiBgRemoval, setAiBgRemoval] = useState(false);
+  const [collabSlots] = useState([
+    { id: 1, label: "Guitar", occupied: false },
+    { id: 2, label: "Bass", occupied: false },
+    { id: 3, label: "Drums", occupied: false },
+    { id: 4, label: "Keys", occupied: false },
+  ]);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
@@ -115,9 +123,10 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
     return 0;
   }, [lyrics?.lyrics, currentTime]);
 
-  const showCamera = layout === "camera" || layout === "split";
+  const showCamera = layout === "stadium" || layout === "split";
   const showLyrics = layout === "lyrics" || layout === "split";
   const showGuitar = layout === "guitar";
+  const isStadium = layout === "stadium";
 
   if (!song) return <RecordSearchScreen onSongSelect={onSongSelect} />;
 
@@ -134,13 +143,20 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           </div>
           <div className="min-w-0">
             <h2 className="font-['Outfit'] text-sm font-black tracking-tight text-white flex items-center gap-1.5">
-              <span className="text-white">SIDE</span><span className="text-[#FF6B00]">TRACK</span>
+              <span className="text-white">Pocket</span><span className="text-[#FF6B00]">Products</span>
               <span className="text-[#5C5C6B] text-[10px] font-medium ml-0.5">Live Stage</span>
               {isRecording && <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-red-500 ml-1"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />REC</span>}
             </h2>
             {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
           </div>
         </div>
+        {/* AI Background Removal Toggle */}
+        <Button data-testid="ai-bg-toggle" variant="ghost" onClick={() => setAiBgRemoval(!aiBgRemoval)}
+          className={`h-8 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
+            aiBgRemoval ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B]"
+          }`}>
+          <Wand2 className="w-3.5 h-3.5" /> AI BG
+        </Button>
         <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
           className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>
           <MessageCircle className="w-3.5 h-3.5" />
@@ -165,77 +181,208 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           </div>
 
           {/* Main content area */}
-          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            {/* Camera / Video */}
-            {showCamera && (
-              <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl mx-3 mt-1 neon-ambient-glow border border-white/5`} data-testid="camera-section">
-                <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
-                {!streamRef.current && !isRecording && (
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
-                    <div className="relative z-10 text-center">
-                      <Camera className="w-12 h-12 text-[#FF6B00]/40 mb-2 mx-auto" />
-                      <p className="text-xs text-[#5C5C6B]">Camera activates when recording</p>
+          <div className="flex-1 flex min-h-0 overflow-hidden">
+            {/* ── STADIUM LAYOUT: 1 (Host) + 4 (Collaborators) ── */}
+            {isStadium && (
+              <div className="flex-1 flex gap-3 p-3 min-h-0 layout-transition" data-testid="stadium-layout">
+                {/* Main Performer / First Man — 65% */}
+                <div className="flex-[65] relative rounded-2xl overflow-hidden neon-frame-orange neon-corners neon-corners-orange scan-line stage-glass"
+                  data-testid="host-frame">
+                  <img src={STAGE_BG} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${aiBgRemoval ? "opacity-40" : "opacity-20"}`} />
+                  <video ref={videoRef} autoPlay muted playsInline
+                    className={`absolute inset-0 w-full h-full object-cover z-10 transition-all duration-500 ${aiBgRemoval ? "mix-blend-screen" : ""}`}
+                    style={{ transform: "scaleX(-1)" }} data-testid="host-video" />
+                  {!streamRef.current && !isRecording && (
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
+                      <div className="w-20 h-20 rounded-full bg-[#FF6B00]/5 flex items-center justify-center mb-4 border border-[#FF6B00]/15">
+                        <Camera className="w-10 h-10 text-[#FF6B00]/25" />
+                      </div>
+                      <p className="text-sm text-[#8F8F9D] font-['Outfit'] font-semibold">Your Stage</p>
+                      <p className="text-[10px] text-[#5C5C6B]/60 mt-1.5">Camera activates when recording</p>
                     </div>
+                  )}
+                  <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
+                    <span className="badge-glass px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] border-[#FF6B00]/30" data-testid="first-man-badge">First Man</span>
+                    {aiBgRemoval && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14] border-[#39FF14]/30">AI BG</span>}
                   </div>
-                )}
-                {/* Overlay info */}
-                {isRecording && (
-                  <div className="absolute bottom-3 left-3 crystal-glass rounded-full px-3 py-1">
-                    <span className="text-[10px] text-[#39FF14] font-mono font-bold">{fmtDur(duration)}</span>
-                  </div>
-                )}
+                  {isRecording && (
+                    <div className="absolute bottom-4 left-4 z-30 badge-glass rounded-full px-4 py-2 flex items-center gap-2.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                      <span className="text-sm text-[#39FF14] font-mono font-bold tracking-wider">{fmtDur(duration)}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Collaborator Grid — 35%, 4 vertical slots */}
+                <div className="flex-[35] flex flex-col gap-2.5 min-w-0" data-testid="collab-grid">
+                  {collabSlots.map((slot) => (
+                    <div key={slot.id}
+                      className="flex-1 relative rounded-xl overflow-hidden neon-frame-green stage-glass transition-all duration-300"
+                      data-testid={`collab-slot-${slot.id}`}>
+                      <img src={STAGE_BG} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${aiBgRemoval ? "opacity-25" : "opacity-10"}`} />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                        <div className="w-10 h-10 rounded-full bg-[#39FF14]/5 flex items-center justify-center mb-1.5 border border-[#39FF14]/10">
+                          <Users className="w-4 h-4 text-[#39FF14]/20" />
+                        </div>
+                        <p className="text-[9px] text-[#8F8F9D] font-bold uppercase tracking-wider">{slot.label}</p>
+                        <p className="text-[7px] text-[#5C5C6B]/40 mt-0.5 font-medium">Waiting to join</p>
+                      </div>
+                      <div className="absolute top-2 left-2 z-20">
+                        <span className="badge-glass px-2 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider text-[#39FF14]/50">{slot.label}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
+            {/* ── VIEWER LAYOUT: Massive Cinematic Arena ── */}
+            {layout === "viewer" && (
+              <div className="flex-1 flex flex-col p-3 gap-2.5 min-h-0 layout-transition" data-testid="viewer-layout">
+                {/* Master Arena Frame — cinematic widescreen */}
+                <div className="flex-[80] relative rounded-2xl overflow-hidden neon-frame-orange arena-glow scan-line"
+                  style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(255,107,0,0.06) 0%, #06060C 60%)" }}
+                  data-testid="arena-frame">
+                  <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />
+
+                  {/* Composited performers on virtual stage */}
+                  <div className="absolute inset-0 z-10 flex items-end justify-center gap-4 pb-10 px-8">
+                    {/* Lead performer — largest, center */}
+                    <div className="relative w-[30%] h-[78%] rounded-xl overflow-hidden neon-frame-orange stage-glass">
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#FF6B00]/8 via-transparent to-transparent" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <div className="w-14 h-14 rounded-full bg-[#FF6B00]/8 flex items-center justify-center mb-3 border border-[#FF6B00]/20">
+                          <Mic className="w-7 h-7 text-[#FF6B00]/30" />
+                        </div>
+                        <p className="text-xs text-[#FF6B00]/40 font-bold uppercase tracking-[0.2em]">Lead</p>
+                      </div>
+                      <div className="absolute bottom-2.5 left-2.5 z-20">
+                        <span className="badge-glass px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider text-[#FF6B00]">Host</span>
+                      </div>
+                    </div>
+                    {/* Band members — flanking, progressively smaller */}
+                    {["Guitar", "Bass", "Drums", "Keys"].map((role, idx) => (
+                      <div key={role}
+                        className="relative rounded-lg overflow-hidden neon-frame-green stage-glass transition-all duration-300"
+                        style={{ width: "13%", height: `${58 - idx * 3}%` }}>
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#39FF14]/4 via-transparent to-transparent" />
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <Users className="w-4 h-4 text-[#39FF14]/20 mb-1" />
+                          <p className="text-[7px] text-[#39FF14]/35 font-bold uppercase tracking-wider">{role}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Arena HUD */}
+                  <div className="absolute top-4 left-4 z-30 flex items-center gap-2.5">
+                    <span className="badge-glass px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse shadow-[0_0_6px_rgba(255,107,0,0.6)]" /> Live Arena
+                    </span>
+                    <span className="badge-glass px-2.5 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14]/80">AI Composited</span>
+                  </div>
+                  <div className="absolute top-4 right-4 z-30 badge-glass rounded-full px-3.5 py-1.5 flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-[#FF6B00]" />
+                    <span className="text-[10px] text-white font-bold">0</span>
+                    <span className="text-[8px] text-[#5C5C6B] font-medium">watching</span>
+                  </div>
+                </div>
+
+                {/* Subordinate lyrics strip — glass bar */}
+                <div className="flex-[20] rounded-xl overflow-hidden stage-glass border border-white/5" data-testid="viewer-lyrics">
+                  <ScrollArea className="h-full">
+                    <div className="px-6 py-3 flex flex-wrap gap-x-8 gap-y-1 items-center justify-center">
+                      {lyrics?.lyrics ? lyrics.lyrics.filter(l => l.type === "line").slice(
+                        Math.max(0, activeLyricIdx - 1), activeLyricIdx + 3
+                      ).map((line, i) => {
+                        const isActive = i === 1;
+                        return (
+                          <span key={`v-${line.time}-${i}`}
+                            className={`transition-all duration-500 ${isActive ? "text-[#39FF14] font-bold text-lg" : "text-[#5C5C6B]/50 text-sm"}`}
+                            style={isActive ? { textShadow: "0 0 20px rgba(57,255,20,0.5), 0 0 40px rgba(57,255,20,0.2)" } : undefined}>
+                            {line.text}
+                          </span>
+                        );
+                      }) : <span className="text-sm text-[#5C5C6B]/40 font-medium">Lyrics appear here during performance</span>}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+            )}
+
+            {/* ── SPLIT LAYOUT: Camera + Lyrics ── */}
+            {layout === "split" && (
+              <div className="flex-1 flex flex-col p-3 gap-2">
+                <div className="relative h-[45%] bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl neon-ambient-glow border border-[#FF6B00]/20" data-testid="camera-section">
+                  <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
+                  {!streamRef.current && !isRecording && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
+                      <div className="relative z-10 text-center">
+                        <Camera className="w-12 h-12 text-[#FF6B00]/40 mb-2 mx-auto" />
+                        <p className="text-xs text-[#5C5C6B]">Camera activates when recording</p>
+                      </div>
+                    </div>
+                  )}
+                  {isRecording && (
+                    <div className="absolute bottom-3 left-3 crystal-glass rounded-full px-3 py-1">
+                      <span className="text-[10px] text-[#39FF14] font-mono font-bold">{fmtDur(duration)}</span>
+                    </div>
+                  )}
+                </div>
+                {/* Lyrics pane */}
+                <div className="h-[55%] bg-[#05050A] border border-white/5 rounded-xl overflow-hidden flex-shrink-0" data-testid="lyrics-section">
+                  <ScrollArea className="h-full">
+                    <div className="p-4 space-y-2">
+                      {currentChord && (
+                        <div className="text-center mb-3 pb-3 border-b border-white/5">
+                          <span className="text-3xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</span>
+                        </div>
+                      )}
+                      {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                        const lk = `${line.time}-${line.type}-${i}`;
+                        if (line.type === "section") return <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>;
+                        if (line.type === "break") return <div key={lk} className="h-2" />;
+                        return <p key={lk} className={`text-base leading-relaxed transition-all duration-300 ${i === activeLyricIdx ? "text-[#39FF14] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"}`}>{line.text}</p>;
+                      }) : <p className="text-[#5C5C6B] text-sm text-center py-8">Lyrics sync during recording</p>}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+            )}
+
+            {/* ── LYRICS ONLY ── */}
+            {layout === "lyrics" && (
+              <div className="flex-1 bg-[#05050A] overflow-hidden p-3" data-testid="lyrics-section">
+                <ScrollArea className="h-full">
+                  <div className="p-4 space-y-2">
+                    {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
+                      const lk = `${line.time}-${line.type}-${i}`;
+                      if (line.type === "section") return <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>;
+                      if (line.type === "break") return <div key={lk} className="h-2" />;
+                      return <p key={lk} className={`text-base leading-relaxed transition-all duration-300 ${i === activeLyricIdx ? "text-[#39FF14] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"}`}>{line.text}</p>;
+                    }) : <p className="text-[#5C5C6B] text-sm text-center py-8">Lyrics sync during recording</p>}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
+
+            {/* ── GUITAR ONLY ── */}
             {showGuitar && (
-              <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4 rounded-xl mx-3 mt-1 border border-white/5" data-testid="guitar-full">
+              <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4 rounded-xl m-3 border border-white/5" data-testid="guitar-full">
                 {currentChord ? (
                   <div className="text-center animate-fade-in">
-                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange landscape-chords tracking-tighter">
-                      {currentChord.chord}
-                    </div>
+                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</div>
                     <GuitarDiagram chord={currentChord.chord} />
                     {lyrics?.chords && (
                       <div className="flex gap-3 mt-6 justify-center flex-wrap">
-                        {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c, i) => (
+                        {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c) => (
                           <span key={`${c.time}-${c.chord}`} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
                         ))}
                       </div>
                     )}
                   </div>
-                ) : (
-                  <p className="text-[#5C5C6B] text-sm">Guitar chords will appear here</p>
-                )}
-              </div>
-            )}
-
-            {/* Lyrics */}
-            {(showLyrics || layout === "split") && (
-              <div className={`${layout === "lyrics" ? "flex-1" : "h-[55%]"} bg-[#05050A] border-t border-white/5 overflow-hidden flex-shrink-0`} data-testid="lyrics-section">
-                <ScrollArea className="h-full">
-                  <div className="p-4 space-y-2">
-                    {layout === "split" && currentChord && (
-                      <div className="text-center mb-3 pb-3 border-b border-white/5">
-                        <span className="text-3xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</span>
-                      </div>
-                    )}
-                    {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
-                      const lk = `${line.time}-${line.type}-${i}`;
-                      if (line.type === "section") return (
-                        <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#39FF14]" : "text-[#5C5C6B]"}`}>{line.text}</p>
-                      );
-                      if (line.type === "break") return <div key={lk} className="h-2" />;
-                      return (
-                        <p key={lk} className={`text-base leading-relaxed transition-all duration-300 landscape-lyrics ${
-                          i === activeLyricIdx ? "text-[#39FF14] font-semibold scale-[1.02]" : i < activeLyricIdx ? "text-[#5C5C6B]/50" : "text-[#8F8F9D]"
-                        }`}>{line.text}</p>
-                      );
-                    }) : (
-                      <p className="text-[#5C5C6B] text-sm text-center py-8">Lyrics will sync here during recording</p>
-                    )}
-                  </div>
-                </ScrollArea>
+                ) : <p className="text-[#5C5C6B] text-sm">Guitar chords will appear here</p>}
               </div>
             )}
           </div>
