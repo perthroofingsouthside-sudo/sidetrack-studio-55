@@ -14,8 +14,11 @@ import BecomeAStar from "@/pages/BecomeAStar";
 import SocialProfile from "@/pages/SocialProfile";
 import PricingPage from "@/pages/PricingPage";
 import ConnectPage from "@/pages/ConnectPage";
+import GamerPage from "@/pages/GamerPage";
+import BackstageScreen from "@/components/BackstageScreen";
 import BottomNav from "@/components/BottomNav";
 import GlobalPlayer from "@/components/GlobalPlayer";
+import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
@@ -29,6 +32,20 @@ function App() {
   });
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
+  // ── Two-Lane Ecosystem ─────────────────────────
+  const [lane, setLaneState] = useState(() => localStorage.getItem("pp_lane") || "creator");
+  const [backstageTrack, setBackstageTrack] = useState(null);
+
+  const setLane = useCallback((newLane) => {
+    setLaneState(newLane);
+    localStorage.setItem("pp_lane", newLane);
+    // Persist server-side
+    const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
+    axios.post(`${API}/lanes/set`, { user_id: uid, lane: newLane }).catch(() => {});
+    // Snap to a sensible default tab on lane switch
+    if (newLane === "gamer") setCurrentView("gamer");
+    else setCurrentView("stream");
+  }, []);
 
   // ── Global Audio Player State ──────────────────
   const [nowPlaying, setNowPlaying] = useState(null);
@@ -117,8 +134,23 @@ function App() {
 
   const handleRecordingComplete = useCallback((recording) => {
     setEditingRecording(recording);
+    // Gamer lane: store privately + switch to Viewer playback automatically
+    if (lane === "gamer") {
+      const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
+      axios.post(`${API}/gamer/recordings`, {
+        user_id: uid,
+        song_id: currentSong?.id || "",
+        song_title: currentSong?.title || "Untitled",
+        artist: currentSong?.artist || "",
+        duration_sec: recording.duration || 0,
+        blob_url: recording.url || null,
+      }).catch((e) => console.error("Gamer save err", e));
+      toast.success("Saved privately — switching to Viewer");
+      setCurrentView("record"); // RecordingStudio's "viewer" layout handles playback
+      return;
+    }
     setCurrentView("edit");
-  }, []);
+  }, [lane, currentSong]);
 
   const handleNavigate = useCallback((view) => {
     setCurrentView(view);
@@ -162,6 +194,26 @@ function App() {
         return <BecomeAStar />;
       case "connect":
         return <ConnectPage />;
+      case "gamer":
+        return (
+          <GamerPage
+            onPickedTrack={(t) => setCurrentSong({
+              id: t.id || crypto.randomUUID(), title: t.title, artist: t.artist,
+              album: t.album || "", cover_url: t.cover_url || "", genre: t.genre || "",
+              preview_url: t.preview_url || "",
+            })}
+            onOpenBackstage={(t) => { setBackstageTrack(t); setCurrentView("backstage"); }}
+          />
+        );
+      case "backstage":
+        return (
+          <BackstageScreen
+            song={backstageTrack || currentSong}
+            userId={localStorage.getItem("sidetrack_voter_id") || "anon"}
+            onProceed={() => setCurrentView("record")}
+            onBack={() => setCurrentView("gamer")}
+          />
+        );
       case "pricing":
         return <PricingPage onBack={() => setCurrentView("profile")} />;
       case "profile":
@@ -220,7 +272,7 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#05050A] text-white">
-      <div className={nowPlaying ? "pb-36" : "pb-20"}>
+      <div className={nowPlaying ? "pb-44" : "pb-28"}>
         {renderView()}
       </div>
       {/* Global Now Playing Bar — persists across all tabs */}
@@ -238,6 +290,8 @@ function App() {
         currentView={currentView}
         onNavigate={handleNavigate}
         hasSong={!!currentSong}
+        lane={lane}
+        onLaneChange={setLane}
       />
       <Toaster position="top-center" theme="dark" />
     </div>

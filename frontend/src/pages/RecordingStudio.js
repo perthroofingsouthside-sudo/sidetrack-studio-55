@@ -9,6 +9,8 @@ import { API } from "@/App";
 import axios from "axios";
 import LiveChat from "@/components/LiveChat";
 import AvatarRing, { useAudioActivity } from "@/components/AvatarRing";
+import FloatingComments from "@/components/FloatingComments";
+import CalligraphyLyrics from "@/components/CalligraphyLyrics";
 
 const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
@@ -207,53 +209,61 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
           {/* Main content area */}
           <div className="flex-1 flex min-h-0 overflow-hidden">
-            {/* ── STADIUM LAYOUT: 1 (Host) + 4 (Collaborators) ── */}
+            {/* ── STADIUM LAYOUT (PORTRAIT): Host top + collab strip below + L/R overlays ── */}
             {isStadium && (
-              <div className="flex-1 flex gap-3 p-3 min-h-0 layout-transition" data-testid="stadium-layout">
-                {/* Main Performer / First Man — 65% */}
-                <div className="flex-[65] relative rounded-2xl overflow-hidden neon-frame-orange neon-corners neon-corners-orange scan-line stage-glass"
-                  data-testid="host-frame">
+              <div className="flex-1 flex flex-col gap-2 p-2 sm:p-3 min-h-0 layout-transition" data-testid="stadium-layout">
+                {/* Main Performer / Host — vertical portrait, ~70% of vertical space */}
+                <div className="flex-[70] relative rounded-2xl overflow-hidden neon-frame-orange neon-corners neon-corners-orange scan-line stage-glass mx-auto w-full max-w-md"
+                  data-testid="host-frame"
+                  style={{ aspectRatio: "9/16", maxHeight: "100%" }}>
                   <img src={STAGE_BG} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${aiBgRemoval ? "opacity-40" : "opacity-20"}`} />
                   <video ref={videoRef} autoPlay muted playsInline
                     className={`absolute inset-0 w-full h-full object-cover z-10 transition-all duration-500 ${aiBgRemoval ? "mix-blend-screen" : ""}`}
                     style={{ transform: "scaleX(-1)" }} data-testid="host-video" />
+
+                  {/* LEFT — Floating neon green comments */}
+                  <FloatingComments active={true} />
+                  {/* RIGHT — Calligraphy lyrics overlay */}
+                  <CalligraphyLyrics lyrics={lyrics} activeIdx={activeLyricIdx} />
+
                   {!streamRef.current && !isRecording && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center">
-                      <div className="w-20 h-20 rounded-full bg-[#FF6B00]/5 flex items-center justify-center mb-4 border border-[#FF6B00]/15">
-                        <Camera className="w-10 h-10 text-[#FF6B00]/25" />
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
+                      <div className="w-16 h-16 rounded-full bg-[#FF6B00]/5 flex items-center justify-center mb-3 border border-[#FF6B00]/15">
+                        <Camera className="w-7 h-7 text-[#FF6B00]/25" />
                       </div>
                       <p className="text-sm text-[#8F8F9D] font-['Outfit'] font-semibold">Your Stage</p>
-                      <p className="text-[10px] text-[#5C5C6B]/60 mt-1.5">Camera activates when recording</p>
+                      <p className="text-[10px] text-[#5C5C6B]/60 mt-1.5">Tap mic to start</p>
                     </div>
                   )}
-                  <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
+                  <div className="absolute top-3 left-3 z-40 flex items-center gap-2">
                     <AvatarRing name="You" size="sm" isActive={isActive} intensity={intensity} icon={Mic} label="Host" />
-                    <span className="badge-glass px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] border-[#FF6B00]/30" data-testid="first-man-badge">First Man</span>
+                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] border-[#FF6B00]/30" data-testid="first-man-badge">First Man</span>
                     {aiBgRemoval && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14] border-[#39FF14]/30">AI BG</span>}
-                    {liveCleanup && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#FF6B00] border-[#FF6B00]/30" data-testid="live-cleanup-badge">AI Cleanup</span>}
+                    {liveCleanup && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#FF6B00] border-[#FF6B00]/30" data-testid="live-cleanup-badge">Cleanup</span>}
                   </div>
                   {isRecording && (
-                    <div className="absolute bottom-4 left-4 z-30 badge-glass rounded-full px-4 py-2 flex items-center gap-2.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-                      <span className="text-sm text-[#39FF14] font-mono font-bold tracking-wider">{fmtDur(duration)}</span>
+                    <div className="absolute bottom-4 left-4 z-40 badge-glass rounded-full px-3 py-1.5 flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
+                      <span className="text-xs text-[#39FF14] font-mono font-bold tracking-wider">{fmtDur(duration)}</span>
                     </div>
                   )}
                 </div>
 
-                {/* Collaborator Grid — 35%, 4 vertical slots */}
-                <div className="flex-[35] flex flex-col gap-2.5 min-w-0" data-testid="collab-grid">
+                {/* Collab Strip — horizontal scroll below host */}
+                <div className="flex-[20] min-h-[88px] flex gap-2 overflow-x-auto pb-1 scrollbar-hide w-full max-w-md mx-auto" data-testid="collab-grid">
                   {collabSlots.map((slot) => (
                     <div key={slot.id}
-                      className="flex-1 relative rounded-xl overflow-hidden neon-frame-green stage-glass transition-all duration-300"
-                      data-testid={`collab-slot-${slot.id}`}>
+                      className="flex-shrink-0 w-[110px] sm:w-[130px] relative rounded-xl overflow-hidden neon-frame-green stage-glass transition-all duration-300"
+                      data-testid={`collab-slot-${slot.id}`}
+                      style={{ aspectRatio: "3/4" }}>
                       <img src={STAGE_BG} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${aiBgRemoval ? "opacity-25" : "opacity-10"}`} />
                       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
                         <AvatarRing name={slot.label} size="sm" icon={Users} isActive={false} intensity={0} />
                         <p className="text-[9px] text-[#8F8F9D] font-bold uppercase tracking-wider mt-1.5">{slot.label}</p>
-                        <p className="text-[7px] text-[#5C5C6B]/40 mt-0.5 font-medium">Waiting to join</p>
+                        <p className="text-[7px] text-[#5C5C6B]/40 mt-0.5 font-medium">Waiting</p>
                       </div>
-                      <div className="absolute top-2 left-2 z-20">
-                        <span className="badge-glass px-2 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider text-[#39FF14]/50">{slot.label}</span>
+                      <div className="absolute top-1.5 left-1.5 z-20">
+                        <span className="badge-glass px-1.5 py-0.5 rounded text-[7px] font-bold uppercase tracking-wider text-[#39FF14]/60">{slot.label}</span>
                       </div>
                     </div>
                   ))}
@@ -261,74 +271,50 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
               </div>
             )}
 
-            {/* ── VIEWER LAYOUT: Massive Cinematic Arena ── */}
+            {/* ── VIEWER LAYOUT (PORTRAIT): Lead portrait top + band strip below + L/R overlays ── */}
             {layout === "viewer" && (
-              <div className="flex-1 flex flex-col p-3 gap-2.5 min-h-0 layout-transition" data-testid="viewer-layout">
-                {/* Master Arena Frame — cinematic widescreen */}
-                <div className="flex-[80] relative rounded-2xl overflow-hidden neon-frame-orange arena-glow scan-line"
-                  style={{ background: "radial-gradient(ellipse at 50% 100%, rgba(255,107,0,0.06) 0%, #06060C 60%)" }}
+              <div className="flex-1 flex flex-col p-2 sm:p-3 gap-2 min-h-0 layout-transition" data-testid="viewer-layout">
+                {/* Main Lead Frame — vertical portrait ~72% */}
+                <div className="flex-[72] relative rounded-2xl overflow-hidden neon-frame-orange arena-glow scan-line mx-auto w-full max-w-md"
+                  style={{ aspectRatio: "9/16", maxHeight: "100%", background: "radial-gradient(ellipse at 50% 100%, rgba(255,107,0,0.08) 0%, #06060C 60%)" }}
                   data-testid="arena-frame">
                   <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />
 
-                  {/* Composited performers on virtual stage */}
-                  <div className="absolute inset-0 z-10 flex items-end justify-center gap-4 pb-10 px-8">
-                    {/* Lead performer — largest, center */}
-                    <div className="relative w-[30%] h-[78%] rounded-xl overflow-hidden neon-frame-orange stage-glass">
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#FF6B00]/8 via-transparent to-transparent" />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <AvatarRing name="Lead" size="lg" isActive={isActive} intensity={intensity} icon={Mic} />
-                        <p className="text-xs text-[#FF6B00]/60 font-bold uppercase tracking-[0.2em] mt-2">Lead</p>
-                      </div>
-                      <div className="absolute bottom-2.5 left-2.5 z-20">
-                        <span className="badge-glass px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider text-[#FF6B00]">Host</span>
-                      </div>
-                    </div>
-                    {/* Band members — flanking, progressively smaller */}
-                    {["Guitar", "Bass", "Drums", "Keys"].map((role, idx) => (
-                      <div key={role}
-                        className="relative rounded-lg overflow-hidden neon-frame-green stage-glass transition-all duration-300"
-                        style={{ width: "13%", height: `${58 - idx * 3}%` }}>
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#39FF14]/4 via-transparent to-transparent" />
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <Users className="w-4 h-4 text-[#39FF14]/20 mb-1" />
-                          <p className="text-[7px] text-[#39FF14]/35 font-bold uppercase tracking-wider">{role}</p>
-                        </div>
-                      </div>
-                    ))}
+                  {/* LEFT — Floating neon green comments */}
+                  <FloatingComments active={true} />
+                  {/* RIGHT — Calligraphy lyrics overlay */}
+                  <CalligraphyLyrics lyrics={lyrics} activeIdx={activeLyricIdx} />
+
+                  {/* Centered lead performer avatar */}
+                  <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+                    <AvatarRing name="Lead" size="lg" isActive={isActive} intensity={intensity} icon={Mic} />
+                    <p className="text-[10px] text-[#FF6B00]/70 font-bold uppercase tracking-[0.2em] mt-3">Lead</p>
                   </div>
 
                   {/* Arena HUD */}
-                  <div className="absolute top-4 left-4 z-30 flex items-center gap-2.5">
-                    <span className="badge-glass px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] flex items-center gap-1.5">
+                  <div className="absolute top-3 left-3 z-40 flex items-center gap-2">
+                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse shadow-[0_0_6px_rgba(255,107,0,0.6)]" /> Live Arena
                     </span>
-                    <span className="badge-glass px-2.5 py-1.5 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14]/80">AI Composited</span>
                   </div>
-                  <div className="absolute top-4 right-4 z-30 badge-glass rounded-full px-3.5 py-1.5 flex items-center gap-2">
-                    <Eye className="w-3.5 h-3.5 text-[#FF6B00]" />
+                  <div className="absolute top-3 right-3 z-40 badge-glass rounded-full px-3 py-1 flex items-center gap-1.5">
+                    <Eye className="w-3 h-3 text-[#FF6B00]" />
                     <span className="text-[10px] text-white font-bold">0</span>
-                    <span className="text-[8px] text-[#5C5C6B] font-medium">watching</span>
                   </div>
                 </div>
 
-                {/* Subordinate lyrics strip — glass bar */}
-                <div className="flex-[20] rounded-xl overflow-hidden stage-glass border border-white/5" data-testid="viewer-lyrics">
-                  <ScrollArea className="h-full">
-                    <div className="px-6 py-3 flex flex-wrap gap-x-8 gap-y-1 items-center justify-center">
-                      {lyrics?.lyrics ? lyrics.lyrics.filter(l => l.type === "line").slice(
-                        Math.max(0, activeLyricIdx - 1), activeLyricIdx + 3
-                      ).map((line, i) => {
-                        const isActive = i === 1;
-                        return (
-                          <span key={`v-${line.time}-${i}`}
-                            className={`transition-all duration-500 ${isActive ? "text-[#39FF14] font-bold text-lg" : "text-[#5C5C6B]/50 text-sm"}`}
-                            style={isActive ? { textShadow: "0 0 20px rgba(57,255,20,0.5), 0 0 40px rgba(57,255,20,0.2)" } : undefined}>
-                            {line.text}
-                          </span>
-                        );
-                      }) : <span className="text-sm text-[#5C5C6B]/40 font-medium">Lyrics appear here during performance</span>}
+                {/* Band Strip — horizontal scroll below */}
+                <div className="flex-[18] min-h-[80px] flex gap-2 overflow-x-auto pb-1 scrollbar-hide w-full max-w-md mx-auto" data-testid="viewer-band-strip">
+                  {["Guitar", "Bass", "Drums", "Keys"].map((role) => (
+                    <div key={role} className="flex-shrink-0 w-[100px] relative rounded-lg overflow-hidden neon-frame-green stage-glass"
+                      style={{ aspectRatio: "3/4" }}>
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#39FF14]/6 via-transparent to-transparent" />
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <AvatarRing name={role} size="sm" icon={Users} isActive={false} intensity={0} />
+                        <p className="text-[8px] text-[#39FF14]/50 font-bold uppercase tracking-wider mt-1">{role}</p>
+                      </div>
                     </div>
-                  </ScrollArea>
+                  ))}
                 </div>
               </div>
             )}
