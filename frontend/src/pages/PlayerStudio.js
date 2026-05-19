@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import StemMixer from "@/components/StemMixer";
+import BeatMaker from "@/components/BeatMaker";
 
 export default function PlayerStudio({ song, onRecord, onSongSelect }) {
   const [lyrics, setLyrics] = useState(null);
@@ -397,6 +398,11 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
           {hasRealStems && <span className="text-[10px] text-[#39FF14] uppercase tracking-widest font-bold">Live Stems</span>}
         </div>
         <StemMixer volumes={stemVolumes} muted={mutedStems} onVolumeChange={handleVolumeChange} onMuteToggle={handleMuteToggle} />
+      </div>
+
+      {/* Beat Maker (Studio AI) */}
+      <div className="px-4 pb-6 pt-2">
+        <BeatMaker userId={localStorage.getItem("sidetrack_voter_id") || "anon"} />
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import LiveChat from "@/components/LiveChat";
+import AvatarRing, { useAudioActivity } from "@/components/AvatarRing";
 
 const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
@@ -38,6 +39,9 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   const [trimEnd, setTrimEnd] = useState(100);
   const [trimming, setTrimming] = useState(false);
   const [aiBgRemoval, setAiBgRemoval] = useState(false);
+  const [liveCleanup, setLiveCleanup] = useState(false);
+  const [liveStream, setLiveStream] = useState(null);
+  const { intensity, isActive } = useAudioActivity(liveStream);
   const [collabSlots] = useState([
     { id: 1, label: "Guitar", occupied: false },
     { id: 2, label: "Bass", occupied: false },
@@ -65,6 +69,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
   const stopAllStreams = () => {
     if (streamRef.current) { streamRef.current.getTracks().forEach((t) => t.stop()); streamRef.current = null; }
+    setLiveStream(null);
   };
 
   const startRecording = async () => {
@@ -75,6 +80,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
         : { audio: true };
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
       streamRef.current = stream;
+      setLiveStream(stream);
       if (needsVideo && videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.play(); }
       const mimeType = needsVideo ? "video/webm" : "audio/webm";
       const mediaRecorder = new MediaRecorder(stream, { mimeType });
@@ -157,6 +163,25 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           }`}>
           <Wand2 className="w-3.5 h-3.5" /> AI BG
         </Button>
+        {/* Live AI Cleanup Toggle */}
+        <Button data-testid="live-cleanup-toggle" variant="ghost" onClick={async () => {
+          const next = !liveCleanup;
+          setLiveCleanup(next);
+          try {
+            if (next) {
+              await axios.post(`${API}/studio/cleanup`, {
+                user_id: localStorage.getItem("sidetrack_voter_id") || "anon",
+                mode: "rock", live: true,
+              });
+              toast.success("Live AI Cleanup engaged");
+            }
+          } catch (e) { console.error("cleanup toggle err", e); }
+        }}
+          className={`h-8 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
+            liveCleanup ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10" : "border-white/10 text-[#5C5C6B]"
+          }`}>
+          <Sparkles className="w-3.5 h-3.5" /> Cleanup
+        </Button>
         <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
           className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>
           <MessageCircle className="w-3.5 h-3.5" />
@@ -202,8 +227,10 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                     </div>
                   )}
                   <div className="absolute top-3 left-3 z-30 flex items-center gap-2">
+                    <AvatarRing name="You" size="sm" isActive={isActive} intensity={intensity} icon={Mic} label="Host" />
                     <span className="badge-glass px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] border-[#FF6B00]/30" data-testid="first-man-badge">First Man</span>
                     {aiBgRemoval && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14] border-[#39FF14]/30">AI BG</span>}
+                    {liveCleanup && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#FF6B00] border-[#FF6B00]/30" data-testid="live-cleanup-badge">AI Cleanup</span>}
                   </div>
                   {isRecording && (
                     <div className="absolute bottom-4 left-4 z-30 badge-glass rounded-full px-4 py-2 flex items-center gap-2.5">
@@ -221,10 +248,8 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                       data-testid={`collab-slot-${slot.id}`}>
                       <img src={STAGE_BG} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${aiBgRemoval ? "opacity-25" : "opacity-10"}`} />
                       <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
-                        <div className="w-10 h-10 rounded-full bg-[#39FF14]/5 flex items-center justify-center mb-1.5 border border-[#39FF14]/10">
-                          <Users className="w-4 h-4 text-[#39FF14]/20" />
-                        </div>
-                        <p className="text-[9px] text-[#8F8F9D] font-bold uppercase tracking-wider">{slot.label}</p>
+                        <AvatarRing name={slot.label} size="sm" icon={Users} isActive={false} intensity={0} />
+                        <p className="text-[9px] text-[#8F8F9D] font-bold uppercase tracking-wider mt-1.5">{slot.label}</p>
                         <p className="text-[7px] text-[#5C5C6B]/40 mt-0.5 font-medium">Waiting to join</p>
                       </div>
                       <div className="absolute top-2 left-2 z-20">
@@ -251,10 +276,8 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                     <div className="relative w-[30%] h-[78%] rounded-xl overflow-hidden neon-frame-orange stage-glass">
                       <div className="absolute inset-0 bg-gradient-to-t from-[#FF6B00]/8 via-transparent to-transparent" />
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                        <div className="w-14 h-14 rounded-full bg-[#FF6B00]/8 flex items-center justify-center mb-3 border border-[#FF6B00]/20">
-                          <Mic className="w-7 h-7 text-[#FF6B00]/30" />
-                        </div>
-                        <p className="text-xs text-[#FF6B00]/40 font-bold uppercase tracking-[0.2em]">Lead</p>
+                        <AvatarRing name="Lead" size="lg" isActive={isActive} intensity={intensity} icon={Mic} />
+                        <p className="text-xs text-[#FF6B00]/60 font-bold uppercase tracking-[0.2em] mt-2">Lead</p>
                       </div>
                       <div className="absolute bottom-2.5 left-2.5 z-20">
                         <span className="badge-glass px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-wider text-[#FF6B00]">Host</span>

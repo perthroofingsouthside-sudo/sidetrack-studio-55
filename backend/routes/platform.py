@@ -15,39 +15,43 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # ── Subscription Tiers ──────────────────────────
+# `requires_ownership: True` = tier is locked until user owns the Creator Ecosystem
 SUBSCRIPTION_TIERS = [
     # ── Listener Tier ──
     {"key": "listener", "name": "Listener", "tagline": "Just the Music", "price": 4.98, "period": "month",
         "features": ["Unlimited streaming", "Curated MTV / MOS / Hip-Hop playlists", "50 skips/day", "Synced lyrics"],
-        "category": "listener", "highlight": True, "includes_covers": False},
+        "category": "listener", "highlight": True, "includes_covers": False, "requires_ownership": False},
     # ── Creator Tiers ──
     {"key": "individual", "name": "Individual Creator", "tagline": "Solo Artist", "price": 11.98, "period": "month",
         "features": ["Everything in Listener", "Full stem separation", "HD audio export", "Karaoke & recording", "Battle entry"],
-        "category": "creator", "highlight": False, "includes_covers": False},
+        "category": "creator", "highlight": False, "includes_covers": False, "requires_ownership": False},
     {"key": "individual_covers", "name": "Creator + Covers", "tagline": "Full License", "price": 15.98, "period": "month",
         "features": ["Everything in Individual", "Unlimited cover recordings", "Cover distribution rights", "Priority in Battles"],
-        "category": "creator", "highlight": True, "includes_covers": True},
+        "category": "creator", "highlight": True, "includes_covers": True, "requires_ownership": False},
     {"key": "student", "name": "Student Creator", "tagline": "Study & Play", "price": 9.98, "period": "month",
         "features": ["All Individual features", "Valid student email required", "Discounted creator tools"],
-        "category": "creator", "highlight": False, "includes_covers": False},
+        "category": "creator", "highlight": False, "includes_covers": False, "requires_ownership": True},
     {"key": "couple_duo", "name": "Couple / Duo", "tagline": "Two Voices", "price": 14.98, "period": "month",
         "features": ["2 accounts", "Shared duet workspace", "Unlimited skips for both", "Priority duet matching"],
-        "category": "creator", "highlight": False, "includes_covers": False},
+        "category": "creator", "highlight": False, "includes_covers": False, "requires_ownership": True},
     {"key": "family", "name": "Family", "tagline": "Up to 5 members", "price": 20.98, "period": "month",
         "features": ["5 individual accounts", "Family mix playlists", "Parental controls", "All creator features"],
-        "category": "creator", "highlight": False, "includes_covers": False},
+        "category": "creator", "highlight": False, "includes_covers": False, "requires_ownership": True},
     # ── Band Tiers ──
     {"key": "adult_band", "name": "Adult Band", "tagline": "Active Band", "price": 17.98, "period": "month",
         "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "Covers included", "1 upload/week to stay active"],
-        "category": "band", "highlight": False, "includes_covers": True},
+        "category": "band", "highlight": False, "includes_covers": True, "requires_ownership": True},
     {"key": "under18_band", "name": "Under-18 Band", "tagline": "Young Stars", "price": 2.98, "period": "month",
         "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "Safe community features"],
-        "category": "band", "highlight": False, "includes_covers": False},
+        "category": "band", "highlight": False, "includes_covers": False, "requires_ownership": True},
     # ── Covers Add-on ──
     {"key": "covers_addon", "name": "Covers Add-on", "tagline": "For any plan", "price": 5.98, "period": "month",
         "features": ["Unlimited cover recordings", "Cover distribution rights", "Stack with any subscription"],
-        "category": "addon", "highlight": False, "includes_covers": True},
+        "category": "addon", "highlight": False, "includes_covers": True, "requires_ownership": False},
 ]
+
+# Tiers locked behind Creator Ecosystem ownership
+LOCKED_TIERS = {t["key"] for t in SUBSCRIPTION_TIERS if t.get("requires_ownership")}
 
 # Revenue split: 70% artist / 30% platform
 PLATFORM_CUT = 0.30
@@ -57,13 +61,31 @@ ARTIST_CUT = 0.70
 PAY_PER_SONG_PRICE = 0.79  # Cheaper than iTunes $0.99
 
 @router.get("/subscriptions/tiers")
-async def list_tiers():
-    return {"success": True, "tiers": SUBSCRIPTION_TIERS}
+async def list_tiers(user_id: str = None):
+    """Return all subscription tiers. If user_id provided, includes per-tier `locked` flag."""
+    is_owned = False
+    if user_id:
+        own = await db.ownership.find_one({"user_id": user_id}, {"_id": 0})
+        is_owned = bool(own and own.get("status") == "owned")
+    tiers = []
+    for t in SUBSCRIPTION_TIERS:
+        tier = dict(t)
+        tier["locked"] = bool(t.get("requires_ownership") and not is_owned)
+        tiers.append(tier)
+    return {"success": True, "tiers": tiers, "is_owned": is_owned}
 
 @router.post("/subscriptions/select")
 async def select_subscription(payload: SubscriptionSelect):
     tier = next((t for t in SUBSCRIPTION_TIERS if t["key"] == payload.tier_key), None)
     if not tier: raise HTTPException(status_code=400, detail="Invalid tier key")
+    # ── Ownership gate ──
+    if tier.get("requires_ownership"):
+        own = await db.ownership.find_one({"user_id": payload.user_id}, {"_id": 0})
+        if not own or own.get("status") != "owned":
+            raise HTTPException(
+                status_code=403,
+                detail="Creator Ecosystem ownership required to unlock this discounted tier.",
+            )
     now = datetime.now(timezone.utc)
     sub_doc = {"user_id": payload.user_id, "tier_key": tier["key"], "tier_name": tier["name"], "price": tier["price"],
         "status": "trial", "trial_end": (now + timedelta(days=30)).isoformat(), "started_at": now.isoformat(),
