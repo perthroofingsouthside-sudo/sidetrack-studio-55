@@ -16,23 +16,27 @@ STRIPE_API_KEY = os.environ.get("STRIPE_API_KEY", "")
 
 # Fixed tier prices — NEVER accept amounts from frontend
 TIER_PRICES = {
-    "stadium_vip": 4.98,
+    "listener": 4.98,
     "individual": 11.98,
+    "individual_covers": 15.98,
     "student": 9.98,
     "couple_duo": 14.98,
     "family": 20.98,
     "adult_band": 17.98,
     "under18_band": 2.98,
+    "covers_addon": 5.98,
 }
 
 TIER_NAMES = {
-    "stadium_vip": "Stadium VIP",
-    "individual": "Individual",
-    "student": "Student",
+    "listener": "Listener",
+    "individual": "Individual Creator",
+    "individual_covers": "Creator + Covers",
+    "student": "Student Creator",
     "couple_duo": "Couple / Duo",
     "family": "Family",
     "adult_band": "Adult Band",
     "under18_band": "Under-18 Band",
+    "covers_addon": "Covers Add-on",
 }
 
 

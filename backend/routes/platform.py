@@ -1,5 +1,6 @@
 """Subscriptions, band activity, rewards, trim, social, discovery, sync, chat."""
 from fastapi import APIRouter, HTTPException, Form, WebSocket, WebSocketDisconnect
+from pydantic import BaseModel
 from database import db
 from models import SubscriptionSelect, TrimRequest, FollowAction
 import uuid
@@ -15,21 +16,45 @@ router = APIRouter()
 
 # ── Subscription Tiers ──────────────────────────
 SUBSCRIPTION_TIERS = [
-    {"key": "stadium_vip", "name": "Stadium VIP", "tagline": "Fan Pass", "price": 4.98, "period": "month",
-        "features": ["Save & share personal mixes to profile", "Exclusive neon chat badges & emojis", "Priority DM access to artists during live sessions"], "category": "fan", "highlight": True},
-    {"key": "individual", "name": "Individual", "tagline": "Solo Artist", "price": 11.98, "period": "month",
-        "features": ["Unlimited skips", "Full stem separation", "HD audio export", "All karaoke features"], "category": "creator", "highlight": False},
-    {"key": "student", "name": "Student", "tagline": "Study & Play", "price": 9.98, "period": "month",
-        "features": ["All Individual features", "Valid student email required", "Discounted creator tools"], "category": "creator", "highlight": False},
+    # ── Listener Tier ──
+    {"key": "listener", "name": "Listener", "tagline": "Just the Music", "price": 4.98, "period": "month",
+        "features": ["Unlimited streaming", "Curated MTV / MOS / Hip-Hop playlists", "50 skips/day", "Synced lyrics"],
+        "category": "listener", "highlight": True, "includes_covers": False},
+    # ── Creator Tiers ──
+    {"key": "individual", "name": "Individual Creator", "tagline": "Solo Artist", "price": 11.98, "period": "month",
+        "features": ["Everything in Listener", "Full stem separation", "HD audio export", "Karaoke & recording", "Battle entry"],
+        "category": "creator", "highlight": False, "includes_covers": False},
+    {"key": "individual_covers", "name": "Creator + Covers", "tagline": "Full License", "price": 15.98, "period": "month",
+        "features": ["Everything in Individual", "Unlimited cover recordings", "Cover distribution rights", "Priority in Battles"],
+        "category": "creator", "highlight": True, "includes_covers": True},
+    {"key": "student", "name": "Student Creator", "tagline": "Study & Play", "price": 9.98, "period": "month",
+        "features": ["All Individual features", "Valid student email required", "Discounted creator tools"],
+        "category": "creator", "highlight": False, "includes_covers": False},
     {"key": "couple_duo", "name": "Couple / Duo", "tagline": "Two Voices", "price": 14.98, "period": "month",
-        "features": ["2 accounts", "Shared duet workspace", "Unlimited skips for both", "Priority duet matching"], "category": "creator", "highlight": False},
+        "features": ["2 accounts", "Shared duet workspace", "Unlimited skips for both", "Priority duet matching"],
+        "category": "creator", "highlight": False, "includes_covers": False},
     {"key": "family", "name": "Family", "tagline": "Up to 5 members", "price": 20.98, "period": "month",
-        "features": ["5 individual accounts", "Family mix playlists", "Parental controls", "All creator features"], "category": "creator", "highlight": False},
+        "features": ["5 individual accounts", "Family mix playlists", "Parental controls", "All creator features"],
+        "category": "creator", "highlight": False, "includes_covers": False},
+    # ── Band Tiers ──
     {"key": "adult_band", "name": "Adult Band", "tagline": "Active Band", "price": 17.98, "period": "month",
-        "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "1 upload/week to stay active"], "category": "band", "highlight": False},
+        "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "Covers included", "1 upload/week to stay active"],
+        "category": "band", "highlight": False, "includes_covers": True},
     {"key": "under18_band", "name": "Under-18 Band", "tagline": "Young Stars", "price": 2.98, "period": "month",
-        "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "Safe community features"], "category": "band", "highlight": False},
+        "features": ["Up to 8 members", "Band collaboration room", "Shared stem library", "Safe community features"],
+        "category": "band", "highlight": False, "includes_covers": False},
+    # ── Covers Add-on ──
+    {"key": "covers_addon", "name": "Covers Add-on", "tagline": "For any plan", "price": 5.98, "period": "month",
+        "features": ["Unlimited cover recordings", "Cover distribution rights", "Stack with any subscription"],
+        "category": "addon", "highlight": False, "includes_covers": True},
 ]
+
+# Revenue split: 70% artist / 30% platform
+PLATFORM_CUT = 0.30
+ARTIST_CUT = 0.70
+
+# Pay-per-song pricing for tracks outside curated catalog
+PAY_PER_SONG_PRICE = 0.79  # Cheaper than iTunes $0.99
 
 @router.get("/subscriptions/tiers")
 async def list_tiers():
@@ -73,6 +98,89 @@ async def record_band_upload(user_id: str):
     await db.band_uploads.insert_one({"user_id": user_id, "uploaded_at": now.isoformat()})
     await db.subscriptions.update_one({"user_id": user_id}, {"$set": {"last_upload": now.isoformat()}})
     return {"success": True, "message": "Upload recorded"}
+
+
+# ── Pay-Per-Song: Purchase tracks outside curated catalog ──
+
+class SongPurchase(BaseModel):
+    user_id: str
+    track_id: str
+    title: str = ""
+    artist: str = ""
+    price: float = 0  # Ignored server-side — price is enforced
+
+
+@router.post("/store/purchase")
+async def purchase_song(purchase: SongPurchase):
+    """Purchase a song outside the curated catalog. 70/30 artist/platform split."""
+    # Check if already purchased
+    existing = await db.song_purchases.find_one(
+        {"user_id": purchase.user_id, "track_id": purchase.track_id}, {"_id": 0}
+    )
+    if existing:
+        return {"success": True, "already_owned": True, "message": "You already own this track"}
+
+    now = datetime.now(timezone.utc).isoformat()
+    price = PAY_PER_SONG_PRICE  # Server-enforced, never from client
+    artist_share = round(price * ARTIST_CUT, 2)
+    platform_share = round(price * PLATFORM_CUT, 2)
+
+    doc = {
+        "id": str(uuid.uuid4()),
+        "user_id": purchase.user_id,
+        "track_id": purchase.track_id,
+        "title": purchase.title,
+        "artist": purchase.artist,
+        "price": price,
+        "artist_share": artist_share,
+        "platform_share": platform_share,
+        "purchased_at": now,
+    }
+    await db.song_purchases.insert_one(doc)
+
+    return {
+        "success": True,
+        "purchase_id": doc["id"],
+        "price": price,
+        "artist_share": artist_share,
+        "platform_share": platform_share,
+        "message": f"Purchased for ${price:.2f} (${artist_share:.2f} to artist, ${platform_share:.2f} platform fee)",
+    }
+
+
+@router.get("/store/library/{user_id}")
+async def get_user_library(user_id: str):
+    """Get all songs a user has purchased."""
+    purchases = await db.song_purchases.find(
+        {"user_id": user_id}, {"_id": 0}
+    ).sort("purchased_at", -1).to_list(200)
+    return {"success": True, "purchases": purchases, "count": len(purchases)}
+
+
+@router.get("/store/check/{user_id}/{track_id}")
+async def check_ownership(user_id: str, track_id: str):
+    """Check if a user owns a specific track."""
+    owned = await db.song_purchases.find_one(
+        {"user_id": user_id, "track_id": track_id}, {"_id": 0}
+    )
+    return {"success": True, "owned": owned is not None}
+
+
+@router.get("/store/pricing")
+async def get_store_pricing():
+    """Get pay-per-song pricing and revenue split info."""
+    return {
+        "success": True,
+        "price_per_song": PAY_PER_SONG_PRICE,
+        "artist_cut_pct": int(ARTIST_CUT * 100),
+        "platform_cut_pct": int(PLATFORM_CUT * 100),
+        "curated_categories": [
+            "MTV Classics (1981-1998)",
+            "Ministry of Sound Collection",
+            "Top 200 Hip-Hop Albums",
+        ],
+        "note": "Songs in curated playlists are included with any subscription. Songs outside require purchase.",
+    }
 
 # ── Active Band Auto-Downgrade ──────────────────
 
