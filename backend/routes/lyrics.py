@@ -155,7 +155,9 @@ def parse_plain(plain_raw: str) -> list:
 async def get_lyrics(song_id: str):
     song = await db.songs.find_one({"id": song_id}, {"_id": 0})
     if not song:
-        raise HTTPException(status_code=404, detail="Song not found")
+        # For iTunes tracks not in DB, return a redirect hint instead of 404
+        # so frontend knows to use /lyrics/fetch directly
+        return {"success": False, "message": "Song not in DB — use /lyrics/fetch", "use_direct": True}
     title, artist, genre = song.get('title', ''), song.get('artist', ''), song.get('genre', '')
     try:
         params = {"track_name": title, "artist_name": artist}
@@ -178,8 +180,10 @@ async def get_lyrics(song_id: str):
                     if lines:
                         return {"success": True, "song_id": song_id, "title": title, "artist": artist,
                             "lyrics": lines, "chords": chords, "synced": False, "source": "lrclib", "key": key}
+    except httpx.TimeoutException:
+        logger.info(f"LRCLIB timeout for song '{title}'")
     except Exception as e:
-        logger.warning(f"LRCLIB fetch failed: {e}")
+        logger.warning(f"LRCLIB fetch error for '{title}': {type(e).__name__}: {e}")
     mock_data = get_mock_lyrics(title, artist)
     return {"success": True, "song_id": song_id, "title": title, "artist": artist, **mock_data, "synced": False, "source": "mock"}
 
@@ -203,11 +207,15 @@ async def search_lyrics(track: str, artist: str = ""):
 
 @router.get("/lyrics/fetch")
 async def fetch_lyrics_direct(track: str, artist: str = ""):
+    """Fetch full parsed lyrics from LRCLIB by track name and artist (no DB lookup)."""
+    if not track:
+        mock_data = get_mock_lyrics(track, artist)
+        return {"success": True, "title": track, "artist": artist, **mock_data, "synced": False, "source": "mock"}
     try:
         params = {"track_name": track}
         if artist:
             params["artist_name"] = artist
-        async with httpx.AsyncClient(timeout=8) as c:
+        async with httpx.AsyncClient(timeout=10) as c:
             resp = await c.get("https://lrclib.net/api/get", params=params)
             if resp.status_code == 200:
                 data = resp.json()
@@ -226,8 +234,13 @@ async def fetch_lyrics_direct(track: str, artist: str = ""):
                     if lines:
                         return {"success": True, "title": data.get("trackName", track), "artist": data.get("artistName", artist),
                             "lyrics": lines, "chords": chords, "synced": False, "source": "lrclib", "key": key}
+                # LRCLIB returned 200 but no usable lyrics — fall through to mock
+            # Non-200 (404/500/etc) — song not in LRCLIB, fall through silently
+    except httpx.TimeoutException:
+        logger.info(f"LRCLIB timeout for '{track}' by '{artist}'")
     except Exception as e:
-        logger.warning(f"LRCLIB direct fetch failed: {e}")
+        logger.warning(f"LRCLIB fetch error for '{track}': {type(e).__name__}: {e}")
+    # Fallback to generated mock lyrics with music-theory chords
     mock_data = get_mock_lyrics(track, artist)
     return {"success": True, "title": track, "artist": artist, **mock_data, "synced": False, "source": "mock"}
 

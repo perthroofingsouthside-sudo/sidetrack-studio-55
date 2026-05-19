@@ -1,4 +1,4 @@
-"""Pydantic models for SIDETRACK backend."""
+"""Pydantic models for Pocket Products backend."""
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List
 import uuid

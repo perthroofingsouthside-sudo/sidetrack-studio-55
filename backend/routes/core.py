@@ -7,7 +7,7 @@ router = APIRouter()
 
 @router.get("/")
 async def root():
-    return {"message": "SIDETRACK API"}
+    return {"message": "Pocket Products API"}
 
 
 @router.get("/health")

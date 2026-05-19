@@ -138,7 +138,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
               </div>
               <div>
                 <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black tracking-[-0.03em] leading-none">
-                  <span className="text-white">SIDE</span><span className="text-[#FF6B00]">TRACK</span>
+                  <span className="text-white">Pocket</span><span className="text-[#FF6B00]"> Products</span>
                 </h1>
               </div>
             </div>

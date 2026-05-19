@@ -1,4 +1,4 @@
-"""Stripe payment routes for SIDETRACK subscription tiers."""
+"""Stripe payment routes for Pocket Products subscription tiers."""
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 from database import db

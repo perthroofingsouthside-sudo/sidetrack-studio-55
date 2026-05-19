@@ -187,7 +187,7 @@ export default function PricingPage({ onBack }) {
                 Go <span className="text-[#FF6B00] glow-text-orange">Pro</span>
               </h1>
               <p className="text-xs sm:text-sm text-[#5C5C6B] mt-1">
-                Unlock the full SIDETRACK experience
+                Unlock the full Pocket Products experience
               </p>
             </div>
           </div>

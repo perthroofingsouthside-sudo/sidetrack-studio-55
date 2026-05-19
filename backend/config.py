@@ -1,4 +1,4 @@
-"""Shared configuration for SIDETRACK backend."""
+"""Shared configuration for Pocket Products backend."""
 import os
 
 RAPIDAPI_KEY = os.environ.get('RAPIDAPI_KEY', '')

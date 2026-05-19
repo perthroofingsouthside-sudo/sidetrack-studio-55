@@ -1,4 +1,4 @@
-"""Shared database connection for SIDETRACK backend."""
+"""Shared database connection for Pocket Products backend."""
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 

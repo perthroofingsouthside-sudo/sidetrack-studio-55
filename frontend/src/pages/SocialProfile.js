@@ -101,7 +101,7 @@ export default function SocialProfile({ onNavigate }) {
                   </>
                 )}
               </div>
-              <p className="text-xs text-[#5C5C6B] mt-1">SIDETRACK member</p>
+              <p className="text-xs text-[#5C5C6B] mt-1">Pocket Products member</p>
 
               {/* Follower counts */}
               {liveStats && (

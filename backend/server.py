@@ -1,4 +1,4 @@
-"""SIDETRACK API — Modular FastAPI backend.
+"""Pocket Products API — Modular FastAPI backend.
 Routes are organized into domain modules under /routes/.
 """
 from fastapi import FastAPI, APIRouter, WebSocket, WebSocketDisconnect
@@ -15,7 +15,7 @@ load_dotenv(ROOT_DIR / '.env')
 # Import shared state
 from database import db, client
 
-app = FastAPI(title="SIDETRACK API")
+app = FastAPI(title="Pocket Products API")
 api_router = APIRouter(prefix="/api")
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
