@@ -53,7 +53,11 @@ export function getCentDeviation(detectedFreq: number, targetFreq: number): numb
 /**
  * Check if detected pitch is within tolerance
  */
-export function isPitchInTune(detectedFreq: number, targetFreq: number, toleranceCents: number = 50): boolean {
+export function isPitchInTune(
+  detectedFreq: number,
+  targetFreq: number,
+  toleranceCents: number = 50,
+): boolean {
   const deviation = Math.abs(getCentDeviation(detectedFreq, targetFreq));
   return deviation <= toleranceCents;
 }
@@ -191,5 +195,9 @@ export function getMidiNoteName(note: number): string {
  * Check if two frequencies are within an octave
  */
 export function isSameNote(freq1: number, freq2: number, tolerance: number = 50): boolean {
-  return isPitchInTune(freq1, freq2, tolerance) || isPitchInTune(freq1, freq2 * 2, tolerance) || isPitchInTune(freq1, freq2 / 2, tolerance);
+  return (
+    isPitchInTune(freq1, freq2, tolerance) ||
+    isPitchInTune(freq1, freq2 * 2, tolerance) ||
+    isPitchInTune(freq1, freq2 / 2, tolerance)
+  );
 }
