@@ -220,7 +220,7 @@ export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlayli
               <Plus className="w-4 h-4 text-[#39FF14]" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-white">Create your first playlist</p>
+              <p className="text-sm font-bold text-white">Create a playlist</p>
               <p className="text-[10px] text-[#5C5C6B]">Tap to start collecting your tracks</p>
             </div>
           </button>

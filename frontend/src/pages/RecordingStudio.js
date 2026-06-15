@@ -144,7 +144,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   return (
     <div className="bg-[#05050A] flex flex-row max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
       {/* ── LEFT SIDEBAR — Pocket Products + Layout tabs + Toggles + Chat ── */}
-      <aside className="w-[140px] sm:w-[160px] flex-shrink-0 crystal-glass border-r border-white/5 flex flex-col z-20" data-testid="stage-sidebar">
+      <aside className="w-[140px] sm:w-[160px] flex-shrink-0 crystal-glass border-r border-white/5 flex flex-col z-20 overflow-y-auto scrollbar-hide" data-testid="stage-sidebar">
         {/* Brand */}
         <div className="px-2.5 pt-2.5 pb-2 flex items-start gap-2 border-b border-white/5">
           <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack}
@@ -232,9 +232,9 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           </div>
         )}
 
-        {/* Jam Room — Creator lane only (band sessions). Scrollable container so it never overflows the sidebar. */}
+        {/* Jam Room — Creator lane only (band sessions). */}
         {lane === "creator" && (
-          <div className="flex-1 min-h-0 overflow-y-auto px-1.5 pb-2 scrollbar-hide">
+          <div className="px-1.5 pb-2">
             <JamRoomPanel song={song} />
           </div>
         )}

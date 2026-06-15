@@ -140,8 +140,12 @@ async def create_recording(recording: RecordingCreate):
 
 
 @router.get("/recordings")
-async def list_recordings():
-    recordings = await db.recordings.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
+async def list_recordings(user_id: str = None):
+    """List recordings, optionally filtered to a single user (used by Studio's My Tracks)."""
+    q = {}
+    if user_id:
+        q = {"$or": [{"user_id": user_id}, {"owner_id": user_id}]}
+    recordings = await db.recordings.find(q, {"_id": 0}).sort("created_at", -1).to_list(100)
     return {"success": True, "recordings": recordings}
 
 
