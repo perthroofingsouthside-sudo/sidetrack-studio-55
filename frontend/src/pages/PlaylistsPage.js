@@ -126,7 +126,7 @@ export default function PlaylistsPage({ onTrackSelect }) {
             {(selectedPlaylist.tracks || []).length === 0 && (
               <div className="surface-card p-8 text-center">
                 <ListMusic className="w-10 h-10 text-[#FF6B00]/20 mx-auto mb-3" />
-                <p className="text-sm text-[#606070]">No tracks yet. Search for songs on the Stream page and add them!</p>
+                <p className="text-sm text-[#606070]">No tracks yet. Search for songs on the Discover page and add them!</p>
               </div>
             )}
             {(selectedPlaylist.tracks || []).map((track, idx) => (

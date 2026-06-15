@@ -141,8 +141,9 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
   return (
     <div className="bg-[#05050A] flex flex-col max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
-      {/* Header bar */}
-      <div className="crystal-glass px-3 py-2 flex items-center gap-2 flex-shrink-0 z-20">
+      {/* ── Header — Two rows ─────────────────────── */}
+      {/* Row 1: Pocket Products at the top, full width */}
+      <div className="crystal-glass px-3 pt-2 pb-1.5 flex items-center gap-2 flex-shrink-0 z-20">
         <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#8F8F9D] hover:text-white w-8 h-8">
           <ArrowLeft className="w-4 h-4" />
         </Button>
@@ -159,14 +160,22 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
             {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
           </div>
         </div>
-        {/* AI Background Removal Toggle */}
+      </div>
+
+      {/* Row 2: Action toggles — Chat / AI BG / Cleanup on the LEFT under PP */}
+      <div className="px-3 pb-2 pt-1 flex items-center gap-1.5 flex-shrink-0 z-20" data-testid="stage-toolbar">
+        <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
+          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
+            showChat ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B]"
+          }`}>
+          <MessageCircle className="w-3 h-3" /> Chat
+        </Button>
         <Button data-testid="ai-bg-toggle" variant="ghost" onClick={() => setAiBgRemoval(!aiBgRemoval)}
-          className={`h-8 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
+          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
             aiBgRemoval ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B]"
           }`}>
-          <Wand2 className="w-3.5 h-3.5" /> AI BG
+          <Wand2 className="w-3 h-3" /> AI BG
         </Button>
-        {/* Live AI Cleanup Toggle */}
         <Button data-testid="live-cleanup-toggle" variant="ghost" onClick={async () => {
           const next = !liveCleanup;
           setLiveCleanup(next);
@@ -180,21 +189,26 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
             }
           } catch (e) { console.error("cleanup toggle err", e); }
         }}
-          className={`h-8 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
+          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
             liveCleanup ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10" : "border-white/10 text-[#5C5C6B]"
           }`}>
-          <Sparkles className="w-3.5 h-3.5" /> Cleanup
-        </Button>
-        <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
-          className={`h-8 px-2.5 rounded-full text-xs gap-1 border ${showChat ? "border-[#39FF14]/40 text-[#39FF14]" : "border-white/10 text-[#5C5C6B]"}`}>
-          <MessageCircle className="w-3.5 h-3.5" />
+          <Sparkles className="w-3 h-3" /> Cleanup
         </Button>
       </div>
+
+      {/* Inline Chat panel — drops down UNDER the header, doesn't cover the stage */}
+      {showChat && (
+        <div className="px-2 pb-1.5 flex-shrink-0 z-10" data-testid="stage-chat-panel">
+          <div className="rounded-xl border border-[#39FF14]/20 overflow-hidden" style={{ maxHeight: "32vh" }}>
+            <LiveChat trackTitle={song?.title} />
+          </div>
+        </div>
+      )}
 
       {/* Main stage area */}
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Stage content */}
-        <div className={`flex-1 flex flex-col min-w-0 ${showChat ? "lg:mr-0" : ""}`}>
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Layout Selector */}
           <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
             {LAYOUTS.map((l) => (
@@ -455,12 +469,6 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           </div>
         </div>
 
-        {/* Chat sidebar */}
-        {showChat && (
-          <div className="w-[280px] lg:w-[300px] flex-shrink-0 p-2 hidden sm:block" data-testid="stage-chat-panel">
-            <LiveChat trackTitle={song?.title} />
-          </div>
-        )}
       </div>
 
       {/* ── Trim & Share Modal ──────────────────── */}
