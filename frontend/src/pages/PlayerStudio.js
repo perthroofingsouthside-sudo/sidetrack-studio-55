@@ -212,20 +212,20 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
     return lyrics.chords.slice(idx, idx + 4);
   }, [lyrics?.chords, currentTime]);
 
-  // Auto-scroll lyrics — ONLY inside the lyrics container.
-  // Previously used scrollIntoView which hijacked the whole page; now we
-  // calculate the offset relative to the scroll container and only move that.
-  useEffect(() => {
+  // Lyrics auto-scroll DISABLED by user request.
+  // The page was being hijacked on every active-line change. Users can manually
+  // tap the "Sync to current line" button below the lyrics to jump.
+  const scrollToActiveLyric = useCallback(() => {
     if (activeLyricIdx < 0 || !lyricsScrollRef.current) return;
     const container = lyricsScrollRef.current;
     const el = container.querySelector(`[data-lyric-idx="${activeLyricIdx}"]`);
     if (!el) return;
-    // Compute the el's offset relative to the scroll container,
-    // then scroll the container only — never the window/page.
     const containerRect = container.getBoundingClientRect();
     const elRect = el.getBoundingClientRect();
     const targetTop = container.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
-    container.scrollTo({ top: targetTop, behavior: "smooth" });
+    // Use 'auto' (not smooth) so even if scrolling propagates, it's instant —
+    // and confined to this container only via scrollTop (not scrollTo).
+    container.scrollTop = Math.max(0, targetTop);
   }, [activeLyricIdx]);
 
   if (!song) return <StudioSearchScreen onSongSelect={onSongSelect} />;
@@ -303,19 +303,30 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
             <AlignLeft className="w-4 h-4 text-[#39FF14]" /> Lyrics
             {lyrics?.synced && <span className="text-[8px] px-1.5 py-0.5 rounded-full bg-[#39FF14]/15 text-[#39FF14] uppercase font-bold">Synced</span>}
           </h3>
-          {/* Chords Toggle */}
-          <Button
-            data-testid="chords-toggle-btn"
-            variant="ghost"
-            onClick={() => setShowChords(!showChords)}
-            className={`h-7 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1 border transition-all ${
-              showChords
-                ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10"
-                : "border-white/10 text-[#5C5C6B] hover:border-white/20"
-            }`}
-          >
-            <Guitar className="w-3 h-3" /> Chords {showChords ? "On" : "Off"}
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Manual Sync — opt-in, never hijacks the page */}
+            <Button
+              data-testid="lyrics-sync-btn"
+              variant="ghost"
+              onClick={scrollToActiveLyric}
+              className="h-7 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1 border border-[#39FF14]/30 text-[#39FF14] bg-[#39FF14]/10 hover:bg-[#39FF14]/20 transition-all"
+            >
+              <AlignLeft className="w-3 h-3" /> Sync
+            </Button>
+            {/* Chords Toggle */}
+            <Button
+              data-testid="chords-toggle-btn"
+              variant="ghost"
+              onClick={() => setShowChords(!showChords)}
+              className={`h-7 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1 border transition-all ${
+                showChords
+                  ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10"
+                  : "border-white/10 text-[#5C5C6B] hover:border-white/20"
+              }`}
+            >
+              <Guitar className="w-3 h-3" /> Chords {showChords ? "On" : "Off"}
+            </Button>
+          </div>
         </div>
 
         {/* Chords strip — visible when toggled on */}
