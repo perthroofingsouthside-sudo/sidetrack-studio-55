@@ -1,12 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Mic, Loader2, Search } from "lucide-react";
+import { Mic, Loader2, Search, ListMusic, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 
-export default function HomePage({ onSongRecognized, onTrackSelect, nowPlaying }) {
+export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlaylists, nowPlaying }) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState("");
@@ -14,9 +14,11 @@ export default function HomePage({ onSongRecognized, onTrackSelect, nowPlaying }
   const [results, setResults] = useState([]);
   const [hipHop, setHipHop] = useState([]);
   const [altRock, setAltRock] = useState([]);
+  const [playlists, setPlaylists] = useState([]);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
+  const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
 
   useEffect(() => {
     return () => {
@@ -24,15 +26,16 @@ export default function HomePage({ onSongRecognized, onTrackSelect, nowPlaying }
     };
   }, []);
 
-  // Load side rail albums on mount (Hip-Hop left, Alt-Rock right)
+  // Load side rail albums on mount (Hip-Hop left, Alt-Rock right) + user playlists
   useEffect(() => {
     const load = async () => {
       try {
-        const [hh1, hh2, ar1, ar2] = await Promise.all([
+        const [hh1, hh2, ar1, ar2, pls] = await Promise.all([
           axios.get(`${API}/music/search?q=${encodeURIComponent("hip hop")}&limit=20`),
           axios.get(`${API}/music/search?q=${encodeURIComponent("rap")}&limit=20`),
           axios.get(`${API}/music/search?q=${encodeURIComponent("alternative rock")}&limit=20`),
           axios.get(`${API}/music/search?q=${encodeURIComponent("indie rock")}&limit=20`),
+          axios.get(`${API}/playlists?owner=${encodeURIComponent(userId.current)}`),
         ]);
         const pickFour = (lists) => {
           const seen = new Set();
@@ -50,6 +53,7 @@ export default function HomePage({ onSongRecognized, onTrackSelect, nowPlaying }
         };
         setHipHop(pickFour([hh1.data?.tracks, hh2.data?.tracks]));
         setAltRock(pickFour([ar1.data?.tracks, ar2.data?.tracks]));
+        setPlaylists(pls.data?.playlists || []);
       } catch (err) { /* silent — the page still works */ }
     };
     load();
@@ -188,6 +192,72 @@ export default function HomePage({ onSongRecognized, onTrackSelect, nowPlaying }
             Search
           </Button>
         </div>
+      </div>
+
+      {/* YOUR PLAYLISTS — quick selector */}
+      <div className="relative z-10 mt-5 w-full max-w-md" data-testid="discover-playlists">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />
+            <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black">Your Playlists</p>
+          </div>
+          <button
+            onClick={() => onOpenPlaylists && onOpenPlaylists()}
+            data-testid="discover-playlists-manage"
+            className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider transition-colors"
+          >
+            Manage →
+          </button>
+        </div>
+
+        {playlists.length === 0 ? (
+          <button
+            onClick={() => onOpenPlaylists && onOpenPlaylists()}
+            data-testid="discover-playlists-empty"
+            className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-[#39FF14]/25 hover:border-[#39FF14]/60 hover:bg-[#39FF14]/5 transition-all text-left group"
+          >
+            <div className="w-10 h-10 rounded-lg bg-[#39FF14]/10 flex items-center justify-center group-hover:bg-[#39FF14]/20 transition-colors">
+              <Plus className="w-4 h-4 text-[#39FF14]" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-white">Create your first playlist</p>
+              <p className="text-[10px] text-[#5C5C6B]">Tap to start collecting your tracks</p>
+            </div>
+          </button>
+        ) : (
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="discover-playlists-row">
+            {playlists.slice(0, 8).map((pl, idx) => (
+              <button
+                key={pl.id || idx}
+                onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
+                data-testid={`discover-playlist-${idx}`}
+                className="flex-shrink-0 w-28 rounded-xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
+              >
+                <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+                  {pl.cover_url ? (
+                    <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <ListMusic className="w-7 h-7 text-[#39FF14]/40 group-hover:text-[#39FF14] transition-colors" />
+                  )}
+                </div>
+                <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
+                <p className="text-[10px] text-[#5C5C6B] truncate">
+                  {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
+                </p>
+              </button>
+            ))}
+            <button
+              onClick={() => onOpenPlaylists && onOpenPlaylists()}
+              data-testid="discover-playlists-add"
+              className="flex-shrink-0 w-28 rounded-xl border border-dashed border-white/10 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all flex flex-col items-center justify-center p-2 gap-1.5"
+            >
+              <div className="w-9 h-9 rounded-lg bg-[#39FF14]/10 flex items-center justify-center">
+                <Plus className="w-4 h-4 text-[#39FF14]" />
+              </div>
+              <p className="text-[10px] text-[#5C5C6B] font-bold uppercase tracking-wider">New</p>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* SIDE ALBUM RAILS — hidden on tiny screens, shown sm+ */}

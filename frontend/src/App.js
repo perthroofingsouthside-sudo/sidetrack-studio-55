@@ -178,6 +178,7 @@ function App() {
           <HomePage
             onSongRecognized={handleSongRecognized}
             onTrackSelect={handleTrackSelect}
+            onOpenPlaylists={() => setCurrentView("playlists")}
             nowPlaying={nowPlaying}
           />
         );
