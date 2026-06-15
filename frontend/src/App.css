@@ -1,14 +1,372 @@
-/* App-level animations and transitions */
-.page-enter {
-  animation: slide-up 0.4s ease-out forwards;
+/* SIDETRACK DESIGN SYSTEM - Enhanced Visual Consistency */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 1. GLOBAL COLOR PALETTE */
+/* ═══════════════════════════════════════════════════════════════ */
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #05050A;
+  --bg-secondary: #0A0A0F;
+  --bg-tertiary: #0F0F16;
+  --bg-surface: #12121A;
+  
+  /* Accent Colors */
+  --color-orange: #FF6B00;
+  --color-orange-hover: #FF8533;
+  --color-lime: #39FF14;
+  --color-cyan: #00E5FF;
+  --color-purple: #8A2BE2;
+  
+  /* Neutral Colors */
+  --text-primary: #FFFFFF;
+  --text-secondary: #A0A0B0;
+  --text-tertiary: #5C5C6B;
+  --text-quaternary: #8F8F9D;
+  
+  /* Borders & Dividers */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-color-accent: rgba(255, 107, 0, 0.2);
+  --border-color-success: rgba(57, 255, 20, 0.2);
 }
 
-/* Recording pulse */
+/* ═══════════════════════════════════════════════════════════════ */
+/* 2. TYPOGRAPHY */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Heading - Outfit Bold */
+.font-heading {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Body - Manrope Regular */
+.font-body {
+  font-family: 'Manrope', sans-serif;
+  font-weight: 400;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 3. INTERACTIVE STATES */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Primary CTA Button */
+.btn-primary {
+  background: linear-gradient(135deg, #FF6B00 0%, #FF8533 100%);
+  color: white;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-primary:focus {
+  outline: 2px solid #FF6B00;
+  outline-offset: 2px;
+  box-shadow: 0 0 24px rgba(255, 107, 0, 0.5);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Secondary CTA Button */
+.btn-secondary {
+  background: transparent;
+  border: 1.5px solid rgba(255, 107, 0, 0.3);
+  color: #FF6B00;
+  transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 107, 0, 0.1);
+  border-color: rgba(255, 107, 0, 0.6);
+  box-shadow: 0 0 16px rgba(255, 107, 0, 0.2);
+}
+
+.btn-secondary:focus {
+  outline: 2px solid #FF6B00;
+  outline-offset: 2px;
+}
+
+/* Ghost Button */
+.btn-ghost {
+  background: transparent;
+  color: #A0A0B0;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.btn-ghost:hover {
+  color: #FF6B00;
+  background: rgba(255, 107, 0, 0.08);
+}
+
+.btn-ghost:focus {
+  outline: 2px solid #FF6B00;
+  outline-offset: 2px;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 4. SURFACES & CARDS */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Crystal Glass - Floating Elements */
+.glass-crystal {
+  background: rgba(5, 5, 10, 0.4);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.glass-heavy {
+  background: rgba(5, 5, 10, 0.6);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Retro Terminal - Chat/Code Surfaces */
+.retro-terminal {
+  background: linear-gradient(135deg, rgba(15, 15, 22, 0.8) 0%, rgba(18, 18, 26, 0.6) 100%);
+  border: 1px solid rgba(57, 255, 20, 0.15);
+  border-radius: 12px;
+  position: relative;
+}
+
+.retro-terminal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(57, 255, 20, 0.02) 0px,
+    transparent 1px,
+    transparent 2px,
+    rgba(57, 255, 20, 0.02) 3px
+  );
+  pointer-events: none;
+  border-radius: 12px;
+}
+
+/* Surface Card - Standard Card */
+.surface-card {
+  background: rgba(18, 18, 26, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.surface-card:hover {
+  border-color: rgba(255, 107, 0, 0.2);
+  background: rgba(18, 18, 26, 0.7);
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 5. NEON GLOW EFFECTS */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Orange Glow - Primary Action */
+.glow-orange {
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4),
+              0 0 40px rgba(255, 107, 0, 0.2),
+              inset 0 0 20px rgba(255, 107, 0, 0.1);
+}
+
+/* Lime Glow - Success/Active */
+.glow-lime {
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.3),
+              0 0 40px rgba(57, 255, 20, 0.15),
+              inset 0 0 20px rgba(57, 255, 20, 0.08);
+}
+
+/* Cyan Glow - Accent */
+.glow-cyan {
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.2),
+              0 0 40px rgba(0, 229, 255, 0.1);
+}
+
+/* Neon Progress Bar */
+.neon-progress {
+  background: linear-gradient(90deg, #FF6B00 0%, #39FF14 100%);
+  box-shadow: 0 0 10px rgba(255, 107, 0, 0.5),
+              0 0 20px rgba(57, 255, 20, 0.3);
+}
+
+/* Neon Ambient Glow */
+.neon-ambient-glow {
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.15),
+              inset 0 0 10px rgba(255, 107, 0, 0.05);
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 6. ANIMATIONS */
+/* ═══════════════════════════════════════════════════════════════ */
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 107, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+  }
+}
+
+@keyframes chat-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes rec-pulse {
   0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
   50% { box-shadow: 0 0 0 12px rgba(255, 59, 48, 0); }
 }
 
+.animate-slide-up {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-in;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-chat-in {
+  animation: chat-in 0.3s ease-out;
+}
+
+.animate-rec-pulse {
+  animation: rec-pulse 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 7. INPUT & FORM STATES */
+/* ═══════════════════════════════════════════════════════════════ */
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  background: rgba(15, 15, 22, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  transition: all 0.3s ease;
+  border-radius: 12px;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea:focus {
+  border-color: #FF6B00;
+  background: rgba(15, 15, 22, 0.8);
+  box-shadow: 0 0 16px rgba(255, 107, 0, 0.2);
+  outline: none;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+textarea::placeholder {
+  color: #5C5C6B;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 8. SCROLLBAR STYLING */
+/* ═══════════════════════════════════════════════════════════════ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 0, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 0, 0.6);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 9. UTILITY CLASSES */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.stage-ambient {
+  position: relative;
+  background: radial-gradient(circle at center, rgba(255, 107, 0, 0.05) 0%, transparent 70%);
+}
+
+.lyric-active {
+  color: #39FF14;
+  font-weight: 600;
+  transform: scale(1.02);
+  transition: all 0.3s ease;
+}
+
+.lyric-inactive {
+  color: #5C5C6B;
+  opacity: 0.4;
+}
+
+.chord-active {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: #FF6B00;
+  text-shadow: 0 0 20px rgba(255, 107, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 10. APP-LEVEL ANIMATIONS */
+/* ═══════════════════════════════════════════════════════════════ */
+
+.page-enter {
+  animation: slide-up 0.4s ease-out forwards;
+}
+
+/* Recording pulse */
 .animate-rec-pulse {
   animation: rec-pulse 1.5s ease-in-out infinite;
 }
@@ -40,4 +398,44 @@
 /* Video overlay */
 .video-overlay {
   background: linear-gradient(to top, rgba(5, 5, 10, 0.9) 0%, transparent 50%);
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 11. ACCESSIBILITY */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Focus visible for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #FF6B00;
+  outline-offset: 2px;
+  box-shadow: 0 0 16px rgba(255, 107, 0, 0.3);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Dark mode (default) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: more) {
+  .btn-primary {
+    border: 2px solid #FF6B00;
+  }
+  
+  .surface-card {
+    border-color: rgba(255, 255, 255, 0.15);
+  }
 }
