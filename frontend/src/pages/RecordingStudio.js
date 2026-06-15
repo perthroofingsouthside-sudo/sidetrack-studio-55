@@ -140,90 +140,101 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   if (!song) return <RecordSearchScreen onSongSelect={onSongSelect} />;
 
   return (
-    <div className="bg-[#05050A] flex flex-col max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
-      {/* ── Header — Two rows ─────────────────────── */}
-      {/* Row 1: Pocket Products at the top, full width */}
-      <div className="crystal-glass px-3 pt-2 pb-1.5 flex items-center gap-2 flex-shrink-0 z-20">
-        <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack} className="text-[#8F8F9D] hover:text-white w-8 h-8">
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
-        <div className="flex items-center gap-2 flex-1 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#FF6B00] to-[#39FF14] flex items-center justify-center flex-shrink-0">
-            <Mic className="w-3.5 h-3.5 text-black" />
-          </div>
-          <div className="min-w-0">
-            <h2 className="font-['Outfit'] text-sm font-black tracking-tight text-white flex items-center gap-1.5">
-              <span className="text-white">Pocket</span><span className="text-[#FF6B00]">Products</span>
-              <span className="text-[#5C5C6B] text-[10px] font-medium ml-0.5">Live Stage</span>
-              {isRecording && <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.15em] text-red-500 ml-1"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />REC</span>}
+    <div className="bg-[#05050A] flex flex-row max-w-full overflow-x-hidden stage-ambient" style={{ height: "calc(100vh - 4rem)" }} data-testid="recording-studio">
+      {/* ── LEFT SIDEBAR — Pocket Products + Layout tabs + Toggles + Chat ── */}
+      <aside className="w-[140px] sm:w-[160px] flex-shrink-0 crystal-glass border-r border-white/5 flex flex-col z-20" data-testid="stage-sidebar">
+        {/* Brand */}
+        <div className="px-2.5 pt-2.5 pb-2 flex items-start gap-2 border-b border-white/5">
+          <Button data-testid="back-btn" variant="ghost" size="icon" onClick={onBack}
+            className="text-[#8F8F9D] hover:text-white w-7 h-7 flex-shrink-0 -ml-1">
+            <ArrowLeft className="w-4 h-4" />
+          </Button>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-['Outfit'] text-[13px] font-black tracking-tight leading-tight">
+              <span className="text-white">Pocket</span>{" "}
+              <span className="text-[#FF6B00]">Products</span>
             </h2>
-            {song && <p className="text-[10px] text-[#5C5C6B] truncate">{song.title} &mdash; {song.artist}</p>}
+            <p className="text-[8px] text-[#39FF14] font-bold uppercase tracking-[0.15em] mt-0.5">Live Stage</p>
+            {isRecording && (
+              <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-[0.15em] text-red-500 mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />REC
+              </span>
+            )}
+            {song && <p className="text-[9px] text-[#5C5C6B] truncate mt-1">{song.title}</p>}
+            {song && <p className="text-[8px] text-[#5C5C6B]/70 truncate">{song.artist}</p>}
           </div>
         </div>
-      </div>
 
-      {/* Row 2: Action toggles — Chat / AI BG / Cleanup on the LEFT under PP */}
-      <div className="px-3 pb-2 pt-1 flex items-center gap-1.5 flex-shrink-0 z-20" data-testid="stage-toolbar">
-        <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
-          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
-            showChat ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B]"
-          }`}>
-          <MessageCircle className="w-3 h-3" /> Chat
-        </Button>
-        <Button data-testid="ai-bg-toggle" variant="ghost" onClick={() => setAiBgRemoval(!aiBgRemoval)}
-          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
-            aiBgRemoval ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B]"
-          }`}>
-          <Wand2 className="w-3 h-3" /> AI BG
-        </Button>
-        <Button data-testid="live-cleanup-toggle" variant="ghost" onClick={async () => {
-          const next = !liveCleanup;
-          setLiveCleanup(next);
-          try {
-            if (next) {
-              await axios.post(`${API}/studio/cleanup`, {
-                user_id: localStorage.getItem("sidetrack_voter_id") || "anon",
-                mode: "rock", live: true,
-              });
-              toast.success("Live AI Cleanup engaged");
-            }
-          } catch (e) { console.error("cleanup toggle err", e); }
-        }}
-          className={`h-7 px-2.5 rounded-full text-[10px] gap-1 border transition-all font-bold ${
-            liveCleanup ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10" : "border-white/10 text-[#5C5C6B]"
-          }`}>
-          <Sparkles className="w-3 h-3" /> Cleanup
-        </Button>
-      </div>
-
-      {/* Inline Chat panel — drops down UNDER the header, doesn't cover the stage */}
-      {showChat && (
-        <div className="px-2 pb-1.5 flex-shrink-0 z-10" data-testid="stage-chat-panel">
-          <div className="rounded-xl border border-[#39FF14]/20 overflow-hidden" style={{ maxHeight: "32vh" }}>
-            <LiveChat trackTitle={song?.title} />
-          </div>
-        </div>
-      )}
-
-      {/* Main stage area */}
-      <div className="flex-1 flex min-h-0 overflow-hidden">
-        {/* Stage content */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Layout Selector */}
-          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
+        {/* Layout Tabs — vertical stack below brand */}
+        <div className="px-2 pt-2 pb-1.5 border-b border-white/5" data-testid="layout-selector">
+          <p className="text-[8px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold mb-1.5 px-1">View</p>
+          <div className="flex flex-col gap-1">
             {LAYOUTS.map((l) => (
               <Button key={l.key} data-testid={`layout-${l.key}`}
                 onClick={() => { if (!isRecording) setLayout(l.key); }}
-                className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
+                className={`w-full h-8 px-2.5 rounded-lg text-[10px] gap-1.5 transition-all justify-start font-bold ${
+                  layout === l.key
+                    ? "bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.5)]"
+                    : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15 hover:text-white"
                 }`}>
-                <l.icon className="w-3 h-3" />{l.label}
+                <l.icon className="w-3 h-3 shrink-0" />
+                <span className="truncate">{l.label}</span>
               </Button>
             ))}
           </div>
+        </div>
 
-          {/* Main content area */}
-          <div className="flex-1 flex min-h-0 overflow-hidden">
+        {/* Action Toggles — Chat / AI BG / Cleanup */}
+        <div className="px-2 pt-2 pb-1.5">
+          <p className="text-[8px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold mb-1.5 px-1">Tools</p>
+          <div className="flex flex-col gap-1">
+            <Button data-testid="stage-chat-toggle" variant="ghost" onClick={() => setShowChat(!showChat)}
+              className={`w-full h-7 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start border transition-all font-bold ${
+                showChat ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B] hover:text-white"
+              }`}>
+              <MessageCircle className="w-3 h-3 shrink-0" /> Chat
+            </Button>
+            <Button data-testid="ai-bg-toggle" variant="ghost" onClick={() => setAiBgRemoval(!aiBgRemoval)}
+              className={`w-full h-7 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start border transition-all font-bold ${
+                aiBgRemoval ? "border-[#39FF14]/40 text-[#39FF14] bg-[#39FF14]/10" : "border-white/10 text-[#5C5C6B] hover:text-white"
+              }`}>
+              <Wand2 className="w-3 h-3 shrink-0" /> AI BG
+            </Button>
+            <Button data-testid="live-cleanup-toggle" variant="ghost" onClick={async () => {
+              const next = !liveCleanup;
+              setLiveCleanup(next);
+              try {
+                if (next) {
+                  await axios.post(`${API}/studio/cleanup`, {
+                    user_id: localStorage.getItem("sidetrack_voter_id") || "anon",
+                    mode: "rock", live: true,
+                  });
+                  toast.success("Live AI Cleanup engaged");
+                }
+              } catch (e) { console.error("cleanup toggle err", e); }
+            }}
+              className={`w-full h-7 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start border transition-all font-bold ${
+                liveCleanup ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10" : "border-white/10 text-[#5C5C6B] hover:text-white"
+              }`}>
+              <Sparkles className="w-3 h-3 shrink-0" /> Cleanup
+            </Button>
+          </div>
+        </div>
+
+        {/* Chat panel — drops down INSIDE the sidebar, under the 3 toggles */}
+        {showChat && (
+          <div className="flex-1 min-h-0 px-1.5 pb-2" data-testid="stage-chat-panel">
+            <div className="h-full rounded-lg border border-[#39FF14]/20 overflow-hidden">
+              <LiveChat trackTitle={song?.title} compact={true} />
+            </div>
+          </div>
+        )}
+      </aside>
+
+      {/* ── MAIN STAGE AREA (expanded, takes remaining space) ── */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Main content area */}
+        <div className="flex-1 flex min-h-0 overflow-hidden">
             {/* ── STADIUM LAYOUT (PORTRAIT): Host top + collab strip below + L/R overlays ── */}
             {isStadium && (
               <div className="flex-1 flex flex-col gap-2 p-2 sm:p-3 min-h-0 layout-transition" data-testid="stadium-layout">
@@ -468,8 +479,6 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
             )}
           </div>
         </div>
-
-      </div>
 
       {/* ── Trim & Share Modal ──────────────────── */}
       {showTrimModal && (
