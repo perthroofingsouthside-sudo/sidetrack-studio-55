@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Sparkles, Wand2, Music2, Loader2, Play } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Sparkles, Wand2, Music2, Loader2, Play, Mic, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
@@ -18,6 +18,91 @@ export default function BeatMaker({ userId }) {
   const [keySig, setKeySig] = useState("C");
   const [generating, setGenerating] = useState(false);
   const [beat, setBeat] = useState(null);
+  const [humming, setHumming] = useState(false);
+  const humStreamRef = useRef(null);
+  const humCtxRef = useRef(null);
+  const humPitchesRef = useRef([]);
+  const humRafRef = useRef(null);
+
+  // Lightweight autocorrelation pitch detector for hum input
+  const detectPitch = (buf, sampleRate) => {
+    const SIZE = buf.length;
+    let rms = 0;
+    for (let i = 0; i < SIZE; i++) rms += buf[i] * buf[i];
+    rms = Math.sqrt(rms / SIZE);
+    if (rms < 0.01) return 0; // too quiet
+    let r1 = 0, r2 = SIZE - 1, thres = 0.2;
+    for (let i = 0; i < SIZE / 2; i++) if (Math.abs(buf[i]) < thres) { r1 = i; break; }
+    for (let i = 1; i < SIZE / 2; i++) if (Math.abs(buf[SIZE - i]) < thres) { r2 = SIZE - i; break; }
+    const trimmed = buf.slice(r1, r2);
+    const T = trimmed.length;
+    const c = new Array(T).fill(0);
+    for (let i = 0; i < T; i++) for (let j = 0; j < T - i; j++) c[i] += trimmed[j] * trimmed[j + i];
+    let d = 0;
+    while (d < T - 1 && c[d] > c[d + 1]) d++;
+    let maxval = -1, maxpos = -1;
+    for (let i = d; i < T; i++) if (c[i] > maxval) { maxval = c[i]; maxpos = i; }
+    if (maxpos < 1) return 0;
+    return sampleRate / maxpos;
+  };
+
+  const startHum = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      humStreamRef.current = stream;
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      humCtxRef.current = ctx;
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      ctx.createMediaStreamSource(stream).connect(analyser);
+      const buf = new Float32Array(analyser.fftSize);
+      humPitchesRef.current = [];
+      setHumming(true);
+      let lastSample = 0;
+      const tick = () => {
+        analyser.getFloatTimeDomainData(buf);
+        const now = performance.now();
+        if (now - lastSample >= 50) {
+          const hz = detectPitch(buf, ctx.sampleRate);
+          humPitchesRef.current.push(hz);
+          lastSample = now;
+        }
+        humRafRef.current = requestAnimationFrame(tick);
+      };
+      humRafRef.current = requestAnimationFrame(tick);
+      // Cap at 6s
+      setTimeout(() => { if (humming || humStreamRef.current) stopHum(); }, 6000);
+    } catch (e) {
+      toast.error("Microphone access denied");
+      setHumming(false);
+    }
+  };
+
+  const stopHum = async () => {
+    if (humRafRef.current) cancelAnimationFrame(humRafRef.current);
+    if (humStreamRef.current) { humStreamRef.current.getTracks().forEach(t => t.stop()); humStreamRef.current = null; }
+    if (humCtxRef.current && humCtxRef.current.state !== "closed") humCtxRef.current.close();
+    setHumming(false);
+    const pitches = humPitchesRef.current;
+    if (!pitches || pitches.length < 4) { toast.error("Hum a little longer"); return; }
+    setGenerating(true);
+    setBeat(null);
+    try {
+      const res = await axios.post(`${API}/studio/beat/hum`, {
+        user_id: userId, pitches, sample_interval_ms: 50, genre, quantize_to: 16,
+      });
+      if (res.data.success) {
+        setBeat(res.data.beat);
+        toast.success(`Hum → Beat · ${res.data.beat.bpm} BPM · ${res.data.beat.melody_notes.length} notes`);
+        // Log vibe-match behavior
+        axios.post(`${API}/discover/mix-behavior`, {
+          user_id: userId, event: "beat_gen", genre,
+        }).catch(() => {});
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Hum-to-beat failed");
+    } finally { setGenerating(false); }
+  };
 
   useEffect(() => {
     axios.get(`${API}/studio/genres`).then(r => {
@@ -129,16 +214,31 @@ export default function BeatMaker({ userId }) {
         </div>
       </div>
 
-      {/* Generate button */}
-      <Button
-        onClick={handleGenerate}
-        disabled={generating}
-        data-testid="beat-generate-btn"
-        className="w-full h-10 rounded-xl text-xs font-bold text-[#05050A] bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90 transition-all"
-        style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}
-      >
-        {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating beat...</> : <><Sparkles className="w-4 h-4 mr-2" /> Generate Beat</>}
-      </Button>
+      {/* Generate button + Hum button */}
+      <div className="grid grid-cols-2 gap-2">
+        <Button
+          onClick={handleGenerate}
+          disabled={generating || humming}
+          data-testid="beat-generate-btn"
+          className="h-10 rounded-xl text-xs font-bold text-[#05050A] bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90 transition-all"
+          style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}
+        >
+          {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="w-4 h-4 mr-2" /> Generate</>}
+        </Button>
+        <Button
+          onClick={humming ? stopHum : startHum}
+          disabled={generating}
+          data-testid="beat-hum-btn"
+          className={`h-10 rounded-xl text-xs font-bold transition-all ${
+            humming
+              ? "bg-red-500 hover:bg-red-600 text-white animate-pulse"
+              : "bg-[#39FF14]/15 hover:bg-[#39FF14]/25 text-[#39FF14] border border-[#39FF14]/40"
+          }`}
+          style={humming ? { boxShadow: "0 0 24px rgba(239,68,68,0.5)" } : { boxShadow: "0 0 16px rgba(57,255,20,0.25)" }}
+        >
+          {humming ? <><Square className="w-4 h-4 mr-2" /> Stop Humming</> : <><Mic className="w-4 h-4 mr-2" /> Hum-to-Beat</>}
+        </Button>
+      </div>
 
       {/* Generated beat result */}
       {beat && (
@@ -147,7 +247,19 @@ export default function BeatMaker({ userId }) {
             <Music2 className="w-4 h-4 text-[#39FF14]" />
             <p className="text-xs font-bold text-white">{beat.genre_label} · {beat.bpm} BPM · {beat.bars} bars</p>
           </div>
-          <p className="text-[10px] text-[#5C5C6B] mb-2">{beat.duration_sec}s · Key {beat.key} · {beat.engine}</p>
+          <p className="text-[10px] text-[#5C5C6B] mb-2">{beat.duration_sec || beat.bars}s · Key {beat.key || (beat.melody_notes && beat.melody_notes[0]?.name) || "—"} · {beat.engine}</p>
+
+          {/* Hum melody notes preview */}
+          {beat.melody_notes && beat.melody_notes.length > 0 && (
+            <div className="mb-2 p-2 rounded-lg border border-[#39FF14]/20" style={{ background: "rgba(57,255,20,0.04)" }} data-testid="beat-melody-notes">
+              <p className="text-[9px] uppercase tracking-wider text-[#39FF14] font-bold mb-1">Hum Melody · {beat.melody_notes.length} notes</p>
+              <div className="flex flex-wrap gap-1">
+                {beat.melody_notes.slice(0, 14).map((n, i) => (
+                  <span key={i} className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#39FF14]/15 text-[#39FF14]">{n.name}</span>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Mini pattern preview */}
           <div className="space-y-1.5 mb-2">

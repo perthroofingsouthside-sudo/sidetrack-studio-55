@@ -32,6 +32,7 @@ from routes.payments import router as payments_router
 from routes.connect import router as connect_router
 from routes.studio_ai import router as studio_ai_router
 from routes.lanes import router as lanes_router
+from routes.sync import router as sync_router
 
 # ── Register all route modules on the /api prefix ─
 api_router.include_router(core_router)
@@ -44,6 +45,7 @@ api_router.include_router(payments_router)
 api_router.include_router(connect_router)
 api_router.include_router(studio_ai_router)
 api_router.include_router(lanes_router)
+api_router.include_router(sync_router)
 
 app.include_router(api_router)
 

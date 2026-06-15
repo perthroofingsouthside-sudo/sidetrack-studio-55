@@ -11,6 +11,7 @@ import LiveChat from "@/components/LiveChat";
 import AvatarRing, { useAudioActivity } from "@/components/AvatarRing";
 import FloatingComments from "@/components/FloatingComments";
 import CalligraphyLyrics from "@/components/CalligraphyLyrics";
+import SyncHUD from "@/components/SyncHUD";
 
 const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
@@ -427,6 +428,16 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
               </Button>
 
               <span className="text-sm font-mono text-[#5C5C6B] w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
+            </div>
+
+            {/* Global Sync HUD — Master Clock for group jams */}
+            <div className="px-1">
+              <SyncHUD
+                roomId={`stage-${song?.id || "default"}`}
+                userId={localStorage.getItem("sidetrack_voter_id") || "anon"}
+                isHost={true}
+                defaultBpm={120}
+              />
             </div>
 
             {/* Trim & Share button — only when not recording */}

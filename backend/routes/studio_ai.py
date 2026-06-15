@@ -165,3 +165,171 @@ async def recent_cleanup(user_id: str, limit: int = 10):
     cursor = db.cleanup_jobs.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(limit)
     jobs = await cursor.to_list(length=limit)
     return {"success": True, "jobs": jobs}
+
+
+
+# Imports for typing in the new section
+from typing import Dict
+
+
+# ── HUM-TO-BEAT MIDI ──────────────────────────────
+# Convert a hummed pitch sequence into a Dr. Dre-style MIDI beat.
+# Frontend captures mic → autocorrelation pitch detection → posts pitches[].
+
+_NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+
+
+def _freq_to_midi(freq: float) -> int:
+    if freq <= 20 or freq > 5000:
+        return 0
+    import math
+    return int(round(69 + 12 * math.log2(freq / 440.0)))
+
+
+def _midi_to_name(midi: int) -> str:
+    if midi <= 0:
+        return ""
+    return f"{_NOTE_NAMES[midi % 12]}{(midi // 12) - 1}"
+
+
+class HumBeatRequest(BaseModel):
+    user_id: str
+    pitches: List[float]
+    sample_interval_ms: int = 50
+    genre: str = "hip_hop_top200"
+    quantize_to: int = 16
+
+
+@router.post("/studio/beat/hum")
+async def hum_to_beat(payload: HumBeatRequest):
+    """Convert a hummed pitch sequence into a Dr. Dre-style MIDI beat."""
+    if payload.genre not in ALLOWED_GENRES:
+        raise HTTPException(status_code=400, detail=f"Genre must be one of: {ALLOWED_GENRES}")
+    if not payload.pitches or len(payload.pitches) < 4:
+        raise HTTPException(status_code=400, detail="Need at least 4 pitch samples")
+
+    raw_notes: List[dict] = []
+    for i, hz in enumerate(payload.pitches):
+        midi = _freq_to_midi(float(hz))
+        t_ms = i * payload.sample_interval_ms
+        if midi > 0:
+            raw_notes.append({"t_ms": t_ms, "midi": midi})
+
+    if not raw_notes:
+        raise HTTPException(status_code=400, detail="No detectable pitch — hum louder")
+
+    grouped: List[dict] = []
+    cur = {"midi": raw_notes[0]["midi"], "t_start": raw_notes[0]["t_ms"], "t_end": raw_notes[0]["t_ms"]}
+    for n in raw_notes[1:]:
+        if abs(n["midi"] - cur["midi"]) <= 1 and (n["t_ms"] - cur["t_end"]) < (payload.sample_interval_ms * 3):
+            cur["t_end"] = n["t_ms"]
+        else:
+            grouped.append(cur)
+            cur = {"midi": n["midi"], "t_start": n["t_ms"], "t_end": n["t_ms"]}
+    grouped.append(cur)
+
+    total_ms = grouped[-1]["t_end"] - grouped[0]["t_start"]
+    if total_ms < 200:
+        bpm = 90
+    else:
+        sec = max(0.5, total_ms / 1000.0)
+        bpm = int(round((2 * 4 * 60) / sec))
+        bpm = max(60, min(180, bpm))
+    sec_per_beat = 60.0 / bpm
+    sec_per_step = sec_per_beat / 4
+    grid_size = payload.quantize_to * 2
+
+    notes: List[dict] = []
+    t0 = grouped[0]["t_start"]
+    for g in grouped:
+        rel_sec = (g["t_start"] - t0) / 1000.0
+        step = int(round(rel_sec / sec_per_step))
+        if 0 <= step < grid_size:
+            dur_steps = max(1, int(round((g["t_end"] - g["t_start"]) / 1000.0 / sec_per_step)))
+            notes.append({
+                "step": step, "duration_steps": dur_steps,
+                "midi": g["midi"], "name": _midi_to_name(g["midi"]),
+            })
+
+    kick = [0] * grid_size
+    snare = [0] * grid_size
+    hihat = [0] * grid_size
+    bass = [0] * grid_size
+    for bar_start in range(0, grid_size, 16):
+        for off in (0, 8):
+            kick[bar_start + off] = 1
+        for off in (4, 12):
+            snare[bar_start + off] = 1
+        for off in range(0, 16, 2):
+            hihat[bar_start + off] = 1
+    deepest_per_quarter = {}
+    for n in notes:
+        q = n["step"] // 4
+        if q not in deepest_per_quarter or n["midi"] < deepest_per_quarter[q]["midi"]:
+            deepest_per_quarter[q] = n
+    bass_notes: List[dict] = []
+    for q, n in deepest_per_quarter.items():
+        step = q * 4
+        if step < grid_size:
+            bass[step] = 1
+            bass_notes.append({"step": step, "midi": max(24, n["midi"] - 12),
+                               "name": _midi_to_name(max(24, n["midi"] - 12))})
+
+    beat_id = str(uuid.uuid4())
+    now = datetime.now(timezone.utc).isoformat()
+    doc = {
+        "id": beat_id, "user_id": payload.user_id,
+        "genre": payload.genre, "genre_label": GENRE_LABELS[payload.genre],
+        "bpm": bpm, "bars": grid_size // 16, "grid_size": grid_size,
+        "melody_notes": notes, "bass_notes": bass_notes,
+        "pattern": {"kick": kick, "snare": snare, "hihat": hihat, "bass": bass},
+        "engine": "hum_to_midi_v1", "source": "hum",
+        "created_at": now,
+    }
+    await db.beats.insert_one(doc.copy())
+    logger.info(f"[HumBeat] id={beat_id} user={payload.user_id} bpm={bpm} notes={len(notes)}")
+    return {"success": True, "beat": doc}
+
+
+# ── VIBE-MATCH BEHAVIOR TRACKING ──────────────────
+
+class MixBehaviorLog(BaseModel):
+    user_id: str
+    track_id: Optional[str] = None
+    event: str
+    stem: Optional[str] = None
+    value: Optional[float] = None
+    genre: Optional[str] = None
+
+
+@router.post("/discover/mix-behavior")
+async def log_mix_behavior(payload: MixBehaviorLog):
+    if payload.event not in ("mute", "solo", "volume", "beat_gen", "cleanup_on", "play", "skip"):
+        raise HTTPException(status_code=400, detail="Invalid event")
+    now = datetime.now(timezone.utc).isoformat()
+    await db.mix_behavior.insert_one({
+        "user_id": payload.user_id, "track_id": payload.track_id,
+        "event": payload.event, "stem": payload.stem,
+        "value": payload.value, "genre": payload.genre, "ts": now,
+    })
+    return {"success": True}
+
+
+@router.get("/discover/vibe/{user_id}")
+async def vibe_profile(user_id: str):
+    cursor = db.mix_behavior.find({"user_id": user_id}, {"_id": 0}).sort("ts", -1).limit(200)
+    events = await cursor.to_list(length=200)
+    stem_score: Dict[str, int] = {}
+    genre_score: Dict[str, int] = {}
+    for ev in events:
+        if ev.get("stem"):
+            stem_score[ev["stem"]] = stem_score.get(ev["stem"], 0) + (3 if ev["event"] == "solo" else 1)
+        if ev.get("genre"):
+            genre_score[ev["genre"]] = genre_score.get(ev["genre"], 0) + 1
+    top_stems = sorted(stem_score.items(), key=lambda x: -x[1])[:3]
+    top_genres = sorted(genre_score.items(), key=lambda x: -x[1])[:3]
+    return {
+        "success": True, "user_id": user_id, "event_count": len(events),
+        "top_stems": [{"stem": s, "score": v} for s, v in top_stems],
+        "top_genres": [{"genre": g, "score": v} for g, v in top_genres],
+    }

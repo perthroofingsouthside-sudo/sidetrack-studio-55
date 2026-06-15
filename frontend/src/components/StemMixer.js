@@ -2,6 +2,16 @@ import { useState } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX, Headphones, UserCheck } from "lucide-react";
+import { API } from "@/App";
+import axios from "axios";
+
+// Fire-and-forget Vibe-Match behavior log
+const emitMix = (event, stem, value) => {
+  try {
+    const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
+    axios.post(`${API}/discover/mix-behavior`, { user_id: uid, event, stem, value }).catch(() => {});
+  } catch {}
+};
 
 const STEMS = [
   { key: "vocals", label: "VOX", color: "#39FF14" },
@@ -23,6 +33,7 @@ export default function StemMixer({ volumes, muted, onVolumeChange, onMuteToggle
   const [activePreset, setActivePreset] = useState(null);
 
   const handleSolo = (key) => {
+    emitMix("solo", key, null);
     if (soloStem === key) {
       // Un-solo: unmute all
       setSoloStem(null);
@@ -98,7 +109,7 @@ export default function StemMixer({ volumes, muted, onVolumeChange, onMuteToggle
               <div className="flex gap-1">
                 <Button
                   data-testid={`stem-${stem.key}-mute`}
-                  onClick={() => { onMuteToggle(stem.key); setSoloStem(null); setActivePreset(null); }}
+                  onClick={() => { emitMix("mute", stem.key, null); onMuteToggle(stem.key); setSoloStem(null); setActivePreset(null); }}
                   variant="ghost"
                   size="icon"
                   className={`w-8 h-8 rounded-full transition-all ${

@@ -34,11 +34,14 @@ export function useAudioActivity(stream) {
         let sum = 0;
         for (let i = 0; i < dataRef.current.length; i++) sum += dataRef.current[i] * dataRef.current[i];
         const rms = Math.sqrt(sum / dataRef.current.length) / 255;
-        // Normalize to 0-1 with a threshold
-        const threshold = 0.05;
-        const normalized = Math.max(0, Math.min(1, (rms - threshold) / (0.6 - threshold)));
+        // Convert RMS to dB: 20·log10(rms). rms=1 → 0dB, rms=0.0178 → -35dB
+        const db = rms > 0 ? 20 * Math.log10(rms) : -120;
+        // Active threshold: -35dB (configurable). Map -35dB..-5dB → 0..1 intensity.
+        const ACTIVE_DB = -35;
+        const PEAK_DB = -5;
+        const normalized = Math.max(0, Math.min(1, (db - ACTIVE_DB) / (PEAK_DB - ACTIVE_DB)));
         setIntensity(normalized);
-        setIsActive(normalized > 0.02);
+        setIsActive(db > ACTIVE_DB);
         rafRef.current = requestAnimationFrame(tick);
       };
       rafRef.current = requestAnimationFrame(tick);
