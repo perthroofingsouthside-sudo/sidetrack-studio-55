@@ -3,6 +3,7 @@ import { ArrowLeft, Scissors, Share2, Download, RotateCcw, Music2 } from "lucide
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
+import PublishPanel from "@/components/PublishPanel";
 
 export default function EditSharePage({ recording, song, onBack, onOpenInStudio }) {
   const [trimStart, setTrimStart] = useState(0);
@@ -237,29 +238,9 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
         </Button>
       </div>
 
-      {/* Social Share */}
-      <div className="px-4 py-4" data-testid="social-share-section">
-        <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-          <Share2 className="w-4 h-4" />
-          Share to Social
-        </h3>
-        <div className="grid grid-cols-2 gap-3">
-          {[
-            { name: "Instagram", color: "bg-gradient-to-br from-[#833AB4] to-[#E1306C]" },
-            { name: "TikTok", color: "bg-[#12121A] border border-white/10" },
-            { name: "Twitter / X", color: "bg-[#12121A] border border-white/10" },
-            { name: "YouTube", color: "bg-[#FF0000]/20 border border-[#FF0000]/30" },
-          ].map((platform) => (
-            <Button
-              key={platform.name}
-              data-testid={`share-${platform.name.toLowerCase().replace(/[\s\/]/g, "-")}-btn`}
-              onClick={() => handleShare(platform.name)}
-              className={`h-12 rounded-2xl text-white font-medium transition-all hover:-translate-y-0.5 ${platform.color}`}
-            >
-              {platform.name}
-            </Button>
-          ))}
-        </div>
+      {/* Publish & Stream */}
+      <div className="px-4 py-4">
+        <PublishPanel recording={recording} song={song} />
       </div>
     </div>
   );

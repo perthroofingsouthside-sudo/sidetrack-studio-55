@@ -443,6 +443,16 @@ function StudioSearchScreen({ onSongSelect }) {
   const [importing, setImporting] = useState(false);
   const inputRef = useRef(null);
   const deviceImportRef = useRef(null);
+  // ── Lane awareness ──
+  // Creator = Original music ONLY (no iTunes search). Default landing on Stems/Import.
+  // Gamer   = Karaoke / curated catalog search.
+  const lane = (typeof window !== "undefined" && localStorage.getItem("pp_lane")) || "creator";
+  const isCreator = lane === "creator";
+
+  // Creator lane lands straight on the Original Studio (stems + import).
+  useEffect(() => {
+    if (isCreator) setShowOriginal(true);
+  }, [isCreator]);
 
   useEffect(() => { if (!showOriginal) inputRef.current?.focus(); }, [showOriginal]);
 
@@ -514,9 +524,40 @@ function StudioSearchScreen({ onSongSelect }) {
       <div className="min-h-screen bg-[#05050A] flex flex-col items-center px-6 pt-12" data-testid="original-mode">
         <Sparkles className="w-10 h-10 text-[#39FF14]/40 mb-3" />
         <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1">
-          Create <span className="text-[#39FF14]">Original</span> Music
+          {isCreator
+            ? <>Your <span className="text-[#FF6B00]">Original</span> Studio</>
+            : <>Create <span className="text-[#39FF14]">Original</span> Music</>}
         </h2>
-        <p className="text-sm text-[#5C5C6B] mb-8 text-center">Upload your stems so other artists can cover your track</p>
+        <p className="text-sm text-[#5C5C6B] mb-6 text-center max-w-md">
+          {isCreator
+            ? "Creator Lane is for ORIGINAL music only — upload stems, import recordings, then mix, post and battle."
+            : "Upload your stems so other artists can cover your track"}
+        </p>
+
+        {/* Import from device — first-class CTA for creators */}
+        <div className="w-full max-w-md mb-4 space-y-2">
+          <input
+            ref={deviceImportRef}
+            type="file"
+            accept="audio/*,video/*"
+            className="hidden"
+            onChange={handleDeviceImport}
+            data-testid="studio-device-import-input"
+          />
+          <Button
+            onClick={() => deviceImportRef.current?.click()}
+            disabled={importing}
+            data-testid="studio-device-import-btn"
+            className="w-full h-11 rounded-xl bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A] font-black text-sm hover:opacity-90"
+            style={{ boxShadow: "0 0 22px rgba(255,107,0,0.35)" }}
+          >
+            {importing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
+            Import a Recording from Device
+          </Button>
+          <p className="text-[10px] text-[#5C5C6B] text-center">.mp3 / .wav / .webm / .mp4 · up to 50MB</p>
+        </div>
+
+        <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-3 mt-2">Or layer in stems</p>
 
         <div className="w-full max-w-md space-y-3" data-testid="stem-upload-section">
           {["Vocals", "Guitar", "Bass", "Drums"].map((stem) => (
@@ -538,9 +579,11 @@ function StudioSearchScreen({ onSongSelect }) {
           ))}
         </div>
 
-        <Button onClick={() => setShowOriginal(false)} variant="ghost" className="mt-6 text-[#5C5C6B]" data-testid="back-to-search">
-          Back to Search
-        </Button>
+        {!isCreator && (
+          <Button onClick={() => setShowOriginal(false)} variant="ghost" className="mt-6 text-[#5C5C6B]" data-testid="back-to-search">
+            Back to Karaoke Search
+          </Button>
+        )}
       </div>
     );
   }
@@ -548,49 +591,31 @@ function StudioSearchScreen({ onSongSelect }) {
   return (
     <div className="min-h-screen bg-[#05050A] flex flex-col" data-testid="studio-search-screen">
       <div className={`flex-1 flex flex-col items-center px-6 ${results.length ? "pt-8" : "justify-center"}`}>
-        <Music2 className="w-12 h-12 text-[#FF6B00]/30 mb-3" />
+        <Music2 className="w-12 h-12 text-[#39FF14]/40 mb-3" />
         <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1" data-testid="studio-search-title">
-          What do you want to <span className="text-[#FF6B00]">remix</span>?
+          Pick a <span className="text-[#39FF14]">Karaoke</span> Track
         </h2>
-        <p className="text-sm text-[#5C5C6B] mb-6 text-center">Find a track to open in the Studio, or create original music</p>
+        <p className="text-sm text-[#5C5C6B] mb-6 text-center max-w-md">
+          Sing or jam over the song. Your performance stays <span className="text-[#39FF14] font-bold">private</span>.
+        </p>
 
         <div className="w-full max-w-lg flex gap-2 mb-4">
           <Input ref={inputRef} data-testid="studio-search-input" value={query}
             onChange={(e) => setQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && doSearch()}
-            placeholder="Search songs, artists, albums..."
-            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#FF6B00] focus:ring-[#FF6B00]/20" />
+            placeholder="Search MTV / MOS / Hip-Hop / Alt-Rock..."
+            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#39FF14] focus:ring-[#39FF14]/20" />
           <Button data-testid="studio-search-btn" onClick={doSearch} disabled={searching}
-            className="h-12 px-6 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-sm shrink-0"
-            style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}>
+            className="h-12 px-6 rounded-xl bg-[#39FF14] hover:bg-[#39FF14]/90 text-[#05050A] font-bold text-sm shrink-0"
+            style={{ boxShadow: "0 0 20px rgba(57,255,20,0.3)" }}>
             {searching ? "..." : <><Search className="w-4 h-4 mr-1.5" /> Search</>}
           </Button>
         </div>
 
-        {/* Action row: Original + Import from device */}
+        {/* Gamer-only action row (Creator never sees this — they're forced to Original mode). */}
         <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
-          <Button onClick={() => setShowOriginal(true)} variant="ghost" data-testid="original-music-btn"
-            className="h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
-            <Sparkles className="w-3.5 h-3.5" /> Start Original — Upload Stems
-          </Button>
-
-          <input
-            ref={deviceImportRef}
-            type="file"
-            accept="audio/*,video/*"
-            className="hidden"
-            onChange={handleDeviceImport}
-            data-testid="studio-device-import-input"
-          />
-          <Button
-            onClick={() => deviceImportRef.current?.click()}
-            disabled={importing}
-            variant="ghost"
-            data-testid="studio-device-import-btn"
-            className="h-10 px-5 rounded-full border border-[#FF6B00]/30 text-[#FF6B00] text-xs font-bold gap-2 hover:bg-[#FF6B00]/10 transition-all"
-          >
-            {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
-            Import from Device
-          </Button>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold">
+            Curated catalog · MTV / MOS / Hip-Hop / Alt-Rock
+          </p>
         </div>
 
         {/* Results */}

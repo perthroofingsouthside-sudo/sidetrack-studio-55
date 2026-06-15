@@ -12,6 +12,7 @@ import AvatarRing, { useAudioActivity } from "@/components/AvatarRing";
 import FloatingComments from "@/components/FloatingComments";
 import CalligraphyLyrics from "@/components/CalligraphyLyrics";
 import SyncHUD from "@/components/SyncHUD";
+import JamRoomPanel from "@/components/JamRoomPanel";
 
 const STAGE_BG = "https://images.unsplash.com/photo-1773769234826-65edeac80f99?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1MDV8MHwxfHNlYXJjaHw0fHxjb25jZXJ0JTIwc3RhZ2UlMjBsaWdodGluZyUyMGRhcmt8ZW58MHx8fHwxNzc3Njk1MTcwfDA&ixlib=rb-4.1.0&q=85&w=800";
 
@@ -45,6 +46,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
   const [liveCleanup, setLiveCleanup] = useState(false);
   const [liveStream, setLiveStream] = useState(null);
   const { intensity, isActive } = useAudioActivity(liveStream);
+  const lane = (typeof window !== "undefined" && localStorage.getItem("pp_lane")) || "creator";
   const [collabSlots] = useState([
     { id: 1, label: "Guitar", occupied: false },
     { id: 2, label: "Bass", occupied: false },
@@ -223,10 +225,17 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
         {/* Chat panel — drops down INSIDE the sidebar, under the 3 toggles */}
         {showChat && (
-          <div className="flex-1 min-h-0 px-1.5 pb-2" data-testid="stage-chat-panel">
+          <div className="flex-shrink-0 px-1.5 pb-2" style={{ maxHeight: "28vh" }} data-testid="stage-chat-panel">
             <div className="h-full rounded-lg border border-[#39FF14]/20 overflow-hidden">
               <LiveChat trackTitle={song?.title} compact={true} />
             </div>
+          </div>
+        )}
+
+        {/* Jam Room — Creator lane only (band sessions). Scrollable container so it never overflows the sidebar. */}
+        {lane === "creator" && (
+          <div className="flex-1 min-h-0 overflow-y-auto px-1.5 pb-2 scrollbar-hide">
+            <JamRoomPanel song={song} />
           </div>
         )}
       </aside>
@@ -582,8 +591,24 @@ function RecordSearchScreen({ onSongSelect }) {
   const [results, setResults] = useState([]);
   const [searching, setSearching] = useState(false);
   const inputRef = useRef(null);
+  const lane = (typeof window !== "undefined" && localStorage.getItem("pp_lane")) || "creator";
+  const isCreator = lane === "creator";
 
-  useEffect(() => { inputRef.current?.focus(); }, []);
+  useEffect(() => {
+    // Creator lane never picks an iTunes song — it's original-only.
+    // Auto-create an Original Session on entry so they land in the Live Stage.
+    if (isCreator && onSongSelect) {
+      onSongSelect({
+        id: "original_" + crypto.randomUUID(),
+        title: "Original Session",
+        artist: localStorage.getItem("sidetrack_username") || "You",
+        album: "", cover_url: "", genre: "Original", preview_url: "",
+      });
+      return;
+    }
+    inputRef.current?.focus();
+    // eslint-disable-next-line
+  }, []);
 
   const doSearch = async () => {
     if (!query.trim()) return;
@@ -603,15 +628,27 @@ function RecordSearchScreen({ onSongSelect }) {
     });
   };
 
+  // Creator lane briefly shows a spinner while auto-jumping
+  if (isCreator) {
+    return (
+      <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center" data-testid="record-search-screen">
+        <Sparkles className="w-10 h-10 text-[#FF6B00]/40 mb-3 animate-pulse" />
+        <p className="text-sm text-[#5C5C6B]">Opening Original Live Stage…</p>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#05050A] flex flex-col" data-testid="record-search-screen">
       {/* Top section — vertically centered search */}
       <div className={`flex-1 flex flex-col items-center px-6 ${results.length ? "pt-8" : "justify-center"}`}>
-        <Mic className="w-12 h-12 text-[#FF6B00]/30 mb-3" />
+        <Mic className="w-12 h-12 text-[#39FF14]/30 mb-3" />
         <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1" data-testid="record-search-title">
-          What do you want to <span className="text-[#FF6B00]">record</span>?
+          Pick a <span className="text-[#39FF14]">Karaoke</span> Track
         </h2>
-        <p className="text-sm text-[#5C5C6B] mb-6 text-center">Find a song, then jump straight into the Live Stage</p>
+        <p className="text-sm text-[#5C5C6B] mb-6 text-center">
+          Curated MTV / MOS / Hip-Hop / Alt-Rock catalog. Sing or jam over the song.
+        </p>
 
         <div className="w-full max-w-lg flex gap-2 mb-4">
           <Input
@@ -620,27 +657,19 @@ function RecordSearchScreen({ onSongSelect }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && doSearch()}
-            placeholder="Search songs, artists, albums..."
-            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#FF6B00] focus:ring-[#FF6B00]/20"
+            placeholder="Search the catalog..."
+            className="h-12 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-base focus:border-[#39FF14] focus:ring-[#39FF14]/20"
           />
           <Button
             data-testid="record-search-btn"
             onClick={doSearch}
             disabled={searching}
-            className="h-12 px-6 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-sm shrink-0"
-            style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}
+            className="h-12 px-6 rounded-xl bg-[#39FF14] hover:bg-[#39FF14]/90 text-[#05050A] font-bold text-sm shrink-0"
+            style={{ boxShadow: "0 0 20px rgba(57,255,20,0.3)" }}
           >
             {searching ? <span className="animate-pulse">...</span> : <><Search className="w-4 h-4 mr-1.5" /> Search</>}
           </Button>
         </div>
-
-        {/* Original Music Button */}
-        <Button onClick={() => {
-          if (onSongSelect) onSongSelect({ id: "original_" + crypto.randomUUID(), title: "Original Session", artist: localStorage.getItem("sidetrack_username") || "You", album: "", cover_url: "", genre: "Original", preview_url: "" });
-        }} variant="ghost" data-testid="record-original-btn"
-          className="mb-6 h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
-          <Sparkles className="w-3.5 h-3.5" /> Start Original — Record from Scratch
-        </Button>
 
         {/* Results */}
         {results.length > 0 && (
