@@ -124,6 +124,17 @@ function App() {
   }, []);
 
   const handleTrackSelect = useCallback((song) => {
+    // Set the song and start playback in the global mini-player.
+    // Do NOT auto-navigate to Studio — that's now an explicit user choice
+    // (Discover users can keep browsing while music plays).
+    setCurrentSong(song);
+    if (song?.preview_url && playTrack) {
+      playTrack(song);
+    }
+  }, [playTrack]);
+
+  // Used by views that explicitly want to land on the Studio (e.g. Studio's own search).
+  const handleTrackSelectInStudio = useCallback((song) => {
     setCurrentSong(song);
     setCurrentView("studio");
   }, []);
@@ -243,7 +254,7 @@ function App() {
           <PlayerStudio
             song={currentSong}
             onRecord={() => setCurrentView("record")}
-            onSongSelect={handleTrackSelect}
+            onSongSelect={handleTrackSelectInStudio}
           />
         );
       case "record":

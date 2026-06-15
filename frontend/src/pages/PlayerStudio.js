@@ -212,12 +212,20 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
     return lyrics.chords.slice(idx, idx + 4);
   }, [lyrics?.chords, currentTime]);
 
-  // Auto-scroll lyrics
+  // Auto-scroll lyrics — ONLY inside the lyrics container.
+  // Previously used scrollIntoView which hijacked the whole page; now we
+  // calculate the offset relative to the scroll container and only move that.
   useEffect(() => {
-    if (activeLyricIdx >= 0 && lyricsScrollRef.current) {
-      const el = lyricsScrollRef.current.querySelector(`[data-lyric-idx="${activeLyricIdx}"]`);
-      if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    if (activeLyricIdx < 0 || !lyricsScrollRef.current) return;
+    const container = lyricsScrollRef.current;
+    const el = container.querySelector(`[data-lyric-idx="${activeLyricIdx}"]`);
+    if (!el) return;
+    // Compute the el's offset relative to the scroll container,
+    // then scroll the container only — never the window/page.
+    const containerRect = container.getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    const targetTop = container.scrollTop + (elRect.top - containerRect.top) - (containerRect.height / 2) + (elRect.height / 2);
+    container.scrollTo({ top: targetTop, behavior: "smooth" });
   }, [activeLyricIdx]);
 
   if (!song) return <StudioSearchScreen onSongSelect={onSongSelect} />;
