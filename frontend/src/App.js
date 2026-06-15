@@ -174,7 +174,13 @@ function App() {
   const renderView = () => {
     switch (currentView) {
       case "home":
-        return <HomePage onSongRecognized={handleSongRecognized} nowPlaying={nowPlaying} />;
+        return (
+          <HomePage
+            onSongRecognized={handleSongRecognized}
+            onTrackSelect={handleTrackSelect}
+            nowPlaying={nowPlaying}
+          />
+        );
       case "stream":
         return (
           <StreamPage
