@@ -272,6 +272,23 @@ function App() {
             recording={editingRecording}
             song={currentSong}
             onBack={() => setCurrentView("studio")}
+            onOpenInStudio={(rec) => {
+              // Convert a recording into a "song" object the Studio can play with.
+              const recSong = {
+                id: rec.id || `rec-${Date.now()}`,
+                title: (currentSong?.title ? `${currentSong.title} — Your Take` : "Your Recording"),
+                artist: localStorage.getItem("sidetrack_username") || "You",
+                album: "Personal Recording",
+                cover_url: currentSong?.cover_url || "",
+                genre: currentSong?.genre || "original",
+                preview_url: rec.url || "",
+                is_recording: true,
+              };
+              setCurrentSong(recSong);
+              if (rec.url && playTrack) playTrack(recSong);
+              setCurrentView("studio");
+              toast.success("Recording opened in Studio");
+            }}
           />
         );
       default:

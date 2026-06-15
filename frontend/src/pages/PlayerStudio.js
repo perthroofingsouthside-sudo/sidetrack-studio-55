@@ -440,7 +440,9 @@ function StudioSearchScreen({ onSongSelect }) {
   const [searching, setSearching] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [uploading, setUploading] = useState(null);
+  const [importing, setImporting] = useState(false);
   const inputRef = useRef(null);
+  const deviceImportRef = useRef(null);
 
   useEffect(() => { if (!showOriginal) inputRef.current?.focus(); }, [showOriginal]);
 
@@ -460,6 +462,37 @@ function StudioSearchScreen({ onSongSelect }) {
       album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
       preview_url: track.preview_url || "",
     });
+  };
+
+  // Import an audio/video file from device → open as a "song" in Studio.
+  const handleDeviceImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) { toast.error("File too large (max 50MB)"); return; }
+    setImporting(true);
+    try {
+      const url = URL.createObjectURL(file);
+      const baseName = file.name.replace(/\.[^/.]+$/, "");
+      const song = {
+        id: `import-${Date.now()}`,
+        title: baseName || "Imported Track",
+        artist: localStorage.getItem("sidetrack_username") || "You",
+        album: "Device Import",
+        cover_url: "",
+        genre: "imported",
+        preview_url: url,
+        is_local_import: true,
+        local_blob: file,
+      };
+      if (onSongSelect) onSongSelect(song);
+      toast.success(`Imported "${baseName}" — opening in Studio`);
+    } catch (err) {
+      toast.error("Couldn't import file");
+    } finally {
+      setImporting(false);
+      // Reset input so the same file can be re-imported
+      if (e.target) e.target.value = "";
+    }
   };
 
   const handleStemUpload = async (stemType, file) => {
@@ -533,11 +566,32 @@ function StudioSearchScreen({ onSongSelect }) {
           </Button>
         </div>
 
-        {/* Original Music Button */}
-        <Button onClick={() => setShowOriginal(true)} variant="ghost" data-testid="original-music-btn"
-          className="mb-6 h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
-          <Sparkles className="w-3.5 h-3.5" /> Start Original — Upload Your Stems
-        </Button>
+        {/* Action row: Original + Import from device */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
+          <Button onClick={() => setShowOriginal(true)} variant="ghost" data-testid="original-music-btn"
+            className="h-10 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold gap-2 hover:bg-[#39FF14]/10 transition-all">
+            <Sparkles className="w-3.5 h-3.5" /> Start Original — Upload Stems
+          </Button>
+
+          <input
+            ref={deviceImportRef}
+            type="file"
+            accept="audio/*,video/*"
+            className="hidden"
+            onChange={handleDeviceImport}
+            data-testid="studio-device-import-input"
+          />
+          <Button
+            onClick={() => deviceImportRef.current?.click()}
+            disabled={importing}
+            variant="ghost"
+            data-testid="studio-device-import-btn"
+            className="h-10 px-5 rounded-full border border-[#FF6B00]/30 text-[#FF6B00] text-xs font-bold gap-2 hover:bg-[#FF6B00]/10 transition-all"
+          >
+            {importing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Upload className="w-3.5 h-3.5" />}
+            Import from Device
+          </Button>
+        </div>
 
         {/* Results */}
         {results.length > 0 && (

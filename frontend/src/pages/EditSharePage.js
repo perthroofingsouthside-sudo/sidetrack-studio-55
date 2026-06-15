@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Scissors, Share2, Download, RotateCcw } from "lucide-react";
+import { ArrowLeft, Scissors, Share2, Download, RotateCcw, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { toast } from "sonner";
 
-export default function EditSharePage({ recording, song, onBack }) {
+export default function EditSharePage({ recording, song, onBack, onOpenInStudio }) {
   const [trimStart, setTrimStart] = useState(0);
   const [trimEnd, setTrimEnd] = useState(100);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -215,14 +215,24 @@ export default function EditSharePage({ recording, song, onBack }) {
         </div>
       </div>
 
-      {/* Download */}
-      <div className="px-4 py-2">
+      {/* Take to Studio + Download */}
+      <div className="px-4 py-2 space-y-2">
+        <Button
+          data-testid="open-in-studio-btn"
+          onClick={() => onOpenInStudio && onOpenInStudio(recording)}
+          className="w-full h-12 bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90 text-[#05050A] font-black rounded-2xl transition-all hover:-translate-y-0.5"
+          style={{ boxShadow: "0 0 24px rgba(255,107,0,0.35)" }}
+        >
+          <Music2 className="w-5 h-5 mr-2" />
+          Open in Studio · Remix & Separate Stems
+        </Button>
         <Button
           data-testid="download-btn"
           onClick={handleDownload}
-          className="w-full h-12 bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold rounded-2xl glow-orange transition-all hover:-translate-y-0.5"
+          variant="ghost"
+          className="w-full h-11 border border-[#FF6B00]/30 text-[#FF6B00] font-bold rounded-2xl hover:bg-[#FF6B00]/10 transition-all"
         >
-          <Download className="w-5 h-5 mr-2" />
+          <Download className="w-4 h-4 mr-2" />
           Download Recording
         </Button>
       </div>
