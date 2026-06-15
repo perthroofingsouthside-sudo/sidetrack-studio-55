@@ -51,7 +51,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
           setRoom(res.data.room);
           if (onMembersChange) onMembersChange(res.data.room.members);
         }
-      } catch { /* silent */ }
+      } catch (err) { console.debug("[Jam] poll failed", err?.message); }
     };
     pollRef.current = setInterval(tick, 4000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
@@ -100,7 +100,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
     if (!room?.code) return;
     try {
       await axios.post(`${API}/jam/rooms/${room.code}/leave`, { user_id: userId.current });
-    } catch { /* silent */ }
+    } catch (err) { console.debug("[Jam] leave call failed", err?.message); }
     setRoom(null);
     toast.message("Left the jam");
     // Clean URL

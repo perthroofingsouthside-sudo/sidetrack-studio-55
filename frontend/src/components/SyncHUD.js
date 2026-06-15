@@ -61,9 +61,10 @@ export default function SyncHUD({ roomId, userId, isHost = true, defaultBpm = 12
         {/* Beat dots */}
         <div className="flex gap-1 mt-1">
           {Array.from({ length: beatsPerBar }).map((_, i) => {
-            const isCurrent = running && i === (beat - 1);
+            const beatIdx = i;
+            const isCurrent = running && beatIdx === (beat - 1);
             return (
-              <span key={i}
+              <span key={`beat-${beatIdx}-of-${beatsPerBar}`}
                 className="h-1 flex-1 rounded-sm transition-all duration-100"
                 style={{
                   background: isCurrent

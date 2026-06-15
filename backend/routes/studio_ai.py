@@ -72,7 +72,8 @@ async def generate_beat(payload: BeatRequest):
     now = datetime.now(timezone.utc).isoformat()
     # Generate a deterministic stem pattern (mock)
     seed = abs(hash(f"{payload.genre}-{payload.bpm}-{payload.bars}-{payload.key}")) % 9999
-    rng = random.Random(seed)
+    # Deterministic RNG (NOT for security): same inputs → same beat pattern.
+    rng = random.Random(seed)  # noqa: S311
     pattern = {
         "kick": [1 if rng.random() > 0.5 else 0 for _ in range(payload.bars * 4)],
         "snare": [1 if rng.random() > 0.7 else 0 for _ in range(payload.bars * 4)],

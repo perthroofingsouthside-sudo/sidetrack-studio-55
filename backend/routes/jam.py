@@ -9,8 +9,7 @@ Workflow:
 Video is currently MOCKED (presence tiles only). Real WebRTC P2P is a Phase 2.
 """
 import logging
-import random
-import string
+import secrets
 import uuid
 from datetime import datetime, timezone
 from typing import Optional, List
@@ -25,9 +24,10 @@ router = APIRouter()
 
 
 def _gen_code(n: int = 6) -> str:
-    """Short, human-readable, ambiguous-character-free code."""
+    """Short, human-readable, ambiguous-character-free code. Uses `secrets` for
+    unguessable invite codes."""
     alphabet = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
-    return "".join(random.choices(alphabet, k=n))
+    return "".join(secrets.choice(alphabet) for _ in range(n))
 
 
 # ── MODELS ────────────────────────────────────────

@@ -255,7 +255,7 @@ export default function BeatMaker({ userId }) {
               <p className="text-[9px] uppercase tracking-wider text-[#39FF14] font-bold mb-1">Hum Melody · {beat.melody_notes.length} notes</p>
               <div className="flex flex-wrap gap-1">
                 {beat.melody_notes.slice(0, 14).map((n, i) => (
-                  <span key={i} className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#39FF14]/15 text-[#39FF14]">{n.name}</span>
+                  <span key={`note-${n.step}-${n.name}-${i}`} className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#39FF14]/15 text-[#39FF14]">{n.name}</span>
                 ))}
               </div>
             </div>
@@ -268,7 +268,7 @@ export default function BeatMaker({ userId }) {
                 <span className="text-[9px] uppercase tracking-wider w-12 text-[#A0A0B0] font-bold">{drum}</span>
                 <div className="flex gap-0.5 flex-1">
                   {hits.slice(0, 32).map((h, i) => (
-                    <span key={i}
+                    <span key={`${drum}-step-${i}`}
                       className={`h-1.5 flex-1 rounded-sm transition-colors ${
                         h ? (drum === "kick" || drum === "bass" ? "bg-[#FF6B00]" : "bg-[#39FF14]") : "bg-white/5"
                       }`}

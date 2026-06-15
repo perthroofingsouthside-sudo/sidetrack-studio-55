@@ -163,7 +163,7 @@ def _track_in_curated_catalog(track_id: str) -> bool:
     the 2500-3000 pre-set roster against an effectively unlimited iTunes long-tail."""
     if not track_id:
         return False
-    h = int(hashlib.md5(track_id.encode()).hexdigest(), 16)
+    h = int(hashlib.sha256(track_id.encode()).hexdigest(), 16)
     # 80% are curated free, 20% require $79.98 ownership purchase
     return (h % 100) < 80
 
