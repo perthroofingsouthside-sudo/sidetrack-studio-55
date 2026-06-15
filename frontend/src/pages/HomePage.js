@@ -107,8 +107,8 @@ export default function HomePage({ onSongRecognized, nowPlaying }) {
           </svg>
         </div>
         <h1 className="font-['Outfit'] text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tighter text-center">
-          <span className="text-white">SIDE</span>
-          <span className="text-[#FF6B00] glow-text-orange">TRACK</span>
+          <span className="text-white">Pocket </span>
+          <span className="text-[#FF6B00] glow-text-orange">Products</span>
         </h1>
         <p className="text-[#A0A0B0] text-sm mt-2 text-center font-['Manrope']">
           Recognize. Separate. Create.

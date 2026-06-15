@@ -28,7 +28,8 @@ function App() {
   const [currentView, setCurrentView] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") || params.get("session_id")) return "pricing";
-    return "stream";
+    const savedLane = localStorage.getItem("pp_lane") || "creator";
+    return savedLane === "gamer" ? "gamer" : "home";
   });
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
@@ -44,7 +45,7 @@ function App() {
     axios.post(`${API}/lanes/set`, { user_id: uid, lane: newLane }).catch(() => {});
     // Snap to a sensible default tab on lane switch
     if (newLane === "gamer") setCurrentView("gamer");
-    else setCurrentView("stream");
+    else setCurrentView("home");
   }, []);
 
   // ── Global Audio Player State ──────────────────

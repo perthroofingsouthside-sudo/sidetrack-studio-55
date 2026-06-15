@@ -1,9 +1,8 @@
-import { Home, Music2, Mic2, Radio, Swords, ListMusic, Star, User, MessageSquare, Gamepad2, Sparkles } from "lucide-react";
+import { Home, Music2, Mic2, Swords, ListMusic, Star, User, MessageSquare, Gamepad2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Creator-lane items (Originals, social, battles)
 const CREATOR_ITEMS = [
-  { key: "stream", icon: Radio, label: "Stream" },
   { key: "home", icon: Home, label: "Discover" },
   { key: "battle", icon: Swords, label: "Battle" },
   { key: "star", icon: Star, label: "Star" },
