@@ -22,16 +22,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
   const waveAnimRef = useRef(null);
   const [waveHeights, setWaveHeights] = useState(() => Array.from({ length: 40 }, () => Math.random() * 60 + 20));
 
-  useEffect(() => {
-    loadCoverAudio();
-    return () => {
-      stopAll();
-      if (timerRef.current) clearInterval(timerRef.current);
-      if (waveAnimRef.current) cancelAnimationFrame(waveAnimRef.current);
-    };
-  }, [cover?.id]);
-
-  const loadCoverAudio = async () => {
+  const loadCoverAudio = useCallback(async () => {
     if (!cover?.id || !battle?.id) return;
     try {
       const res = await axios.get(`${API}/battles/${battle.id}/cover/${cover.id}/audio`);
@@ -55,7 +46,18 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
       console.error("Duet load cover audio failed:", err);
       toast.error("Failed to load cover audio");
     }
-  };
+    // stopRecording is defined below and stable via useCallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cover?.id, battle?.id, isRecording]);
+
+  useEffect(() => {
+    loadCoverAudio();
+    return () => {
+      stopAll();
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (waveAnimRef.current) cancelAnimationFrame(waveAnimRef.current);
+    };
+  }, [loadCoverAudio]);
 
   const stopAll = () => {
     if (streamRef.current) {

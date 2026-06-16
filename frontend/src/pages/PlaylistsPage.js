@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ListMusic, Plus, Lock, Globe, Play, Pause, Trash2, Music2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,21 +18,23 @@ export default function PlaylistsPage({ onTrackSelect }) {
   const audioRef = useRef(null);
   const [owner] = useState(() => localStorage.getItem("sidetrack_username") || "anonymous");
 
-  useEffect(() => { loadPlaylists(); }, []);
-
-  const loadPlaylists = async () => {
+  const loadPlaylists = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/playlists?owner=${owner}`);
       if (res.data.success) setPlaylists(res.data.playlists);
       // Also load public playlists
       const pubRes = await axios.get(`${API}/playlists?public_only=true`);
       if (pubRes.data.success) {
-        const pubIds = new Set(playlists.map(p => p.id));
-        const newPub = pubRes.data.playlists.filter(p => !pubIds.has(p.id));
-        setPlaylists(prev => [...prev, ...newPub.filter(p => !prev.find(x => x.id === p.id))]);
+        setPlaylists(prev => {
+          const have = new Set(prev.map(p => p.id));
+          const newPub = pubRes.data.playlists.filter(p => !have.has(p.id));
+          return [...prev, ...newPub];
+        });
       }
     } catch (err) { /* empty */ }
-  };
+  }, [owner]);
+
+  useEffect(() => { loadPlaylists(); }, [loadPlaylists]);
 
   const createPlaylist = async () => {
     if (!newName.trim()) { toast.error("Enter a playlist name"); return; }

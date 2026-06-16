@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { MessageCircle, Video, Phone, Send, ArrowLeft, UserPlus, Music2, Check, X, Mic, Camera, CameraOff, MicOff, PhoneOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,28 +26,28 @@ export default function ConnectPage() {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
 
-  useEffect(() => {
-    loadConversations();
-    loadJamInvites();
-  }, []);
-
-  useEffect(() => {
-    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages]);
-
-  const loadConversations = async () => {
+  const loadConversations = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/messages/conversations/${username || userId.current}`);
       if (res.data.success) setConversations(res.data.conversations);
     } catch (err) { console.error("Connect load error:", err); }
-  };
+  }, [username]);
 
-  const loadJamInvites = async () => {
+  const loadJamInvites = useCallback(async () => {
     try {
       const res = await axios.get(`${API}/jam/invites/${username || userId.current}`);
       if (res.data.success) setJamInvites(res.data.received || []);
     } catch (err) { console.error("Connect load error:", err); }
-  };
+  }, [username]);
+
+  useEffect(() => {
+    loadConversations();
+    loadJamInvites();
+  }, [loadConversations, loadJamInvites]);
+
+  useEffect(() => {
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+  }, [messages]);
 
   const openConversation = async (convo) => {
     setActiveConvo(convo);

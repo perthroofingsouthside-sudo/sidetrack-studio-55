@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Sparkles, Volume2, Loader2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { API } from "@/App";
@@ -25,7 +25,7 @@ export default function BackstageScreen({ song, userId, onProceed, onBack }) {
 
   useEffect(() => () => { if (timerRef.current) clearTimeout(timerRef.current); }, []);
 
-  const requestLines = async (selStyle) => {
+  const requestLines = useCallback(async (selStyle) => {
     setLoading(true);
     setLines([]);
     setVisible(0);
@@ -51,9 +51,9 @@ export default function BackstageScreen({ song, userId, onProceed, onBack }) {
       }
     } catch (err) { console.error("Backstage err", err); }
     finally { setLoading(false); }
-  };
+  }, [userId, song?.title, song?.artist]);
 
-  useEffect(() => { requestLines(style); /* eslint-disable-next-line */ }, [style]);
+  useEffect(() => { requestLines(style); }, [style, requestLines]);
 
   return (
     <div className="min-h-screen relative overflow-hidden" data-testid="backstage-screen"
