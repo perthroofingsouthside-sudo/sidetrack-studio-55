@@ -249,8 +249,8 @@ function InstKeys() {
   return (
     <g transform="translate(150, 248) rotate(-8)">
       <rect x="0" y="0" width="56" height="14" rx="2" fill="#FFFFFF" stroke="#0A0A0F" strokeWidth="1.5" />
-      {[8, 16, 28, 36, 44].map((x, i) => (
-        <rect key={i} x={x} y="0" width="6" height="9" fill="#0A0A0F" />
+      {[8, 16, 28, 36, 44].map((x) => (
+        <rect key={`bk-${x}`} x={x} y="0" width="6" height="9" fill="#0A0A0F" />
       ))}
     </g>
   );

@@ -38,7 +38,7 @@ function DbMeter({ level, color }) {
         const segColor = isPeak && on ? "#FF6B00" : on ? color : "rgba(255,255,255,0.06)";
         return (
           <div
-            key={i}
+            key={`seg-${idx}`}
             className="flex-1 rounded-sm transition-colors"
             style={{
               background: segColor,

@@ -5,6 +5,7 @@
 */
 import { useEffect, useRef, useState, useCallback } from "react";
 import SimplePeer from "simple-peer/simplepeer.min.js";
+import log from "@/utils/log";
 
 // Free public ICE servers — STUN + TURN via Open Relay (metered.ca)
 const ICE_SERVERS = [
@@ -47,9 +48,14 @@ export default function useJamWebRTC({ code, peerId, name, enabled, video = true
   const localStreamRef = useRef(null);
 
   const cleanup = useCallback(() => {
-    Object.values(peersRef.current).forEach((p) => { try { p.destroy(); } catch {} });
+    Object.values(peersRef.current).forEach((p) => {
+      try { p.destroy(); } catch (err) { log.debug("[Jam] peer destroy failed:", err?.message); }
+    });
     peersRef.current = {};
-    if (wsRef.current) { try { wsRef.current.close(); } catch {} wsRef.current = null; }
+    if (wsRef.current) {
+      try { wsRef.current.close(); } catch (err) { log.debug("[Jam] ws close failed:", err?.message); }
+      wsRef.current = null;
+    }
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((t) => t.stop());
       localStreamRef.current = null;
@@ -88,7 +94,7 @@ export default function useJamWebRTC({ code, peerId, name, enabled, video = true
       delete peersRef.current[targetPeerId];
     });
     peer.on("error", (err) => {
-      console.debug("[Jam] peer error", targetPeerId, err?.message);
+      log.debug("[Jam] peer error", targetPeerId, err?.message);
     });
     peersRef.current[targetPeerId] = peer;
     return peer;
@@ -138,7 +144,10 @@ export default function useJamWebRTC({ code, peerId, name, enabled, video = true
           setPeers((prev) => ({ ...prev, [msg.peer_id]: { ...(prev[msg.peer_id] || {}), name: msg.name } }));
         } else if (type === "peer-left") {
           const p = peersRef.current[msg.peer_id];
-          if (p) { try { p.destroy(); } catch {} delete peersRef.current[msg.peer_id]; }
+          if (p) {
+            try { p.destroy(); } catch (err) { log.debug("[Jam] peer destroy failed:", err?.message); }
+            delete peersRef.current[msg.peer_id];
+          }
           setPeers((prev) => { const next = { ...prev }; delete next[msg.peer_id]; return next; });
         } else if (type === "offer") {
           const from = msg.from;
