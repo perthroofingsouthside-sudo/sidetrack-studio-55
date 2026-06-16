@@ -97,6 +97,13 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - ✅ Catalog Pivot whitelist (MTV / MOS / Hip-Hop / Alt-Rock)
 - ✅ Ownership Model with discount-tier gating
 
+- ✅ **Feb 16, 2026 — CODE QUALITY PASS**:
+  - 9 empty catch blocks → all log errors via `console.error` / `console.debug` (PlaylistsPage, HomePage, BattleArena ×2, SyncHUD ×2, StemMixer, JamRoomPanel)
+  - **Security**: removed `random` module from `studio_ai.py` entirely — beat generation now uses `hashlib.sha256` deterministic byte stream (verified: same input → identical kick pattern across calls)
+  - **Test hygiene**: removed all `is True` / `is False` from 5 test files (29 instances) → bare `assert x` / `assert not x` per pytest idiom; `is None` preserved per PEP 8
+  - **Zero `console.log`** statements in production code (only `console.error`/`console.debug` for monitoring)
+  - Regression: 34/34 backend tests (iter-20 + iter-21) still PASS; `CI=true yarn build` clean
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — REFACTOR COMPLETE**:
   - `PlayerStudio.js` 866 → 432 lines (extracted `StudioSearchScreen`, `ChordDots`, `formatTime`)

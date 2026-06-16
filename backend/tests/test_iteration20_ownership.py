@@ -20,7 +20,7 @@ class TestOwnershipProducts:
         r = requests.get(f"{API}/ownership/products", timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert data["currency"] == "aud"
         keys = {p["key"]: p for p in data["products"]}
         assert "ownership_full" in keys and "ownership_finance" in keys
@@ -35,7 +35,7 @@ class TestOwnershipProducts:
         data = r.json()
         assert data["status"] == "none"
         assert data["payments_made"] == 0
-        assert data["is_owned"] is False
+        assert not data["is_owned"]
 
 
 # ── Ownership Simulate ──────────────────────
@@ -46,12 +46,12 @@ class TestOwnershipSimulate:
                           json={"user_id": uid, "tier_key": "ownership_full"}, timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["is_owned"] is True
+        assert data["is_owned"]
         assert data["status"] == "owned"
 
         # verify status endpoint also confirms
         r2 = requests.get(f"{API}/ownership/{uid}/status", timeout=10)
-        assert r2.json()["is_owned"] is True
+        assert r2.json()["is_owned"]
 
     def test_simulate_finance_12_times_progresses(self):
         uid = _uid("TEST_iter20_fin")
@@ -64,10 +64,10 @@ class TestOwnershipSimulate:
             assert last["payments_made"] == i
             if i < 12:
                 assert last["status"] == "financing"
-                assert last["is_owned"] is False
+                assert not last["is_owned"]
             else:
                 assert last["status"] == "owned"
-                assert last["is_owned"] is True
+                assert last["is_owned"]
 
     def test_simulate_invalid_tier_400(self):
         r = requests.post(f"{API}/ownership/simulate",
@@ -84,13 +84,13 @@ class TestTierLocking:
         r = requests.get(f"{API}/subscriptions/tiers", params={"user_id": uid}, timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["is_owned"] is False
+        assert not data["is_owned"]
         by_key = {t["key"]: t for t in data["tiers"]}
         for k in self.LOCKED:
-            assert by_key[k]["locked"] is True, f"{k} should be locked for non-owner"
+            assert by_key[k]["locked"], f"{k} should be locked for non-owner"
         # listener + individual + addon NOT locked
         for k in ("listener", "individual", "individual_covers", "covers_addon"):
-            assert by_key[k]["locked"] is False
+            assert not by_key[k]["locked"]
 
     def test_tiers_unlocked_after_ownership(self):
         uid = _uid("TEST_iter20_unlock")
@@ -98,10 +98,10 @@ class TestTierLocking:
                       json={"user_id": uid, "tier_key": "ownership_full"}, timeout=10)
         r = requests.get(f"{API}/subscriptions/tiers", params={"user_id": uid}, timeout=10)
         data = r.json()
-        assert data["is_owned"] is True
+        assert data["is_owned"]
         by_key = {t["key"]: t for t in data["tiers"]}
         for k in self.LOCKED:
-            assert by_key[k]["locked"] is False
+            assert not by_key[k]["locked"]
 
     def test_select_student_without_ownership_403(self):
         uid = _uid("TEST_iter20_select_blk")
@@ -129,7 +129,7 @@ class TestCheckout:
                                 "origin_url": "https://example.com"}, timeout=20)
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert "checkout.stripe.com" in data["url"]
 
     def test_checkout_student_no_ownership_403(self):

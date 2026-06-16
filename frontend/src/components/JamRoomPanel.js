@@ -132,7 +132,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
           text: `Jam with me on ${room?.song_title || "Pocket Products"} — code ${room?.code}`,
           url: inviteUrl,
         });
-      } catch { /* user cancelled */ }
+      } catch (err) { console.debug("[Jam] native share dismissed:", err?.message); }
     } else { copyInvite(); }
   };
 

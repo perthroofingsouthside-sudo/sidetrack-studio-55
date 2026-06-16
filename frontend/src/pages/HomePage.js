@@ -66,7 +66,7 @@ export default function HomePage({
         setHipHop(pickFour([hh1.data?.tracks, hh2.data?.tracks]));
         setAltRock(pickFour([ar1.data?.tracks, ar2.data?.tracks]));
         setPlaylists(pls.data?.playlists || []);
-      } catch (err) { /* silent — the page still works */ }
+      } catch (err) { console.error("[Discover] side-rail load failed:", err); }
     };
     load();
   }, []);

@@ -21,7 +21,7 @@ export default function SyncHUD({ roomId, userId, isHost = true, defaultBpm = 12
       try {
         const res = await axios.get(`${API}/sync/state/${encodeURIComponent(roomId)}`);
         if (res.data?.success) setState(res.data);
-      } catch (e) { /* silent */ }
+      } catch (e) { console.debug("[Sync] state poll failed:", e?.message); }
     };
     poll();
     pollRef.current = setInterval(poll, 200);
@@ -38,7 +38,7 @@ export default function SyncHUD({ roomId, userId, isHost = true, defaultBpm = 12
     try {
       await axios.post(`${API}/sync/stop`, { room_id: roomId });
       toast.message("Master clock stopped");
-    } catch (e) { /* noop */ }
+    } catch (e) { console.debug("[Sync] stop failed:", e?.message); }
   };
 
   const running = state?.running;

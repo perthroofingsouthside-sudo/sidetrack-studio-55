@@ -9,7 +9,7 @@ from typing import List, Optional
 from datetime import datetime, timezone
 import uuid
 import logging
-import random
+import hashlib
 
 from database import db
 
@@ -70,15 +70,27 @@ async def generate_beat(payload: BeatRequest):
 
     beat_id = str(uuid.uuid4())
     now = datetime.now(timezone.utc).isoformat()
-    # Generate a deterministic stem pattern (mock)
-    seed = abs(hash(f"{payload.genre}-{payload.bpm}-{payload.bars}-{payload.key}")) % 9999
-    # Deterministic RNG (NOT for security): same inputs → same beat pattern.
-    rng = random.Random(seed)  # noqa: S311
+    # Deterministic pattern via SHA-256 byte-stream of the input tuple — same inputs
+    # always yield the same beat pattern. NOT used for security, just reproducibility.
+    seed_input = f"{payload.genre}|{payload.bpm}|{payload.bars}|{payload.key}".encode("utf-8")
+    digest = hashlib.sha256(seed_input).digest()
+    # Expand to enough bytes for all four stems × bars × 4 steps
+    needed = payload.bars * 4 * 4
+    stream = bytearray()
+    while len(stream) < needed:
+        stream.extend(hashlib.sha256(stream + digest).digest())
+
+    def take(offset: int, threshold: int) -> List[int]:
+        """Read `bars*4` bytes starting at `offset` and return 1 if byte > threshold else 0."""
+        size = payload.bars * 4
+        return [1 if stream[offset + i] > threshold else 0 for i in range(size)]
+
+    step = payload.bars * 4
     pattern = {
-        "kick": [1 if rng.random() > 0.5 else 0 for _ in range(payload.bars * 4)],
-        "snare": [1 if rng.random() > 0.7 else 0 for _ in range(payload.bars * 4)],
-        "hihat": [1 if rng.random() > 0.3 else 0 for _ in range(payload.bars * 4)],
-        "bass": [1 if rng.random() > 0.6 else 0 for _ in range(payload.bars * 4)],
+        "kick":  take(0 * step, 127),   # ~50% density
+        "snare": take(1 * step, 178),   # ~30% density
+        "hihat": take(2 * step, 76),    # ~70% density
+        "bass":  take(3 * step, 102),   # ~40% density
     }
 
     beat_doc = {

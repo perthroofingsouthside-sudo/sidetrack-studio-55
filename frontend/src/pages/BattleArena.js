@@ -38,14 +38,14 @@ export default function BattleArena({ currentSong, onStartDuet }) {
     try {
       const res = await axios.get(`${API}/battles?status=active&limit=20`);
       if (res.data.success) setBattles(res.data.battles);
-    } catch (err) { /* empty */ }
+    } catch (err) { console.error("[Battle] load battles failed:", err); }
   };
 
   const loadLeaderboard = async () => {
     try {
       const res = await axios.get(`${API}/battles/leaderboard/top?limit=10`);
       if (res.data.success) setLeaderboard(res.data.leaderboard);
-    } catch (err) { /* empty */ }
+    } catch (err) { console.error("[Battle] load leaderboard failed:", err); }
   };
 
   const openBattle = async (battle) => {

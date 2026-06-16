@@ -34,14 +34,14 @@ class TestLanes:
         r = session.post(f"{API}/lanes/set", json={"user_id": user_id, "lane": "gamer"})
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert data["lane"] == "gamer"
 
     def test_get_lane_returns_gamer(self, session, user_id):
         r = session.get(f"{API}/lanes/{user_id}")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert data["lane"] == "gamer"
 
     def test_set_lane_creator_then_get(self, session, user_id):
@@ -67,7 +67,7 @@ class TestCatalog:
         r = session.get(f"{API}/catalog/status")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert data["curated_size_target"] == 3000
         assert "gate_strategy" in data
         assert isinstance(data["seeded_records"], int)
@@ -76,7 +76,7 @@ class TestCatalog:
         r = session.get(f"{API}/catalog/in/some_random_track_123")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert "in_catalog" in data
         assert "requires_ownership" in data
         assert isinstance(data["in_catalog"], bool)
@@ -87,7 +87,7 @@ class TestCatalog:
         r = session.post(f"{API}/catalog/seed")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         # 800 MTV + 600 MOS + 800 HH + 600 AR = 2800 ops
         assert data.get("seeded", 0) == 2800
         assert data.get("target") == 3000
@@ -101,8 +101,8 @@ class TestCatalog:
     def test_catalog_in_seeded_track_is_true(self, session):
         r = session.get(f"{API}/catalog/in/mtv_seed_0001")
         data = r.json()
-        assert data["in_catalog"] is True
-        assert data["requires_ownership"] is False
+        assert data["in_catalog"]
+        assert not data["requires_ownership"]
 
 
 # ─── Backstage AI motivation ─────────────────────
@@ -116,7 +116,7 @@ class TestBackstage:
         }, timeout=90)
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert data["style"] == "rock_legend"
         assert isinstance(data["lines"], list)
         assert len(data["lines"]) == 3
@@ -162,11 +162,11 @@ class TestGamerRecordings:
         r = session.post(f"{API}/gamer/recordings", json=payload)
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         rec = data["recording"]
         assert rec["lane"] == "gamer"
-        assert rec["is_private"] is True
-        assert rec["share_to_social"] is False
+        assert rec["is_private"]
+        assert not rec["share_to_social"]
         assert rec["song_title"] == "TEST_Gamer_Song"
         assert rec["user_id"] == user_id
         assert "id" in rec
@@ -175,7 +175,7 @@ class TestGamerRecordings:
         r = session.get(f"{API}/gamer/recordings/{user_id}")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert isinstance(data["recordings"], list)
         assert len(data["recordings"]) >= 1
         assert any(rec["song_title"] == "TEST_Gamer_Song" for rec in data["recordings"])
@@ -190,7 +190,7 @@ class TestSpectatorHub:
         r = session.get(f"{API}/spectator/hub")
         assert r.status_code == 200, r.text
         data = r.json()
-        assert data["success"] is True
+        assert data["success"]
         assert isinstance(data["reality_sets"], list)
         assert isinstance(data["gamer_sets"], list)
         assert "reality_count" in data and "gamer_count" in data
@@ -201,4 +201,4 @@ class TestSpectatorHub:
         for g in data["gamer_sets"]:
             assert "blob_url" not in g, f"blob_url leaked in spectator hub: {g}"
             assert "performer_handle" in g
-            assert g.get("is_virtual") is True
+            assert g.get("is_virtual")

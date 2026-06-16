@@ -31,7 +31,7 @@ export default function PlaylistsPage({ onTrackSelect }) {
           return [...prev, ...newPub];
         });
       }
-    } catch (err) { /* empty */ }
+    } catch (err) { console.error("[Playlists] load failed:", err); }
   }, [owner]);
 
   useEffect(() => { loadPlaylists(); }, [loadPlaylists]);
