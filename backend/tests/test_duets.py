@@ -39,7 +39,7 @@ class TestDuetEndpoints:
         response = api_client.get(f"{BASE_URL}/api/duets")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "duets" in data
         assert isinstance(data["duets"], list)
         print(f"✓ GET /api/duets returns list with {len(data['duets'])} duets")
@@ -49,12 +49,12 @@ class TestDuetEndpoints:
         response = api_client.get(f"{BASE_URL}/api/duets?username=TEST_DuetUser")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "duets" in data
         # All returned duets should have matching username
         for duet in data["duets"]:
             assert duet["username"] == "TEST_DuetUser"
-        print(f"✓ GET /api/duets?username=TEST_DuetUser filters correctly")
+        print("✓ GET /api/duets?username=TEST_DuetUser filters correctly")
     
     def test_create_duet_success(self, api_client):
         """POST /api/duets creates a duet record"""
@@ -77,7 +77,7 @@ class TestDuetEndpoints:
         )
         assert response.status_code == 200
         result = response.json()
-        assert result["success"] == True
+        assert result["success"]
         assert "duet" in result
         
         duet = result["duet"]
@@ -99,7 +99,7 @@ class TestDuetEndpoints:
         response = api_client.get(f"{BASE_URL}/api/duets/{TestDuetEndpoints.created_duet_id}")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "duet" in data
         
         duet = data["duet"]
@@ -117,7 +117,7 @@ class TestDuetEndpoints:
         response = api_client.get(f"{BASE_URL}/api/duets/{TestDuetEndpoints.created_duet_id}/audio")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "audio_data" in data
         assert len(data["audio_data"]) > 0  # Should have base64 audio
         print(f"✓ GET /api/duets/{TestDuetEndpoints.created_duet_id}/audio returns audio data")
@@ -181,7 +181,7 @@ class TestDuetEndpoints:
         response = api_client.get(f"{BASE_URL}/api/duets?username=TEST_DuetUser")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         
         # Should find at least the duet we created
         duets = data["duets"]
@@ -201,7 +201,7 @@ class TestBattleCoversForDuet:
         response = api_client.get(f"{BASE_URL}/api/battles/{EXISTING_BATTLE_ID}")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "battle" in data
         assert "covers" in data
         
@@ -218,7 +218,7 @@ class TestBattleCoversForDuet:
         response = api_client.get(f"{BASE_URL}/api/battles/{EXISTING_BATTLE_ID}/cover/{EXISTING_COVER_ID}/audio")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "audio_data" in data
         print(f"✓ GET /api/battles/{EXISTING_BATTLE_ID}/cover/{EXISTING_COVER_ID}/audio returns audio")
 

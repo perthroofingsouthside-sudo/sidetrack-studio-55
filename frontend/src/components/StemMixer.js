@@ -4,15 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Volume2, VolumeX, Headphones, UserCheck } from "lucide-react";
 import { API } from "@/App";
 import axios from "axios";
+import log from "@/utils/log";
 
 // Fire-and-forget Vibe-Match behavior log
 const emitMix = (event, stem, value) => {
   try {
     const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
     axios.post(`${API}/discover/mix-behavior`, { user_id: uid, event, stem, value })
-      .catch((err) => console.debug("[Vibe] mix-behavior post failed:", err?.message));
+      .catch((err) => log.debug("[Vibe] mix-behavior post failed:", err?.message));
   } catch (err) {
-    console.debug("[Vibe] emitMix failed:", err?.message);
+    log.debug("[Vibe] emitMix failed:", err?.message);
   }
 };
 

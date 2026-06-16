@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import log from "@/utils/log";
 
 const ROLES = ["vocals", "guitar", "bass", "drums", "keys"];
 
@@ -51,7 +52,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
           setRoom(res.data.room);
           if (onMembersChange) onMembersChange(res.data.room.members);
         }
-      } catch (err) { console.debug("[Jam] poll failed", err?.message); }
+      } catch (err) { log.debug("[Jam] poll failed", err?.message); }
     };
     pollRef.current = setInterval(tick, 4000);
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
@@ -100,7 +101,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
     if (!room?.code) return;
     try {
       await axios.post(`${API}/jam/rooms/${room.code}/leave`, { user_id: userId.current });
-    } catch (err) { console.debug("[Jam] leave call failed", err?.message); }
+    } catch (err) { log.debug("[Jam] leave call failed", err?.message); }
     setRoom(null);
     toast.message("Left the jam");
     // Clean URL
@@ -132,7 +133,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
           text: `Jam with me on ${room?.song_title || "Pocket Products"} — code ${room?.code}`,
           url: inviteUrl,
         });
-      } catch (err) { console.debug("[Jam] native share dismissed:", err?.message); }
+      } catch (err) { log.debug("[Jam] native share dismissed:", err?.message); }
     } else { copyInvite(); }
   };
 

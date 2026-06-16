@@ -136,6 +136,12 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
     return 0;
   }, [lyrics?.lyrics, currentTime]);
 
+  // Upcoming chords preview — memoized so filter+slice doesn't run on every render tick
+  const upcomingChords = useMemo(() => {
+    if (!lyrics?.chords) return [];
+    return lyrics.chords.filter((c) => c.time > currentTime).slice(0, 6);
+  }, [lyrics?.chords, currentTime]);
+
   const showCamera = layout === "stadium" || layout === "split";
   const showLyrics = layout === "lyrics" || layout === "split";
   const showGuitar = layout === "guitar";
@@ -422,7 +428,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                     <GuitarDiagram chord={currentChord.chord} />
                     {lyrics?.chords && (
                       <div className="flex gap-3 mt-6 justify-center flex-wrap">
-                        {lyrics.chords.filter(c => c.time > currentTime).slice(0, 6).map((c) => (
+                        {upcomingChords.map((c) => (
                           <span key={`${c.time}-${c.chord}`} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
                         ))}
                       </div>

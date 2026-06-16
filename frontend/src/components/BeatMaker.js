@@ -10,6 +10,9 @@ import axios from "axios";
  * BeatMaker — Studio AI tool that generates a beat in one of the curated genres.
  * Currently the backend returns a mocked pattern + preview URL; UI is fully wired.
  */
+const BAR_OPTIONS = [4, 8, 16, 32];
+const KEY_OPTIONS = ["C", "D", "E", "F", "G", "A", "B"];
+
 export default function BeatMaker({ userId }) {
   const [genres, setGenres] = useState([]);
   const [genre, setGenre] = useState("mtv_classic");
@@ -175,7 +178,7 @@ export default function BeatMaker({ userId }) {
         <div>
           <p className="text-[10px] uppercase tracking-wider text-[#5C5C6B] font-bold mb-1.5">Bars</p>
           <div className="flex gap-1.5">
-            {[4, 8, 16, 32].map(b => (
+            {BAR_OPTIONS.map(b => (
               <button
                 key={b}
                 onClick={() => setBars(b)}
@@ -197,7 +200,7 @@ export default function BeatMaker({ userId }) {
       <div className="mb-4">
         <p className="text-[10px] uppercase tracking-wider text-[#5C5C6B] font-bold mb-1.5">Key</p>
         <div className="flex flex-wrap gap-1">
-          {["C", "D", "E", "F", "G", "A", "B"].map(k => (
+          {KEY_OPTIONS.map(k => (
             <button
               key={k}
               onClick={() => setKeySig(k)}

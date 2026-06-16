@@ -44,7 +44,7 @@ class TestListTiers:
         r = client.get(f"{API}/subscriptions/tiers", timeout=10)
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] == True
+        assert data["success"]
         tiers = data["tiers"]
         assert isinstance(tiers, list)
         assert len(tiers) == 7, f"Expected 7 tiers, got {len(tiers)}"
@@ -78,7 +78,7 @@ class TestSelectSubscription:
         )
         assert r.status_code == 200
         data = r.json()
-        assert data["success"] == True
+        assert data["success"]
         sub = data["subscription"]
         assert sub["user_id"] == user_id
         assert sub["tier_key"] == "stadium_vip"
@@ -114,8 +114,8 @@ class TestSelectSubscription:
         assert st.status_code == 200
         sd = st.json()
         assert sd["tier_key"] == "individual"
-        assert sd["is_pro"] == True
-        assert sd["is_vip"] == False
+        assert sd["is_pro"]
+        assert not sd["is_vip"]
 
     def test_select_upserts_existing_subscription(self, client, user_id):
         client.post(f"{API}/subscriptions/select", json={"user_id": user_id, "tier_key": "student"}, timeout=10)
@@ -131,9 +131,9 @@ class TestSubscriptionStatus:
         r = client.get(f"{API}/subscriptions/{unique_id}/status", timeout=10)
         assert r.status_code == 200
         d = r.json()
-        assert d["success"] == True
-        assert d["is_pro"] == False
-        assert d["is_vip"] == False
+        assert d["success"]
+        assert not d["is_pro"]
+        assert not d["is_vip"]
         assert d["tier_key"] == "free"
         assert d["subscription"] is None
 
@@ -142,16 +142,16 @@ class TestSubscriptionStatus:
         r = client.get(f"{API}/subscriptions/{user_id}/status", timeout=10)
         assert r.status_code == 200
         d = r.json()
-        assert d["is_pro"] == True
-        assert d["is_vip"] == True
+        assert d["is_pro"]
+        assert d["is_vip"]
         assert d["tier_key"] == "stadium_vip"
 
     def test_status_for_creator_tier_is_pro_not_vip(self, client, user_id):
         client.post(f"{API}/subscriptions/select", json={"user_id": user_id, "tier_key": "individual"}, timeout=10)
         r = client.get(f"{API}/subscriptions/{user_id}/status", timeout=10)
         d = r.json()
-        assert d["is_pro"] == True
-        assert d["is_vip"] == False
+        assert d["is_pro"]
+        assert not d["is_vip"]
         assert d["tier_key"] == "individual"
 
     def test_no_mongodb_objectid_in_response(self, client, user_id):

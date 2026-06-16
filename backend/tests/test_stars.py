@@ -39,7 +39,7 @@ class TestStarEndpoints:
         response = self.session.get(f"{BASE_URL}/api/stars/feed?limit=30")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "performances" in data
         assert isinstance(data["performances"], list)
         print(f"PASS: Star feed returns {len(data['performances'])} performances")
@@ -50,7 +50,7 @@ class TestStarEndpoints:
         response = self.session.get(f"{BASE_URL}/api/stars/leaderboard?limit=10")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "leaderboard" in data
         assert isinstance(data["leaderboard"], list)
         print(f"PASS: Star leaderboard returns {len(data['leaderboard'])} entries")
@@ -80,7 +80,7 @@ class TestStarEndpoints:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "performance" in data
         perf = data["performance"]
         assert perf["username"] == form_data["username"]
@@ -103,7 +103,7 @@ class TestStarEndpoints:
         response = self.session.get(f"{BASE_URL}/api/stars/{perf_id}")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "performance" in data
         assert data["performance"]["id"] == perf_id
         print(f"PASS: GET /api/stars/{perf_id} returns correct performance")
@@ -117,7 +117,7 @@ class TestStarEndpoints:
         response = self.session.get(f"{BASE_URL}/api/stars/{perf_id}/audio")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "audio_data" in data
         assert len(data["audio_data"]) > 0  # Should have base64 audio data
         print(f"PASS: GET /api/stars/{perf_id}/audio returns audio data")
@@ -137,7 +137,7 @@ class TestStarEndpoints:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "performance" in data
         assert data["performance"]["votes"] == 1
         print(f"PASS: Vote on performance {perf_id} succeeded, votes now: 1")
@@ -166,7 +166,7 @@ class TestStarEndpoints:
         assert response2.status_code == 400
         data = response2.json()
         assert "Already voted" in data.get("detail", "")
-        print(f"PASS: Duplicate vote returns 400 with 'Already voted' message")
+        print("PASS: Duplicate vote returns 400 with 'Already voted' message")
     
     # --- GET /api/stars/nonexistent ---
     def test_get_nonexistent_performance_returns_404(self):
@@ -227,7 +227,7 @@ class TestMusicSearchForKaraoke:
         response = requests.get(f"{BASE_URL}/api/music/search?q=hello&limit=5")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "tracks" in data
         assert len(data["tracks"]) > 0
         

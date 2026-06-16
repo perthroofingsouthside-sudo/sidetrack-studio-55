@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import log from "@/utils/log";
 
 /**
  * SyncHUD — Global Master Clock indicator for group jams.
@@ -21,7 +22,7 @@ export default function SyncHUD({ roomId, userId, isHost = true, defaultBpm = 12
       try {
         const res = await axios.get(`${API}/sync/state/${encodeURIComponent(roomId)}`);
         if (res.data?.success) setState(res.data);
-      } catch (e) { console.debug("[Sync] state poll failed:", e?.message); }
+      } catch (e) { log.debug("[Sync] state poll failed:", e?.message); }
     };
     poll();
     pollRef.current = setInterval(poll, 200);
@@ -38,7 +39,7 @@ export default function SyncHUD({ roomId, userId, isHost = true, defaultBpm = 12
     try {
       await axios.post(`${API}/sync/stop`, { room_id: roomId });
       toast.message("Master clock stopped");
-    } catch (e) { console.debug("[Sync] stop failed:", e?.message); }
+    } catch (e) { log.debug("[Sync] stop failed:", e?.message); }
   };
 
   const running = state?.running;

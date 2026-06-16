@@ -32,7 +32,7 @@ class TestHealth:
         r = s.get(f"{API}/health", timeout=15)
         assert r.status_code == 200
         d = r.json()
-        assert d.get("status") in ("healthy", "ok") or d.get("ok") == True
+        assert d.get("status") in ("healthy", "ok") or d.get("ok")
 
 
 # ── Music-theory chord engine ───────────────────
@@ -41,7 +41,7 @@ class TestChordEngine:
         r = s.get(f"{API}/chords/lookup", params={"track": "Hello", "artist": "Adele", "genre": "pop", "duration": 120}, timeout=20)
         assert r.status_code == 200, r.text
         d = r.json()
-        assert d["success"] == True
+        assert d["success"]
         assert "key" in d and isinstance(d["key"], str) and len(d["key"]) >= 1
         assert isinstance(d["chords"], list) and len(d["chords"]) > 0
         first = d["chords"][0]
@@ -71,7 +71,7 @@ class TestSubscriptions:
         r = s.get(f"{API}/subscriptions/tiers", timeout=15)
         assert r.status_code == 200
         d = r.json()
-        assert d["success"] == True
+        assert d["success"]
         assert isinstance(d["tiers"], list)
         assert len(d["tiers"]) == 7, f"expected 7 tiers, got {len(d['tiers'])}"
         keys = {t["key"] for t in d["tiers"]}
@@ -83,12 +83,12 @@ class TestSubscriptions:
         assert r.status_code == 200, r.text
         sub = r.json()["subscription"]
         assert sub["tier_key"] == "adult_band"
-        assert sub["active_band"] == True
+        assert sub["active_band"]
 
         r2 = s.get(f"{API}/subscriptions/{uid}/status", timeout=15)
         assert r2.status_code == 200
         d = r2.json()
-        assert d["is_band"] == True
+        assert d["is_band"]
         assert d["tier_key"] == "adult_band"
         assert d["upload_status"] is not None and d["upload_status"]["required"] == 1
 
@@ -103,7 +103,7 @@ class TestSubscriptions:
         r = s.post(f"{API}/subscriptions/check-band-activity", timeout=20)
         assert r.status_code == 200, r.text
         d = r.json()
-        assert d["success"] == True
+        assert d["success"]
         assert isinstance(d["checked"], int) and d["checked"] >= 1
         assert isinstance(d["downgraded"], int)
         # The newly-created uid should be in the downgraded list
@@ -120,7 +120,7 @@ class TestTrim:
         r = s.post(f"{API}/trim", json={"recording_id": "", "start_pct": 10, "end_pct": 80}, timeout=20)
         assert r.status_code == 200, r.text
         d = r.json()
-        assert d["success"] == True
+        assert d["success"]
         assert d["start_pct"] == 10 and d["end_pct"] == 80
 
     def test_trim_invalid_range_400(self, s):
@@ -138,7 +138,7 @@ class TestLyrics:
         r = s.get(f"{API}/lyrics/fetch", params={"track": "Hello", "artist": "Adele"}, timeout=30)
         assert r.status_code == 200, r.text
         d = r.json()
-        assert d.get("success") == True
+        assert d.get("success")
         # Synced lyrics + chord engine fields
         assert "lyrics" in d or "synced" in d or "lines" in d
         assert "key" in d
@@ -200,7 +200,7 @@ class TestPlatform:
         r1 = s.post(f"{API}/social/follow", json=body, timeout=15)
         assert r1.status_code == 200, r1.text
         d1 = r1.json()
-        assert "following" in d1 or "is_following" in d1 or d1.get("success") == True
+        assert "following" in d1 or "is_following" in d1 or d1.get("success")
         r2 = s.post(f"{API}/social/follow", json=body, timeout=15)
         assert r2.status_code == 200
         d2 = r2.json()

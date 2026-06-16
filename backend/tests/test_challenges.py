@@ -31,7 +31,7 @@ class TestChallengesBackend:
         response = self.session.get(f"{BASE_URL}/api/challenges/current")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         challenge = data["challenge"]
         
         # Verify required fields
@@ -69,7 +69,7 @@ class TestChallengesBackend:
         duration = (end - start).days
         assert duration == 7, f"Challenge duration should be 7 days, got {duration}"
         
-        print(f"✓ Challenge dates are Wednesday to Wednesday (7 days)")
+        print("✓ Challenge dates are Wednesday to Wednesday (7 days)")
     
     def test_get_challenge_entries_empty(self):
         """Test GET /api/challenges/{id}/entries returns entries for a specific challenge"""
@@ -82,7 +82,7 @@ class TestChallengesBackend:
         response = self.session.get(f"{BASE_URL}/api/challenges/{challenge_id}/entries")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "entries" in data
         assert "challenge" in data
         assert isinstance(data["entries"], list)
@@ -100,7 +100,7 @@ class TestChallengesBackend:
         response = self.session.get(f"{BASE_URL}/api/challenges/history?limit=10")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "challenges" in data
         assert isinstance(data["challenges"], list)
         
@@ -138,7 +138,7 @@ class TestChallengesBackend:
         response = requests.post(f"{BASE_URL}/api/stars", data=form_data, files=files)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "performance" in data
         
         perf = data["performance"]
@@ -179,7 +179,7 @@ class TestChallengesBackend:
         found = any(e["id"] == perf_id for e in entries)
         assert found, f"Performance {perf_id} not found in challenge entries"
         
-        print(f"✓ Challenge entry appears in entries list")
+        print("✓ Challenge entry appears in entries list")
     
     def test_star_of_week_is_top_voted(self):
         """Test that star_of_week is the top-voted entry in the challenge"""
@@ -230,7 +230,7 @@ class TestChallengesBackend:
                 response = self.session.get(f"{BASE_URL}/api/challenges/current")
                 challenge = response.json()["challenge"]
                 assert challenge.get("star_of_week") is not None, "Star of week should be set after voting"
-            print(f"✓ Star of week logic verified")
+            print("✓ Star of week logic verified")
     
     def test_submit_performance_without_challenge_id(self):
         """Test that 'Sing Now' still works for free karaoke (no challenge tag)"""
@@ -247,12 +247,12 @@ class TestChallengesBackend:
         response = requests.post(f"{BASE_URL}/api/stars", data=form_data, files=files)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         
         perf = data["performance"]
         assert perf.get("challenge_id", "") == "", "Free karaoke should have empty challenge_id"
         
-        print(f"✓ Free karaoke (no challenge) works correctly")
+        print("✓ Free karaoke (no challenge) works correctly")
     
     def test_current_challenge_idempotent(self):
         """Test that calling /api/challenges/current multiple times returns same challenge"""
@@ -263,7 +263,7 @@ class TestChallengesBackend:
         challenge2 = response2.json()["challenge"]
         
         assert challenge1["id"] == challenge2["id"], "Same challenge should be returned"
-        print(f"✓ Current challenge endpoint is idempotent")
+        print("✓ Current challenge endpoint is idempotent")
 
 
 if __name__ == "__main__":

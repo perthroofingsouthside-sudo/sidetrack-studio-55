@@ -45,8 +45,8 @@ class TestLRCLIBIntegration:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
-        assert data["has_synced"] == True
+        assert data["success"]
+        assert data["has_synced"]
         assert data["track_name"] == "Shape of You"
         print(f"✓ LRCLIB search (Shape of You): has_synced={data['has_synced']}")
     
@@ -82,7 +82,7 @@ class TestMusicEndpoints:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert len(data["tracks"]) > 0
         track = data["tracks"][0]
         assert "title" in track
@@ -94,7 +94,7 @@ class TestMusicEndpoints:
         response = requests.get(f"{BASE_URL}/api/music/top-songs", params={"limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert len(data["tracks"]) > 0
         print(f"✓ Top songs: {len(data['tracks'])} tracks")
     
@@ -103,7 +103,7 @@ class TestMusicEndpoints:
         response = requests.get(f"{BASE_URL}/api/music/top-albums", params={"limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert len(data["albums"]) > 0
         album = data["albums"][0]
         assert "name" in album
@@ -125,7 +125,7 @@ class TestPlaylistsCRUD:
         })
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         playlist_id = data["playlist"]["id"]
         yield playlist_id
         # Cleanup
@@ -141,7 +141,7 @@ class TestPlaylistsCRUD:
         response = requests.get(f"{BASE_URL}/api/playlists/{test_playlist_id}")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert data["playlist"]["name"] == "TEST_Iteration11_Playlist"
         print(f"✓ Get playlist: {data['playlist']['name']}")
     
@@ -150,7 +150,7 @@ class TestPlaylistsCRUD:
         response = requests.get(f"{BASE_URL}/api/playlists", params={"owner": "test_user_11"})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         print(f"✓ List playlists: {len(data['playlists'])} playlists")
 
 
@@ -162,7 +162,7 @@ class TestBattleArena:
         response = requests.get(f"{BASE_URL}/api/battles", params={"status": "active", "limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         print(f"✓ List battles: {len(data['battles'])} active battles")
     
     def test_battle_leaderboard(self):
@@ -170,7 +170,7 @@ class TestBattleArena:
         response = requests.get(f"{BASE_URL}/api/battles/leaderboard/top", params={"limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         print(f"✓ Battle leaderboard: {len(data['leaderboard'])} top covers")
 
 
@@ -182,7 +182,7 @@ class TestBecomeAStar:
         response = requests.get(f"{BASE_URL}/api/stars/feed", params={"limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         print(f"✓ Star feed: {len(data['performances'])} performances")
     
     def test_star_leaderboard(self):
@@ -190,7 +190,7 @@ class TestBecomeAStar:
         response = requests.get(f"{BASE_URL}/api/stars/leaderboard", params={"limit": 10})
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         print(f"✓ Star leaderboard: {len(data['leaderboard'])} top performers")
     
     def test_current_challenge(self):
@@ -198,7 +198,7 @@ class TestBecomeAStar:
         response = requests.get(f"{BASE_URL}/api/challenges/current")
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "challenge" in data
         challenge = data["challenge"]
         assert "title" in challenge

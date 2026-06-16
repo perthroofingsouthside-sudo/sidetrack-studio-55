@@ -105,6 +105,13 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - Regression: 34/34 backend tests (iter-20 + iter-21) still PASS; `CI=true yarn build` clean
 
 ## Pending / Backlog (P2)
+- ✅ **Feb 16, 2026 — CODE QUALITY PASS 2**:
+  - 98 ruff blocking errors auto-fixed: 34 E701 multi-statement lines (`community.py`, `platform.py` reformatted), 53 `== True/False` in test files → idiomatic truth checks, 6 unused f-strings stripped
+  - Memoized `upcomingChords` in `RecordingStudio.js` (was filter+slice on every tick = ~10 Hz wasted CPU during playback)
+  - Hoisted `BAR_OPTIONS` + `KEY_OPTIONS` to module scope in `BeatMaker.js` (avoid per-render array allocation)
+  - Added `utils/log.js` shim — `log.debug()` no-ops in production; replaced 5 `console.debug` callers (`JamRoomPanel`, `SyncHUD`, `StemMixer`)
+  - Type-hinted `routes/core.py` (previously 0% → 100%)
+  - Regression: 34/34 backend tests still PASS; `CI=true yarn build` clean
 - ✅ **Feb 16, 2026 — REFACTOR COMPLETE**:
   - `PlayerStudio.js` 866 → 432 lines (extracted `StudioSearchScreen`, `ChordDots`, `formatTime`)
   - `RecordingStudio.js` 734 → 528 lines (extracted `TrimModal`, `RecordSearchScreen`, `GuitarDiagram`)

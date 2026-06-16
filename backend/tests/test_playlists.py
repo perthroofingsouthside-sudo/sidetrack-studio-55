@@ -47,10 +47,10 @@ class TestPlaylistCRUD:
         response = requests.post(f"{BASE_URL}/api/playlists", json=payload, timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "playlist" in data
         assert data["playlist"]["name"] == payload["name"]
-        assert data["playlist"]["is_public"] == True
+        assert data["playlist"]["is_public"]
         assert data["playlist"]["owner"] == self.test_owner
         assert "id" in data["playlist"]
         self.created_playlist_ids.append(data["playlist"]["id"])
@@ -67,8 +67,8 @@ class TestPlaylistCRUD:
         response = requests.post(f"{BASE_URL}/api/playlists", json=payload, timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
-        assert data["playlist"]["is_public"] == False
+        assert data["success"]
+        assert not data["playlist"]["is_public"]
         self.created_playlist_ids.append(data["playlist"]["id"])
         print(f"✓ Created private playlist: {data['playlist']['id']}")
     
@@ -89,7 +89,7 @@ class TestPlaylistCRUD:
         response = requests.get(f"{BASE_URL}/api/playlists?owner={self.test_owner}", timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "playlists" in data
         assert len(data["playlists"]) >= 1
         print(f"✓ Listed {len(data['playlists'])} playlists for owner")
@@ -99,11 +99,11 @@ class TestPlaylistCRUD:
         response = requests.get(f"{BASE_URL}/api/playlists?public_only=true", timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert "playlists" in data
         # All returned playlists should be public
         for pl in data["playlists"]:
-            assert pl.get("is_public", True) == True
+            assert pl.get("is_public", True)
         print(f"✓ Listed {len(data['playlists'])} public playlists")
     
     def test_get_playlist_by_id(self):
@@ -122,7 +122,7 @@ class TestPlaylistCRUD:
         response = requests.get(f"{BASE_URL}/api/playlists/{pl_id}", timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert data["playlist"]["id"] == pl_id
         assert data["playlist"]["name"] == payload["name"]
         print(f"✓ Retrieved playlist by ID: {pl_id}")
@@ -151,10 +151,10 @@ class TestPlaylistCRUD:
         response = requests.put(f"{BASE_URL}/api/playlists/{pl_id}", data=update_data, timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert data["playlist"]["name"] == "Updated Name"
-        assert data["playlist"]["is_public"] == False
-        print(f"✓ Updated playlist name and privacy")
+        assert not data["playlist"]["is_public"]
+        print("✓ Updated playlist name and privacy")
     
     def test_delete_playlist(self):
         """Test deleting a playlist"""
@@ -171,12 +171,12 @@ class TestPlaylistCRUD:
         response = requests.delete(f"{BASE_URL}/api/playlists/{pl_id}", timeout=10)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         
         # Verify deleted
         get_resp = requests.get(f"{BASE_URL}/api/playlists/{pl_id}", timeout=10)
         assert get_resp.status_code == 404
-        print(f"✓ Deleted playlist and verified removal")
+        print("✓ Deleted playlist and verified removal")
 
 
 class TestPlaylistTracks:
@@ -219,11 +219,11 @@ class TestPlaylistTracks:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert data["playlist"]["track_count"] == 1
         assert len(data["playlist"]["tracks"]) == 1
         assert data["playlist"]["tracks"][0]["title"] == "Test Song"
-        print(f"✓ Added track to playlist")
+        print("✓ Added track to playlist")
     
     def test_add_multiple_tracks(self):
         """Test adding multiple tracks"""
@@ -247,7 +247,7 @@ class TestPlaylistTracks:
         # Verify count
         get_resp = requests.get(f"{BASE_URL}/api/playlists/{self.playlist_id}", timeout=10)
         assert get_resp.json()["playlist"]["track_count"] == 3
-        print(f"✓ Added 3 tracks to playlist")
+        print("✓ Added 3 tracks to playlist")
     
     def test_remove_track_from_playlist(self):
         """Test removing a track from a playlist"""
@@ -276,14 +276,14 @@ class TestPlaylistTracks:
         )
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         
         # Verify removed
         get_resp = requests.get(f"{BASE_URL}/api/playlists/{self.playlist_id}", timeout=10)
         tracks = get_resp.json()["playlist"]["tracks"]
         track_ids = [t["track_id"] for t in tracks]
         assert track_id not in track_ids
-        print(f"✓ Removed track from playlist")
+        print("✓ Removed track from playlist")
     
     def test_remove_nonexistent_track(self):
         """Test removing a track that doesn't exist"""
@@ -303,7 +303,7 @@ class TestMusicSearchForPlaylists:
         response = requests.get(f"{BASE_URL}/api/music/search?q=Taylor+Swift&limit=5", timeout=15)
         assert response.status_code == 200
         data = response.json()
-        assert data["success"] == True
+        assert data["success"]
         assert len(data["tracks"]) > 0
         
         # Verify track has fields needed for playlist

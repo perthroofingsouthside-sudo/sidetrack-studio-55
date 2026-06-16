@@ -28,7 +28,7 @@ class TestSkipLimiter:
         assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
         
         data = response.json()
-        assert data.get("success") == True, "Expected success=True"
+        assert data.get("success"), "Expected success=True"
         assert data.get("user_id") == self.test_user_id, f"Expected user_id={self.test_user_id}"
         assert data.get("skips_used") == 0, f"Expected skips_used=0, got {data.get('skips_used')}"
         assert data.get("skips_remaining") == 50, f"Expected skips_remaining=50, got {data.get('skips_remaining')}"
@@ -61,7 +61,7 @@ class TestSkipLimiter:
         assert use_response.status_code == 200, f"Expected 200, got {use_response.status_code}: {use_response.text}"
         
         data = use_response.json()
-        assert data.get("success") == True, "Expected success=True"
+        assert data.get("success"), "Expected success=True"
         assert data.get("skips_remaining") == initial_remaining - 1, f"Expected {initial_remaining - 1} remaining, got {data.get('skips_remaining')}"
         assert data.get("skips_used") == 1, f"Expected skips_used=1, got {data.get('skips_used')}"
         print(f"✓ Skip used, remaining: {data.get('skips_remaining')}")
