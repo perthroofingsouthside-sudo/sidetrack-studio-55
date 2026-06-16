@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1996",
+  "year": 1996,
+  "name": "Triple J Hottest 100 \u2014 1996",
+  "tracks": [
+    {
+      "track_id": "464069411ac7c8",
+      "title": "Pretty Fly (For a White Guy)",
+      "artist": "The Offspring",
+      "rank": 1,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "64819a09d0eea7",
+      "title": "Tubthumping",
+      "artist": "Chumbawamba",
+      "rank": 2,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6e85ca7fd3d4ed",
+      "title": "Brick",
+      "artist": "Ben Folds Five",
+      "rank": 3,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0cbfcae806f32e",
+      "title": "Karma Police",
+      "artist": "Radiohead",
+      "rank": 4,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b5a5e7d08f2cf",
+      "title": "Block Rockin' Beats",
+      "artist": "The Chemical Brothers",
+      "rank": 5,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

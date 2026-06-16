@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1991",
+  "year": 1991,
+  "name": "Triple J Hottest 100 \u2014 1991",
+  "tracks": [
+    {
+      "track_id": "f6bf37ecb304a4",
+      "title": "Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "rank": 1,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bedfea6f1907d",
+      "title": "Losing My Religion",
+      "artist": "R.E.M.",
+      "rank": 2,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c973892848d835",
+      "title": "Black",
+      "artist": "Pearl Jam",
+      "rank": 3,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e42b158c2e2249",
+      "title": "Enter Sandman",
+      "artist": "Metallica",
+      "rank": 4,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1db038afcc4aa9",
+      "title": "Give It Away",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 5,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2010",
+  "year": 2010,
+  "name": "Triple J Hottest 100 \u2014 2010",
+  "tracks": [
+    {
+      "track_id": "7a948c82591fde",
+      "title": "Big Jet Plane",
+      "artist": "Angus & Julia Stone",
+      "rank": 1,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c4b627191f2dc2",
+      "title": "Animal",
+      "artist": "Neon Trees",
+      "rank": 2,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "46a928c3365ee9",
+      "title": "F**kin' Perfect",
+      "artist": "P!nk",
+      "rank": 3,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c8189a4b8a9afb",
+      "title": "Tighten Up",
+      "artist": "The Black Keys",
+      "rank": 4,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a75ff821a9b920",
+      "title": "Pumped Up Kicks",
+      "artist": "Foster the People",
+      "rank": 5,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

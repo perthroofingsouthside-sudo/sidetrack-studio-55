@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2022",
+  "year": 2022,
+  "name": "Triple J Hottest 100 \u2014 2022",
+  "tracks": [
+    {
+      "track_id": "022be2feca2956",
+      "title": "As It Was",
+      "artist": "Harry Styles",
+      "rank": 1,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "85160b273ee44f",
+      "title": "About Damn Time",
+      "artist": "Lizzo",
+      "rank": 2,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1cfb473ebc2d0e",
+      "title": "Bad Habit",
+      "artist": "Steve Lacy",
+      "rank": 3,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7e8f11c196baeb",
+      "title": "Running Up That Hill",
+      "artist": "Kate Bush",
+      "rank": 4,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ca341b46862cca",
+      "title": "Glimpse of Us",
+      "artist": "Joji",
+      "rank": 5,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

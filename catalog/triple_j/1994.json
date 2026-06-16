@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1994",
+  "year": 1994,
+  "name": "Triple J Hottest 100 \u2014 1994",
+  "tracks": [
+    {
+      "track_id": "b2d7bc380b138a",
+      "title": "Tomorrow",
+      "artist": "Silverchair",
+      "rank": 1,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2eff7ec591bcb6",
+      "title": "Glycerine",
+      "artist": "Bush",
+      "rank": 2,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b0ad6ff7c01236",
+      "title": "My Friends",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "096d5ad61157f9",
+      "title": "Wonderwall",
+      "artist": "Oasis",
+      "rank": 4,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ce9c118ba0804a",
+      "title": "1979",
+      "artist": "The Smashing Pumpkins",
+      "rank": 5,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

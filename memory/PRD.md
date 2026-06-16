@@ -135,6 +135,13 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - Profile card now renders the full SVG character (88 px) instead of the previous lone Lucide icon. Verified persistence via `localStorage.pp_gamer_avatar`; live update after save reflects in the profile card
   - **Testids exposed**: `creation-lab`, `creation-lab-preview`, `creation-lab-tabs`, `lab-tab-{skin|hair|face|cap|top|inst}`, `lab-panel-{skin|hair|face|cap|top|inst}`, `skin-{light|warm|tan|brown|deep}`, `hair-{style}`, `hair-color-{hex}`, `face-{cool|smile|wow}`, `cap-{none|cap|beanie}`, `cap-color-{hex}`, `top-{hoodie|tee|jacket|vest}`, `top-color-{hex}`, `inst-{guitar|bass|drums|mic|keys|dj}`, `creation-lab-save`, `creation-lab-cancel`, `creation-lab-reset`, `creation-lab-close`
 
+- ✅ **Feb 16, 2026 — GAMER TRACK CATALOG**:
+  - Seed script `scripts/seed_catalog.py` generates `/app/catalog/master_catalog.json` + `/app/catalog/triple_j/{year}.json` for 1990-2025 (250 tracks: 180 Hottest 100 + 70 Top 200 Hip-Hop, all real charting songs). Replace seed file w/ the 3,800-track user export anytime — same schema.
+  - **Backend** `routes/gamer_catalog.py` — `GET /api/gamer/catalog/{collections,years,tracks}`. Lazy iTunes Search enrichment populates `cover_url` / `preview_url` / `album` / `duration_ms` on first read, cached in MongoDB `gamer_catalog_enrich`.
+  - **New page** `pages/GamerTracksPage.js` — full-screen Gamer-Library: collection picker (Hottest 100 / Top 200 Hip-Hop) · year picker 1990-2025 · debounced search · ranked list w/ iTunes covers · year chips · neon-themed accents per collection (orange / green).
+  - **Routing**: Gamer-lane `nav-playlists` → GamerTracksPage; new `case "catalog"` route also renders it (creator can reach via the new "Hottest 100 + Top 200 Hip-Hop · Bonus" CTA on Discover).
+  - **Testids exposed**: `gamer-tracks-page`, `collection-picker`, `coll-{hottest_100|hip_hop_top_200}`, `year-picker`, `year-{1990..2025}`, `catalog-search`, `catalog-count`, `catalog-list`, `catalog-empty`, `catalog-track-{i}`, `catalog-track-{i}-year`, `discover-catalog-cta`, `discover-open-catalog`.
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)

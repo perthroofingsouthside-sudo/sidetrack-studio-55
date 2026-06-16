@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2007",
+  "year": 2007,
+  "name": "Triple J Hottest 100 \u2014 2007",
+  "tracks": [
+    {
+      "track_id": "237299cc05dac0",
+      "title": "Heard It Through the Grapevine",
+      "artist": "John Butler Trio",
+      "rank": 1,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7a948c82591fde",
+      "title": "Big Jet Plane",
+      "artist": "Angus & Julia Stone",
+      "rank": 2,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e1ba17743e59bb",
+      "title": "Foundations",
+      "artist": "Kate Nash",
+      "rank": 3,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bbd9d875bc86a1",
+      "title": "Daft Punk Is Playing at My House",
+      "artist": "LCD Soundsystem",
+      "rank": 4,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4a03dc49bed1ca",
+      "title": "D.A.N.C.E.",
+      "artist": "Justice",
+      "rank": 5,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

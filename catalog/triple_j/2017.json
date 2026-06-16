@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2017",
+  "year": 2017,
+  "name": "Triple J Hottest 100 \u2014 2017",
+  "tracks": [
+    {
+      "track_id": "5eaadae42b32ff",
+      "title": "Humble",
+      "artist": "Kendrick Lamar",
+      "rank": 1,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b479b4301417cf",
+      "title": "Chained to the Rhythm",
+      "artist": "Katy Perry",
+      "rank": 2,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5cb66cbf6b4059",
+      "title": "Despacito",
+      "artist": "Luis Fonsi & Daddy Yankee",
+      "rank": 3,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7db73e87a58890",
+      "title": "Issues",
+      "artist": "Julia Michaels",
+      "rank": 4,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "99861f93a7d877",
+      "title": "Believer",
+      "artist": "Imagine Dragons",
+      "rank": 5,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

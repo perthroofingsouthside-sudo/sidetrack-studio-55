@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1995",
+  "year": 1995,
+  "name": "Triple J Hottest 100 \u2014 1995",
+  "tracks": [
+    {
+      "track_id": "096d5ad61157f9",
+      "title": "Wonderwall",
+      "artist": "Oasis",
+      "rank": 1,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ac0c747c8f0c4c",
+      "title": "Don't Look Back in Anger",
+      "artist": "Oasis",
+      "rank": 2,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "073ac17e29aa3c",
+      "title": "Champagne Supernova",
+      "artist": "Oasis",
+      "rank": 3,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bd0a9dffdcd684",
+      "title": "Bittersweet Symphony",
+      "artist": "The Verve",
+      "rank": 4,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "dbde8849906ed0",
+      "title": "Tonight, Tonight",
+      "artist": "The Smashing Pumpkins",
+      "rank": 5,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

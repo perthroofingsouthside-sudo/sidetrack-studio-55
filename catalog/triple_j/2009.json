@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2009",
+  "year": 2009,
+  "name": "Triple J Hottest 100 \u2014 2009",
+  "tracks": [
+    {
+      "track_id": "e2ee3eeb9ff444",
+      "title": "Little Lion Man",
+      "artist": "Mumford & Sons",
+      "rank": 1,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0daddd4e91469",
+      "title": "Empire of the Sun",
+      "artist": "Walking on a Dream",
+      "rank": 2,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9df2c14e423ac9",
+      "title": "Heads Will Roll",
+      "artist": "Yeah Yeah Yeahs",
+      "rank": 3,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7feb8a782aaae7",
+      "title": "Wake Up",
+      "artist": "Arcade Fire",
+      "rank": 4,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "27d454d694c0ed",
+      "title": "Lisztomania",
+      "artist": "Phoenix",
+      "rank": 5,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2002",
+  "year": 2002,
+  "name": "Triple J Hottest 100 \u2014 2002",
+  "tracks": [
+    {
+      "track_id": "07bece3d58fce8",
+      "title": "Seven Nation Army",
+      "artist": "The White Stripes",
+      "rank": 1,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b006ced84ff94",
+      "title": "Clocks",
+      "artist": "Coldplay",
+      "rank": 2,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "cabc7b46b91214",
+      "title": "Maps",
+      "artist": "Yeah Yeah Yeahs",
+      "rank": 3,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4833bef5e0856a",
+      "title": "Somebody Told Me",
+      "artist": "The Killers",
+      "rank": 4,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "545a34c7fc8593",
+      "title": "By the Way",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 5,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

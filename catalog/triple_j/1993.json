@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1993",
+  "year": 1993,
+  "name": "Triple J Hottest 100 \u2014 1993",
+  "tracks": [
+    {
+      "track_id": "061b29a69a2c11",
+      "title": "Cannonball",
+      "artist": "The Breeders",
+      "rank": 1,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "737c1f693b3b78",
+      "title": "No Rain",
+      "artist": "Blind Melon",
+      "rank": 2,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "558fac12ca8bd7",
+      "title": "All Apologies",
+      "artist": "Nirvana",
+      "rank": 3,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "862c8b812d44d6",
+      "title": "Buddy Holly",
+      "artist": "Weezer",
+      "rank": 4,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2466ecf5067b41",
+      "title": "Loser",
+      "artist": "Beck",
+      "rank": 5,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

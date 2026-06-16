@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2025",
+  "year": 2025,
+  "name": "Triple J Hottest 100 \u2014 2025",
+  "tracks": [
+    {
+      "track_id": "ea4fefc3d88bef",
+      "title": "Pink Pony Club",
+      "artist": "Chappell Roan",
+      "rank": 1,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9f54c13b193595",
+      "title": "Good Luck, Babe!",
+      "artist": "Chappell Roan",
+      "rank": 2,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1c8f6f7a89f76f",
+      "title": "APT.",
+      "artist": "Ros\u00e9 & Bruno Mars",
+      "rank": 3,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bdc48b34e0514a",
+      "title": "Lose Control",
+      "artist": "Teddy Swims",
+      "rank": 4,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6196b351d05f06",
+      "title": "Houdini",
+      "artist": "Eminem",
+      "rank": 5,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2019",
+  "year": 2019,
+  "name": "Triple J Hottest 100 \u2014 2019",
+  "tracks": [
+    {
+      "track_id": "016a9447cba823",
+      "title": "Dance Monkey",
+      "artist": "Tones and I",
+      "rank": 1,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "50e4ec018ecea2",
+      "title": "Old Town Road",
+      "artist": "Lil Nas X feat. Billy Ray Cyrus",
+      "rank": 2,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c986eff876cb07",
+      "title": "Bad Guy",
+      "artist": "Billie Eilish",
+      "rank": 3,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ef8dbae3ee786e",
+      "title": "Truth Hurts",
+      "artist": "Lizzo",
+      "rank": 4,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5432a58bb05ccb",
+      "title": "Sunflower",
+      "artist": "Post Malone & Swae Lee",
+      "rank": 5,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2004",
+  "year": 2004,
+  "name": "Triple J Hottest 100 \u2014 2004",
+  "tracks": [
+    {
+      "track_id": "1f0a225cc23e60",
+      "title": "Float On",
+      "artist": "Modest Mouse",
+      "rank": 1,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a54bdea2eac6bd",
+      "title": "Mr. Brightside",
+      "artist": "The Killers",
+      "rank": 2,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "58e6487f1e3264",
+      "title": "Vertigo",
+      "artist": "U2",
+      "rank": 3,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "70d7723b27e88e",
+      "title": "Take Me Out",
+      "artist": "Franz Ferdinand",
+      "rank": 4,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "211ca420c1dcd1",
+      "title": "I Bet You Look Good on the Dancefloor",
+      "artist": "Arctic Monkeys",
+      "rank": 5,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

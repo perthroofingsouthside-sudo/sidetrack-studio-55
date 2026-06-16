@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2020",
+  "year": 2020,
+  "name": "Triple J Hottest 100 \u2014 2020",
+  "tracks": [
+    {
+      "track_id": "8cf295c15db848",
+      "title": "Heat Waves",
+      "artist": "Glass Animals",
+      "rank": 1,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a73dc070be72ad",
+      "title": "Watermelon Sugar",
+      "artist": "Harry Styles",
+      "rank": 2,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d7a8cf344308d9",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "rank": 3,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d9f203abffaacd",
+      "title": "Levitating",
+      "artist": "Dua Lipa",
+      "rank": 4,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6d5c15d5fa5904",
+      "title": "Roses",
+      "artist": "Imanbek Remix",
+      "rank": 5,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

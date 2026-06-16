@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1997",
+  "year": 1997,
+  "name": "Triple J Hottest 100 \u2014 1997",
+  "tracks": [
+    {
+      "track_id": "53435b71e4ef8b",
+      "title": "Buy Me a Pony",
+      "artist": "Spiderbait",
+      "rank": 1,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "843212d22ed8a4",
+      "title": "Paranoid Android",
+      "artist": "Radiohead",
+      "rank": 2,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "eba29726db3b09",
+      "title": "Song 2",
+      "artist": "Blur",
+      "rank": 3,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "64819a09d0eea7",
+      "title": "Tubthumping",
+      "artist": "Chumbawamba",
+      "rank": 4,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b5a5e7d08f2cf",
+      "title": "Block Rockin' Beats",
+      "artist": "The Chemical Brothers",
+      "rank": 5,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

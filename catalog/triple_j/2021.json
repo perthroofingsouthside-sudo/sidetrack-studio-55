@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2021",
+  "year": 2021,
+  "name": "Triple J Hottest 100 \u2014 2021",
+  "tracks": [
+    {
+      "track_id": "02d6e67e6e4c70",
+      "title": "Stay",
+      "artist": "The Kid LAROI & Justin Bieber",
+      "rank": 1,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d53e32f639a6b9",
+      "title": "Good 4 U",
+      "artist": "Olivia Rodrigo",
+      "rank": 2,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4a77acbac4e048",
+      "title": "Drivers License",
+      "artist": "Olivia Rodrigo",
+      "rank": 3,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0f674fd898a88b",
+      "title": "Save Your Tears",
+      "artist": "The Weeknd",
+      "rank": 4,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0fd6a748635c9",
+      "title": "Montero (Call Me By Your Name)",
+      "artist": "Lil Nas X",
+      "rank": 5,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

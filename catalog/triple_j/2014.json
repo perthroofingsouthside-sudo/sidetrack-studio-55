@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2014",
+  "year": 2014,
+  "name": "Triple J Hottest 100 \u2014 2014",
+  "tracks": [
+    {
+      "track_id": "05de5793e055fe",
+      "title": "Take Me to Church",
+      "artist": "Hozier",
+      "rank": 1,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ccc078a31e6f85",
+      "title": "Chandelier",
+      "artist": "Sia",
+      "rank": 2,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a01cfdcb47284e",
+      "title": "Talk Is Cheap",
+      "artist": "Chet Faker",
+      "rank": 3,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "21d6fa00884a8b",
+      "title": "Do I Wanna Know?",
+      "artist": "Arctic Monkeys",
+      "rank": 4,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1229e511b7a237",
+      "title": "Sweater Weather",
+      "artist": "The Neighbourhood",
+      "rank": 5,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

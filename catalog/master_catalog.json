@@ -1,0 +1,2304 @@
+{
+  "collections": [
+    {
+      "key": "hottest_100",
+      "name": "Triple J Hottest 100",
+      "years": [
+        1990,
+        1991,
+        1992,
+        1993,
+        1994,
+        1995,
+        1996,
+        1997,
+        1998,
+        1999,
+        2000,
+        2001,
+        2002,
+        2003,
+        2004,
+        2005,
+        2006,
+        2007,
+        2008,
+        2009,
+        2010,
+        2011,
+        2012,
+        2013,
+        2014,
+        2015,
+        2016,
+        2017,
+        2018,
+        2019,
+        2020,
+        2021,
+        2022,
+        2023,
+        2024,
+        2025
+      ]
+    },
+    {
+      "key": "hip_hop_top_200",
+      "name": "Top 200 Hip-Hop",
+      "count": 70
+    }
+  ],
+  "total_tracks": 250,
+  "tracks": [
+    {
+      "track_id": "fe1e56404dce04",
+      "title": "Love Will Tear Us Apart",
+      "artist": "Joy Division",
+      "rank": 1,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "f6bf37ecb304a4",
+      "title": "Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "rank": 2,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c3acdfe7b07036",
+      "title": "Killing in the Name",
+      "artist": "Rage Against the Machine",
+      "rank": 3,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "005ba6ea86a88d",
+      "title": "Under the Bridge",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 4,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c973892848d835",
+      "title": "Black",
+      "artist": "Pearl Jam",
+      "rank": 5,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "f6bf37ecb304a4",
+      "title": "Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "rank": 1,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bedfea6f1907d",
+      "title": "Losing My Religion",
+      "artist": "R.E.M.",
+      "rank": 2,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c973892848d835",
+      "title": "Black",
+      "artist": "Pearl Jam",
+      "rank": 3,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e42b158c2e2249",
+      "title": "Enter Sandman",
+      "artist": "Metallica",
+      "rank": 4,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1db038afcc4aa9",
+      "title": "Give It Away",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 5,
+      "year": 1991,
+      "collection": "hottest_100_1991",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b2d7bc380b138a",
+      "title": "Tomorrow",
+      "artist": "Silverchair",
+      "rank": 1,
+      "year": 1992,
+      "collection": "hottest_100_1992",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b3ea46d3a60b8d",
+      "title": "Plush",
+      "artist": "Stone Temple Pilots",
+      "rank": 2,
+      "year": 1992,
+      "collection": "hottest_100_1992",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c15d0a5e0718fa",
+      "title": "Black Hole Sun",
+      "artist": "Soundgarden",
+      "rank": 3,
+      "year": 1992,
+      "collection": "hottest_100_1992",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "623e0157d9af03",
+      "title": "Linger",
+      "artist": "The Cranberries",
+      "rank": 4,
+      "year": 1992,
+      "collection": "hottest_100_1992",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ae28a1b4747ecd",
+      "title": "Creep",
+      "artist": "Radiohead",
+      "rank": 5,
+      "year": 1992,
+      "collection": "hottest_100_1992",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "061b29a69a2c11",
+      "title": "Cannonball",
+      "artist": "The Breeders",
+      "rank": 1,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "737c1f693b3b78",
+      "title": "No Rain",
+      "artist": "Blind Melon",
+      "rank": 2,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "558fac12ca8bd7",
+      "title": "All Apologies",
+      "artist": "Nirvana",
+      "rank": 3,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "862c8b812d44d6",
+      "title": "Buddy Holly",
+      "artist": "Weezer",
+      "rank": 4,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2466ecf5067b41",
+      "title": "Loser",
+      "artist": "Beck",
+      "rank": 5,
+      "year": 1993,
+      "collection": "hottest_100_1993",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b2d7bc380b138a",
+      "title": "Tomorrow",
+      "artist": "Silverchair",
+      "rank": 1,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2eff7ec591bcb6",
+      "title": "Glycerine",
+      "artist": "Bush",
+      "rank": 2,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b0ad6ff7c01236",
+      "title": "My Friends",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "096d5ad61157f9",
+      "title": "Wonderwall",
+      "artist": "Oasis",
+      "rank": 4,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ce9c118ba0804a",
+      "title": "1979",
+      "artist": "The Smashing Pumpkins",
+      "rank": 5,
+      "year": 1994,
+      "collection": "hottest_100_1994",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "096d5ad61157f9",
+      "title": "Wonderwall",
+      "artist": "Oasis",
+      "rank": 1,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ac0c747c8f0c4c",
+      "title": "Don't Look Back in Anger",
+      "artist": "Oasis",
+      "rank": 2,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "073ac17e29aa3c",
+      "title": "Champagne Supernova",
+      "artist": "Oasis",
+      "rank": 3,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bd0a9dffdcd684",
+      "title": "Bittersweet Symphony",
+      "artist": "The Verve",
+      "rank": 4,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "dbde8849906ed0",
+      "title": "Tonight, Tonight",
+      "artist": "The Smashing Pumpkins",
+      "rank": 5,
+      "year": 1995,
+      "collection": "hottest_100_1995",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "464069411ac7c8",
+      "title": "Pretty Fly (For a White Guy)",
+      "artist": "The Offspring",
+      "rank": 1,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "64819a09d0eea7",
+      "title": "Tubthumping",
+      "artist": "Chumbawamba",
+      "rank": 2,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6e85ca7fd3d4ed",
+      "title": "Brick",
+      "artist": "Ben Folds Five",
+      "rank": 3,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0cbfcae806f32e",
+      "title": "Karma Police",
+      "artist": "Radiohead",
+      "rank": 4,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b5a5e7d08f2cf",
+      "title": "Block Rockin' Beats",
+      "artist": "The Chemical Brothers",
+      "rank": 5,
+      "year": 1996,
+      "collection": "hottest_100_1996",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "53435b71e4ef8b",
+      "title": "Buy Me a Pony",
+      "artist": "Spiderbait",
+      "rank": 1,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "843212d22ed8a4",
+      "title": "Paranoid Android",
+      "artist": "Radiohead",
+      "rank": 2,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "eba29726db3b09",
+      "title": "Song 2",
+      "artist": "Blur",
+      "rank": 3,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "64819a09d0eea7",
+      "title": "Tubthumping",
+      "artist": "Chumbawamba",
+      "rank": 4,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b5a5e7d08f2cf",
+      "title": "Block Rockin' Beats",
+      "artist": "The Chemical Brothers",
+      "rank": 5,
+      "year": 1997,
+      "collection": "hottest_100_1997",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "464069411ac7c8",
+      "title": "Pretty Fly (For a White Guy)",
+      "artist": "The Offspring",
+      "rank": 1,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d2b8f36dcd6185",
+      "title": "Iris",
+      "artist": "Goo Goo Dolls",
+      "rank": 2,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d169709d8c87be",
+      "title": "Ray of Light",
+      "artist": "Madonna",
+      "rank": 3,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "105d78e428f376",
+      "title": "My Favourite Game",
+      "artist": "The Cardigans",
+      "rank": 4,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1c3d87d9bd5e09",
+      "title": "Inside Out",
+      "artist": "Eve 6",
+      "rank": 5,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3f80e7152e9981",
+      "title": "Heavy Heart",
+      "artist": "You Am I",
+      "rank": 1,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "fe931731c0055f",
+      "title": "All the Small Things",
+      "artist": "Blink-182",
+      "rank": 2,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "68166a35efc2f4",
+      "title": "Otherside",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1ddc621fdd548a",
+      "title": "Around the World",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 4,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3e5de1c7313f28",
+      "title": "Steal My Sunshine",
+      "artist": "LEN",
+      "rank": 5,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "621126d3c964df",
+      "title": "Last Goodbye",
+      "artist": "Jeff Buckley",
+      "rank": 1,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d1722a3d768c10",
+      "title": "Yellow",
+      "artist": "Coldplay",
+      "rank": 2,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c9db9617d8860d",
+      "title": "Californication",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bd9de53235af0",
+      "title": "In the End",
+      "artist": "Linkin Park",
+      "rank": 4,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9856375a38df14",
+      "title": "Teenage Dirtbag",
+      "artist": "Wheatus",
+      "rank": 5,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ecb334ae1ba0bb",
+      "title": "Get Free",
+      "artist": "Vines",
+      "rank": 1,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b5673a85a5fc7f",
+      "title": "Last Nite",
+      "artist": "The Strokes",
+      "rank": 2,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "458366c405293b",
+      "title": "Hate To Say I Told You So",
+      "artist": "The Hives",
+      "rank": 3,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bd9de53235af0",
+      "title": "In the End",
+      "artist": "Linkin Park",
+      "rank": 4,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3c8b8de5ea7ae4",
+      "title": "Knights of Cydonia",
+      "artist": "Muse",
+      "rank": 5,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "07bece3d58fce8",
+      "title": "Seven Nation Army",
+      "artist": "The White Stripes",
+      "rank": 1,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7b006ced84ff94",
+      "title": "Clocks",
+      "artist": "Coldplay",
+      "rank": 2,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "cabc7b46b91214",
+      "title": "Maps",
+      "artist": "Yeah Yeah Yeahs",
+      "rank": 3,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4833bef5e0856a",
+      "title": "Somebody Told Me",
+      "artist": "The Killers",
+      "rank": 4,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "545a34c7fc8593",
+      "title": "By the Way",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 5,
+      "year": 2002,
+      "collection": "hottest_100_2002",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "07bece3d58fce8",
+      "title": "Seven Nation Army",
+      "artist": "The White Stripes",
+      "rank": 1,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a54bdea2eac6bd",
+      "title": "Mr. Brightside",
+      "artist": "The Killers",
+      "rank": 2,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "70d7723b27e88e",
+      "title": "Take Me Out",
+      "artist": "Franz Ferdinand",
+      "rank": 3,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1f0a225cc23e60",
+      "title": "Float On",
+      "artist": "Modest Mouse",
+      "rank": 4,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2cc543cda5f7e7",
+      "title": "Reptilia",
+      "artist": "The Strokes",
+      "rank": 5,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1f0a225cc23e60",
+      "title": "Float On",
+      "artist": "Modest Mouse",
+      "rank": 1,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a54bdea2eac6bd",
+      "title": "Mr. Brightside",
+      "artist": "The Killers",
+      "rank": 2,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "58e6487f1e3264",
+      "title": "Vertigo",
+      "artist": "U2",
+      "rank": 3,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "70d7723b27e88e",
+      "title": "Take Me Out",
+      "artist": "Franz Ferdinand",
+      "rank": 4,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "211ca420c1dcd1",
+      "title": "I Bet You Look Good on the Dancefloor",
+      "artist": "Arctic Monkeys",
+      "rank": 5,
+      "year": 2004,
+      "collection": "hottest_100_2004",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "211ca420c1dcd1",
+      "title": "I Bet You Look Good on the Dancefloor",
+      "artist": "Arctic Monkeys",
+      "rank": 1,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5d38038fc0573c",
+      "title": "Hold You in My Arms",
+      "artist": "Ray LaMontagne",
+      "rank": 2,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2d52c599ed7d64",
+      "title": "Fix You",
+      "artist": "Coldplay",
+      "rank": 3,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "53b47451990f38",
+      "title": "Speed of Sound",
+      "artist": "Coldplay",
+      "rank": 4,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c81de5cfb11dcc",
+      "title": "Sex on Fire",
+      "artist": "Kings of Leon",
+      "rank": 5,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3c8b8de5ea7ae4",
+      "title": "Knights of Cydonia",
+      "artist": "Muse",
+      "rank": 1,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "83f0ffa1166d8e",
+      "title": "Crazy",
+      "artist": "Gnarls Barkley",
+      "rank": 2,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "dadf441b891526",
+      "title": "Boy with a Coin",
+      "artist": "Iron & Wine",
+      "rank": 3,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "8d9f5cfc4e4593",
+      "title": "Chelsea Dagger",
+      "artist": "The Fratellis",
+      "rank": 4,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3569a0d0a78602",
+      "title": "Steady, As She Goes",
+      "artist": "The Raconteurs",
+      "rank": 5,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "237299cc05dac0",
+      "title": "Heard It Through the Grapevine",
+      "artist": "John Butler Trio",
+      "rank": 1,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7a948c82591fde",
+      "title": "Big Jet Plane",
+      "artist": "Angus & Julia Stone",
+      "rank": 2,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e1ba17743e59bb",
+      "title": "Foundations",
+      "artist": "Kate Nash",
+      "rank": 3,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bbd9d875bc86a1",
+      "title": "Daft Punk Is Playing at My House",
+      "artist": "LCD Soundsystem",
+      "rank": 4,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4a03dc49bed1ca",
+      "title": "D.A.N.C.E.",
+      "artist": "Justice",
+      "rank": 5,
+      "year": 2007,
+      "collection": "hottest_100_2007",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c81de5cfb11dcc",
+      "title": "Sex on Fire",
+      "artist": "Kings of Leon",
+      "rank": 1,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "401db44dc5e4fc",
+      "title": "Use Somebody",
+      "artist": "Kings of Leon",
+      "rank": 2,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0f5b44991d0bc",
+      "title": "Time to Pretend",
+      "artist": "MGMT",
+      "rank": 3,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4efe0fdbf7dab1",
+      "title": "Electric Feel",
+      "artist": "MGMT",
+      "rank": 4,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d67e9181fb298d",
+      "title": "Kids",
+      "artist": "MGMT",
+      "rank": 5,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e2ee3eeb9ff444",
+      "title": "Little Lion Man",
+      "artist": "Mumford & Sons",
+      "rank": 1,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0daddd4e91469",
+      "title": "Empire of the Sun",
+      "artist": "Walking on a Dream",
+      "rank": 2,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9df2c14e423ac9",
+      "title": "Heads Will Roll",
+      "artist": "Yeah Yeah Yeahs",
+      "rank": 3,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7feb8a782aaae7",
+      "title": "Wake Up",
+      "artist": "Arcade Fire",
+      "rank": 4,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "27d454d694c0ed",
+      "title": "Lisztomania",
+      "artist": "Phoenix",
+      "rank": 5,
+      "year": 2009,
+      "collection": "hottest_100_2009",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7a948c82591fde",
+      "title": "Big Jet Plane",
+      "artist": "Angus & Julia Stone",
+      "rank": 1,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c4b627191f2dc2",
+      "title": "Animal",
+      "artist": "Neon Trees",
+      "rank": 2,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "46a928c3365ee9",
+      "title": "F**kin' Perfect",
+      "artist": "P!nk",
+      "rank": 3,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c8189a4b8a9afb",
+      "title": "Tighten Up",
+      "artist": "The Black Keys",
+      "rank": 4,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a75ff821a9b920",
+      "title": "Pumped Up Kicks",
+      "artist": "Foster the People",
+      "rank": 5,
+      "year": 2010,
+      "collection": "hottest_100_2010",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9ba6c93d3b96e0",
+      "title": "Somebody That I Used to Know",
+      "artist": "Gotye feat. Kimbra",
+      "rank": 1,
+      "year": 2011,
+      "collection": "hottest_100_2011",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a75ff821a9b920",
+      "title": "Pumped Up Kicks",
+      "artist": "Foster the People",
+      "rank": 2,
+      "year": 2011,
+      "collection": "hottest_100_2011",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "592fcfeed58209",
+      "title": "Lonely Boy",
+      "artist": "The Black Keys",
+      "rank": 3,
+      "year": 2011,
+      "collection": "hottest_100_2011",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a4067f78680873",
+      "title": "Take a Walk",
+      "artist": "Passion Pit",
+      "rank": 4,
+      "year": 2011,
+      "collection": "hottest_100_2011",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "29ffd8f9d12554",
+      "title": "Midnight City",
+      "artist": "M83",
+      "rank": 5,
+      "year": 2011,
+      "collection": "hottest_100_2011",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5563cadf7ec2b4",
+      "title": "Thrift Shop",
+      "artist": "Macklemore & Ryan Lewis",
+      "rank": 1,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6a7b6ce95f916e",
+      "title": "Little Talks",
+      "artist": "Of Monsters and Men",
+      "rank": 2,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6e916e338eb5a0",
+      "title": "We Are Young",
+      "artist": "fun. feat. Janelle Mon\u00e1e",
+      "rank": 3,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "80688baf078b9e",
+      "title": "Some Nights",
+      "artist": "fun.",
+      "rank": 4,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ecf7229dadc6ac",
+      "title": "Riptide",
+      "artist": "Vance Joy",
+      "rank": 5,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ecf7229dadc6ac",
+      "title": "Riptide",
+      "artist": "Vance Joy",
+      "rank": 1,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c146014e1b2422",
+      "title": "Royals",
+      "artist": "Lorde",
+      "rank": 2,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2ed25a2580cc5c",
+      "title": "Get Lucky",
+      "artist": "Daft Punk feat. Pharrell Williams",
+      "rank": 3,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a1a6e1ab3c36ef",
+      "title": "Pompeii",
+      "artist": "Bastille",
+      "rank": 4,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "05de5793e055fe",
+      "title": "Take Me to Church",
+      "artist": "Hozier",
+      "rank": 5,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "05de5793e055fe",
+      "title": "Take Me to Church",
+      "artist": "Hozier",
+      "rank": 1,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ccc078a31e6f85",
+      "title": "Chandelier",
+      "artist": "Sia",
+      "rank": 2,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a01cfdcb47284e",
+      "title": "Talk Is Cheap",
+      "artist": "Chet Faker",
+      "rank": 3,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "21d6fa00884a8b",
+      "title": "Do I Wanna Know?",
+      "artist": "Arctic Monkeys",
+      "rank": 4,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1229e511b7a237",
+      "title": "Sweater Weather",
+      "artist": "The Neighbourhood",
+      "rank": 5,
+      "year": 2014,
+      "collection": "hottest_100_2014",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "fda6b4b73f8681",
+      "title": "King Kunta",
+      "artist": "Kendrick Lamar",
+      "rank": 1,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "404a287d41c049",
+      "title": "Alright",
+      "artist": "Kendrick Lamar",
+      "rank": 2,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9cbd2da0e66a2a",
+      "title": "Hotline Bling",
+      "artist": "Drake",
+      "rank": 3,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "505808a1b0294e",
+      "title": "Lean On",
+      "artist": "Major Lazer & DJ Snake feat. M\u00d8",
+      "rank": 4,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "17eb823284e706",
+      "title": "Can't Feel My Face",
+      "artist": "The Weeknd",
+      "rank": 5,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "628bd2fc3c49c9",
+      "title": "Never Be Like You",
+      "artist": "Flume feat. Kai",
+      "rank": 1,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d114b61a5b05b9",
+      "title": "Say It",
+      "artist": "Flume feat. Tove Lo",
+      "rank": 2,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "deef91021d38b1",
+      "title": "Cheap Thrills",
+      "artist": "Sia feat. Sean Paul",
+      "rank": 3,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "15d39a153237a8",
+      "title": "Closer",
+      "artist": "The Chainsmokers feat. Halsey",
+      "rank": 4,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0e9c91e814177c",
+      "title": "Heathens",
+      "artist": "twenty one pilots",
+      "rank": 5,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5eaadae42b32ff",
+      "title": "Humble",
+      "artist": "Kendrick Lamar",
+      "rank": 1,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b479b4301417cf",
+      "title": "Chained to the Rhythm",
+      "artist": "Katy Perry",
+      "rank": 2,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5cb66cbf6b4059",
+      "title": "Despacito",
+      "artist": "Luis Fonsi & Daddy Yankee",
+      "rank": 3,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7db73e87a58890",
+      "title": "Issues",
+      "artist": "Julia Michaels",
+      "rank": 4,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "99861f93a7d877",
+      "title": "Believer",
+      "artist": "Imagine Dragons",
+      "rank": 5,
+      "year": 2017,
+      "collection": "hottest_100_2017",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "72780e24cb899d",
+      "title": "Confidence",
+      "artist": "Ocean Alley",
+      "rank": 1,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "676c9a920064b1",
+      "title": "Better Now",
+      "artist": "Post Malone",
+      "rank": 2,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5e5beef1da574f",
+      "title": "Walk On By",
+      "artist": "Khalid",
+      "rank": 3,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e6a0d97b7b07d2",
+      "title": "Be Alright",
+      "artist": "Dean Lewis",
+      "rank": 4,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "57fc45aebeaa92",
+      "title": "This Is America",
+      "artist": "Childish Gambino",
+      "rank": 5,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "016a9447cba823",
+      "title": "Dance Monkey",
+      "artist": "Tones and I",
+      "rank": 1,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "50e4ec018ecea2",
+      "title": "Old Town Road",
+      "artist": "Lil Nas X feat. Billy Ray Cyrus",
+      "rank": 2,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c986eff876cb07",
+      "title": "Bad Guy",
+      "artist": "Billie Eilish",
+      "rank": 3,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ef8dbae3ee786e",
+      "title": "Truth Hurts",
+      "artist": "Lizzo",
+      "rank": 4,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5432a58bb05ccb",
+      "title": "Sunflower",
+      "artist": "Post Malone & Swae Lee",
+      "rank": 5,
+      "year": 2019,
+      "collection": "hottest_100_2019",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "8cf295c15db848",
+      "title": "Heat Waves",
+      "artist": "Glass Animals",
+      "rank": 1,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a73dc070be72ad",
+      "title": "Watermelon Sugar",
+      "artist": "Harry Styles",
+      "rank": 2,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d7a8cf344308d9",
+      "title": "Blinding Lights",
+      "artist": "The Weeknd",
+      "rank": 3,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d9f203abffaacd",
+      "title": "Levitating",
+      "artist": "Dua Lipa",
+      "rank": 4,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6d5c15d5fa5904",
+      "title": "Roses",
+      "artist": "Imanbek Remix",
+      "rank": 5,
+      "year": 2020,
+      "collection": "hottest_100_2020",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "02d6e67e6e4c70",
+      "title": "Stay",
+      "artist": "The Kid LAROI & Justin Bieber",
+      "rank": 1,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d53e32f639a6b9",
+      "title": "Good 4 U",
+      "artist": "Olivia Rodrigo",
+      "rank": 2,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4a77acbac4e048",
+      "title": "Drivers License",
+      "artist": "Olivia Rodrigo",
+      "rank": 3,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0f674fd898a88b",
+      "title": "Save Your Tears",
+      "artist": "The Weeknd",
+      "rank": 4,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0fd6a748635c9",
+      "title": "Montero (Call Me By Your Name)",
+      "artist": "Lil Nas X",
+      "rank": 5,
+      "year": 2021,
+      "collection": "hottest_100_2021",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "022be2feca2956",
+      "title": "As It Was",
+      "artist": "Harry Styles",
+      "rank": 1,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "85160b273ee44f",
+      "title": "About Damn Time",
+      "artist": "Lizzo",
+      "rank": 2,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1cfb473ebc2d0e",
+      "title": "Bad Habit",
+      "artist": "Steve Lacy",
+      "rank": 3,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "7e8f11c196baeb",
+      "title": "Running Up That Hill",
+      "artist": "Kate Bush",
+      "rank": 4,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ca341b46862cca",
+      "title": "Glimpse of Us",
+      "artist": "Joji",
+      "rank": 5,
+      "year": 2022,
+      "collection": "hottest_100_2022",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "f88fdf83a47a70",
+      "title": "Flowers",
+      "artist": "Miley Cyrus",
+      "rank": 1,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "be97352b6d59f6",
+      "title": "Cruel Summer",
+      "artist": "Taylor Swift",
+      "rank": 2,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6ae6bfc1623565",
+      "title": "Vampire",
+      "artist": "Olivia Rodrigo",
+      "rank": 3,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1a431a2426e892",
+      "title": "Anti-Hero",
+      "artist": "Taylor Swift",
+      "rank": 4,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "32ba609e025881",
+      "title": "Kill Bill",
+      "artist": "SZA",
+      "rank": 5,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c68a5b85a30f6d",
+      "title": "Beautiful Things",
+      "artist": "Benson Boone",
+      "rank": 1,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "60b09d6db8fbd8",
+      "title": "Espresso",
+      "artist": "Sabrina Carpenter",
+      "rank": 2,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6901058578d6f6",
+      "title": "Birds of a Feather",
+      "artist": "Billie Eilish",
+      "rank": 3,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9f6f4766aa5fa5",
+      "title": "Texas Hold 'Em",
+      "artist": "Beyonc\u00e9",
+      "rank": 4,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bedec1a62885c2",
+      "title": "I Had Some Help",
+      "artist": "Post Malone & Morgan Wallen",
+      "rank": 5,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ea4fefc3d88bef",
+      "title": "Pink Pony Club",
+      "artist": "Chappell Roan",
+      "rank": 1,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9f54c13b193595",
+      "title": "Good Luck, Babe!",
+      "artist": "Chappell Roan",
+      "rank": 2,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1c8f6f7a89f76f",
+      "title": "APT.",
+      "artist": "Ros\u00e9 & Bruno Mars",
+      "rank": 3,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bdc48b34e0514a",
+      "title": "Lose Control",
+      "artist": "Teddy Swims",
+      "rank": 4,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6196b351d05f06",
+      "title": "Houdini",
+      "artist": "Eminem",
+      "rank": 5,
+      "year": 2025,
+      "collection": "hottest_100_2025",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "43aa8ccdaedd18",
+      "title": "Lose Yourself",
+      "artist": "Eminem",
+      "rank": 1,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "45dce670bc4ee5",
+      "title": "Stan",
+      "artist": "Eminem feat. Dido",
+      "rank": 2,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "c442a5963efbbf",
+      "title": "Without Me",
+      "artist": "Eminem",
+      "rank": 3,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "26ba824f998426",
+      "title": "The Real Slim Shady",
+      "artist": "Eminem",
+      "rank": 4,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "9513d8fef5319c",
+      "title": "My Name Is",
+      "artist": "Eminem",
+      "rank": 5,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "877e7a21d7d021",
+      "title": "In Da Club",
+      "artist": "50 Cent",
+      "rank": 6,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "2b114e06700385",
+      "title": "Many Men",
+      "artist": "50 Cent",
+      "rank": 7,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "24f702345541bc",
+      "title": "21 Questions",
+      "artist": "50 Cent feat. Nate Dogg",
+      "rank": 8,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "aebd61cd86af77",
+      "title": "Gold Digger",
+      "artist": "Kanye West feat. Jamie Foxx",
+      "rank": 9,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "cdaab017ba6b63",
+      "title": "Stronger",
+      "artist": "Kanye West",
+      "rank": 10,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "d4baccbfc3bb4b",
+      "title": "Heartless",
+      "artist": "Kanye West",
+      "rank": 11,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "60c4f312e2a526",
+      "title": "All of the Lights",
+      "artist": "Kanye West",
+      "rank": 12,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "2793e0fcf712f4",
+      "title": "Flashing Lights",
+      "artist": "Kanye West",
+      "rank": 13,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "31c495212e2a71",
+      "title": "Empire State of Mind",
+      "artist": "Jay-Z feat. Alicia Keys",
+      "rank": 14,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "05c58a52a00886",
+      "title": "99 Problems",
+      "artist": "Jay-Z",
+      "rank": 15,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "5b43d2bb9a6d33",
+      "title": "Big Pimpin'",
+      "artist": "Jay-Z feat. UGK",
+      "rank": 16,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "15b5430fd179df",
+      "title": "Run This Town",
+      "artist": "Jay-Z feat. Rihanna & Kanye West",
+      "rank": 17,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "fea19f36e0f5c4",
+      "title": "Crazy in Love",
+      "artist": "Beyonc\u00e9 feat. Jay-Z",
+      "rank": 18,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "9cbd2da0e66a2a",
+      "title": "Hotline Bling",
+      "artist": "Drake",
+      "rank": 19,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "8b1603c60fa75c",
+      "title": "God's Plan",
+      "artist": "Drake",
+      "rank": 20,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "53dc43e5fdd3e8",
+      "title": "In My Feelings",
+      "artist": "Drake",
+      "rank": 21,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "5e45ad6737e0bb",
+      "title": "One Dance",
+      "artist": "Drake feat. WizKid & Kyla",
+      "rank": 22,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "7fcdda587fb3a3",
+      "title": "Started From the Bottom",
+      "artist": "Drake",
+      "rank": 23,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "7d177af7b58e54",
+      "title": "HUMBLE.",
+      "artist": "Kendrick Lamar",
+      "rank": 24,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "45fef41a9a673c",
+      "title": "DNA.",
+      "artist": "Kendrick Lamar",
+      "rank": 25,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "404a287d41c049",
+      "title": "Alright",
+      "artist": "Kendrick Lamar",
+      "rank": 26,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "fda6b4b73f8681",
+      "title": "King Kunta",
+      "artist": "Kendrick Lamar",
+      "rank": 27,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "0716e98c3b4875",
+      "title": "Money Trees",
+      "artist": "Kendrick Lamar feat. Jay Rock",
+      "rank": 28,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "1338d519468875",
+      "title": "Sicko Mode",
+      "artist": "Travis Scott",
+      "rank": 29,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "1e9067ddb2eda8",
+      "title": "Goosebumps",
+      "artist": "Travis Scott",
+      "rank": 30,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "f33373b6009c7e",
+      "title": "Antidote",
+      "artist": "Travis Scott",
+      "rank": 31,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "eb7090104da951",
+      "title": "Highest in the Room",
+      "artist": "Travis Scott",
+      "rank": 32,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "50e4ec018ecea2",
+      "title": "Old Town Road",
+      "artist": "Lil Nas X feat. Billy Ray Cyrus",
+      "rank": 33,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "26252314939cee",
+      "title": "Industry Baby",
+      "artist": "Lil Nas X & Jack Harlow",
+      "rank": 34,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "4904a4f996c00b",
+      "title": "Bad and Boujee",
+      "artist": "Migos feat. Lil Uzi Vert",
+      "rank": 35,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "3af0e5ef9487a5",
+      "title": "Walk It Talk It",
+      "artist": "Migos feat. Drake",
+      "rank": 36,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "c85a4d467e31f3",
+      "title": "MotorSport",
+      "artist": "Migos feat. Nicki Minaj & Cardi B",
+      "rank": 37,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "b12413d210f38c",
+      "title": "Bodak Yellow",
+      "artist": "Cardi B",
+      "rank": 38,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "d87a8acf1352fc",
+      "title": "WAP",
+      "artist": "Cardi B feat. Megan Thee Stallion",
+      "rank": 39,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "8c63ff4f107ee1",
+      "title": "I Like It",
+      "artist": "Cardi B feat. Bad Bunny & J Balvin",
+      "rank": 40,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "640857dd40fd8c",
+      "title": "Super Bass",
+      "artist": "Nicki Minaj",
+      "rank": 41,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "6b295b5f6d5d2b",
+      "title": "Anaconda",
+      "artist": "Nicki Minaj",
+      "rank": 42,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "d1b84dfea803bf",
+      "title": "Starships",
+      "artist": "Nicki Minaj",
+      "rank": 43,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "0e32284d8d788f",
+      "title": "Hot in Herre",
+      "artist": "Nelly",
+      "rank": 44,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "f65c94c755485d",
+      "title": "Dilemma",
+      "artist": "Nelly feat. Kelly Rowland",
+      "rank": 45,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "606a633468f413",
+      "title": "Ms. Jackson",
+      "artist": "OutKast",
+      "rank": 46,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "2fffd6fdc8db0d",
+      "title": "Hey Ya!",
+      "artist": "OutKast",
+      "rank": 47,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "c1f832e8ab39a6",
+      "title": "Bombs Over Baghdad",
+      "artist": "OutKast",
+      "rank": 48,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "e1e7ce8ee36c8c",
+      "title": "Juicy",
+      "artist": "The Notorious B.I.G.",
+      "rank": 49,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "c179c55758bd6e",
+      "title": "Hypnotize",
+      "artist": "The Notorious B.I.G.",
+      "rank": 50,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "37a012f1b30e78",
+      "title": "Big Poppa",
+      "artist": "The Notorious B.I.G.",
+      "rank": 51,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "aea0206f2f39da",
+      "title": "California Love",
+      "artist": "2Pac feat. Dr. Dre",
+      "rank": 52,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "2f61a2fcff5c9c",
+      "title": "Changes",
+      "artist": "2Pac",
+      "rank": 53,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "b6cd1782b73b1b",
+      "title": "Dear Mama",
+      "artist": "2Pac",
+      "rank": 54,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "94b945643beca5",
+      "title": "Hit 'Em Up",
+      "artist": "2Pac",
+      "rank": 55,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "28cf69cb6657fa",
+      "title": "Still D.R.E.",
+      "artist": "Dr. Dre feat. Snoop Dogg",
+      "rank": 56,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "21bd9ca49d7e54",
+      "title": "The Next Episode",
+      "artist": "Dr. Dre feat. Snoop Dogg",
+      "rank": 57,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "e95ab8a92a8566",
+      "title": "Nuthin' But a 'G' Thang",
+      "artist": "Dr. Dre feat. Snoop Dogg",
+      "rank": 58,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "29288bb4822311",
+      "title": "Gin and Juice",
+      "artist": "Snoop Dogg",
+      "rank": 59,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "b7a1959bab66db",
+      "title": "Drop It Like It's Hot",
+      "artist": "Snoop Dogg feat. Pharrell",
+      "rank": 60,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "a94d19e3bd354d",
+      "title": "Insane in the Brain",
+      "artist": "Cypress Hill",
+      "rank": 61,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "c9f8189bf6d5ab",
+      "title": "It Was a Good Day",
+      "artist": "Ice Cube",
+      "rank": 62,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "8acef57e958d3b",
+      "title": "Straight Outta Compton",
+      "artist": "N.W.A",
+      "rank": 63,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "78e78fcc18d39a",
+      "title": "Sucker MCs",
+      "artist": "Run-D.M.C.",
+      "rank": 64,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "079fc37760797a",
+      "title": "It's Tricky",
+      "artist": "Run-D.M.C.",
+      "rank": 65,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "35582bf2e9a149",
+      "title": "Rapper's Delight",
+      "artist": "The Sugarhill Gang",
+      "rank": 66,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "3569a073c53018",
+      "title": "The Message",
+      "artist": "Grandmaster Flash",
+      "rank": 67,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "81635ada0c1812",
+      "title": "Mo Money Mo Problems",
+      "artist": "The Notorious B.I.G. feat. Puff Daddy & Mase",
+      "rank": 68,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "58c58f01ed67d2",
+      "title": "I'll Be Missing You",
+      "artist": "Puff Daddy feat. Faith Evans",
+      "rank": 69,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    },
+    {
+      "track_id": "02408a9a069fd2",
+      "title": "Rap God",
+      "artist": "Eminem",
+      "rank": 70,
+      "year": 0,
+      "collection": "hip_hop_top_200",
+      "source": "top_200_hip_hop"
+    }
+  ]
+}

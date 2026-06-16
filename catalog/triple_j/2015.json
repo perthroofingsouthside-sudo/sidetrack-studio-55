@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2015",
+  "year": 2015,
+  "name": "Triple J Hottest 100 \u2014 2015",
+  "tracks": [
+    {
+      "track_id": "fda6b4b73f8681",
+      "title": "King Kunta",
+      "artist": "Kendrick Lamar",
+      "rank": 1,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "404a287d41c049",
+      "title": "Alright",
+      "artist": "Kendrick Lamar",
+      "rank": 2,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9cbd2da0e66a2a",
+      "title": "Hotline Bling",
+      "artist": "Drake",
+      "rank": 3,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "505808a1b0294e",
+      "title": "Lean On",
+      "artist": "Major Lazer & DJ Snake feat. M\u00d8",
+      "rank": 4,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "17eb823284e706",
+      "title": "Can't Feel My Face",
+      "artist": "The Weeknd",
+      "rank": 5,
+      "year": 2015,
+      "collection": "hottest_100_2015",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

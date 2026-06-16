@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1999",
+  "year": 1999,
+  "name": "Triple J Hottest 100 \u2014 1999",
+  "tracks": [
+    {
+      "track_id": "3f80e7152e9981",
+      "title": "Heavy Heart",
+      "artist": "You Am I",
+      "rank": 1,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "fe931731c0055f",
+      "title": "All the Small Things",
+      "artist": "Blink-182",
+      "rank": 2,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "68166a35efc2f4",
+      "title": "Otherside",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1ddc621fdd548a",
+      "title": "Around the World",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 4,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3e5de1c7313f28",
+      "title": "Steal My Sunshine",
+      "artist": "LEN",
+      "rank": 5,
+      "year": 1999,
+      "collection": "hottest_100_1999",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

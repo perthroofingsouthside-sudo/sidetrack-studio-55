@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2003",
+  "year": 2003,
+  "name": "Triple J Hottest 100 \u2014 2003",
+  "tracks": [
+    {
+      "track_id": "07bece3d58fce8",
+      "title": "Seven Nation Army",
+      "artist": "The White Stripes",
+      "rank": 1,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a54bdea2eac6bd",
+      "title": "Mr. Brightside",
+      "artist": "The Killers",
+      "rank": 2,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "70d7723b27e88e",
+      "title": "Take Me Out",
+      "artist": "Franz Ferdinand",
+      "rank": 3,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1f0a225cc23e60",
+      "title": "Float On",
+      "artist": "Modest Mouse",
+      "rank": 4,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2cc543cda5f7e7",
+      "title": "Reptilia",
+      "artist": "The Strokes",
+      "rank": 5,
+      "year": 2003,
+      "collection": "hottest_100_2003",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

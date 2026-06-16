@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1998",
+  "year": 1998,
+  "name": "Triple J Hottest 100 \u2014 1998",
+  "tracks": [
+    {
+      "track_id": "464069411ac7c8",
+      "title": "Pretty Fly (For a White Guy)",
+      "artist": "The Offspring",
+      "rank": 1,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d2b8f36dcd6185",
+      "title": "Iris",
+      "artist": "Goo Goo Dolls",
+      "rank": 2,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d169709d8c87be",
+      "title": "Ray of Light",
+      "artist": "Madonna",
+      "rank": 3,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "105d78e428f376",
+      "title": "My Favourite Game",
+      "artist": "The Cardigans",
+      "rank": 4,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1c3d87d9bd5e09",
+      "title": "Inside Out",
+      "artist": "Eve 6",
+      "rank": 5,
+      "year": 1998,
+      "collection": "hottest_100_1998",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

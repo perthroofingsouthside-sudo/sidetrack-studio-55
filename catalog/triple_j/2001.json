@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2001",
+  "year": 2001,
+  "name": "Triple J Hottest 100 \u2014 2001",
+  "tracks": [
+    {
+      "track_id": "ecb334ae1ba0bb",
+      "title": "Get Free",
+      "artist": "Vines",
+      "rank": 1,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "b5673a85a5fc7f",
+      "title": "Last Nite",
+      "artist": "The Strokes",
+      "rank": 2,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "458366c405293b",
+      "title": "Hate To Say I Told You So",
+      "artist": "The Hives",
+      "rank": 3,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bd9de53235af0",
+      "title": "In the End",
+      "artist": "Linkin Park",
+      "rank": 4,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3c8b8de5ea7ae4",
+      "title": "Knights of Cydonia",
+      "artist": "Muse",
+      "rank": 5,
+      "year": 2001,
+      "collection": "hottest_100_2001",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

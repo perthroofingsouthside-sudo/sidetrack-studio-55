@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2023",
+  "year": 2023,
+  "name": "Triple J Hottest 100 \u2014 2023",
+  "tracks": [
+    {
+      "track_id": "f88fdf83a47a70",
+      "title": "Flowers",
+      "artist": "Miley Cyrus",
+      "rank": 1,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "be97352b6d59f6",
+      "title": "Cruel Summer",
+      "artist": "Taylor Swift",
+      "rank": 2,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6ae6bfc1623565",
+      "title": "Vampire",
+      "artist": "Olivia Rodrigo",
+      "rank": 3,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1a431a2426e892",
+      "title": "Anti-Hero",
+      "artist": "Taylor Swift",
+      "rank": 4,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "32ba609e025881",
+      "title": "Kill Bill",
+      "artist": "SZA",
+      "rank": 5,
+      "year": 2023,
+      "collection": "hottest_100_2023",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2012",
+  "year": 2012,
+  "name": "Triple J Hottest 100 \u2014 2012",
+  "tracks": [
+    {
+      "track_id": "5563cadf7ec2b4",
+      "title": "Thrift Shop",
+      "artist": "Macklemore & Ryan Lewis",
+      "rank": 1,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6a7b6ce95f916e",
+      "title": "Little Talks",
+      "artist": "Of Monsters and Men",
+      "rank": 2,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6e916e338eb5a0",
+      "title": "We Are Young",
+      "artist": "fun. feat. Janelle Mon\u00e1e",
+      "rank": 3,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "80688baf078b9e",
+      "title": "Some Nights",
+      "artist": "fun.",
+      "rank": 4,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "ecf7229dadc6ac",
+      "title": "Riptide",
+      "artist": "Vance Joy",
+      "rank": 5,
+      "year": 2012,
+      "collection": "hottest_100_2012",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

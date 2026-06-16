@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2016",
+  "year": 2016,
+  "name": "Triple J Hottest 100 \u2014 2016",
+  "tracks": [
+    {
+      "track_id": "628bd2fc3c49c9",
+      "title": "Never Be Like You",
+      "artist": "Flume feat. Kai",
+      "rank": 1,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d114b61a5b05b9",
+      "title": "Say It",
+      "artist": "Flume feat. Tove Lo",
+      "rank": 2,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "deef91021d38b1",
+      "title": "Cheap Thrills",
+      "artist": "Sia feat. Sean Paul",
+      "rank": 3,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "15d39a153237a8",
+      "title": "Closer",
+      "artist": "The Chainsmokers feat. Halsey",
+      "rank": 4,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "0e9c91e814177c",
+      "title": "Heathens",
+      "artist": "twenty one pilots",
+      "rank": 5,
+      "year": 2016,
+      "collection": "hottest_100_2016",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

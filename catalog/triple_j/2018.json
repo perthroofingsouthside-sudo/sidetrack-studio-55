@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2018",
+  "year": 2018,
+  "name": "Triple J Hottest 100 \u2014 2018",
+  "tracks": [
+    {
+      "track_id": "72780e24cb899d",
+      "title": "Confidence",
+      "artist": "Ocean Alley",
+      "rank": 1,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "676c9a920064b1",
+      "title": "Better Now",
+      "artist": "Post Malone",
+      "rank": 2,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5e5beef1da574f",
+      "title": "Walk On By",
+      "artist": "Khalid",
+      "rank": 3,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "e6a0d97b7b07d2",
+      "title": "Be Alright",
+      "artist": "Dean Lewis",
+      "rank": 4,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "57fc45aebeaa92",
+      "title": "This Is America",
+      "artist": "Childish Gambino",
+      "rank": 5,
+      "year": 2018,
+      "collection": "hottest_100_2018",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

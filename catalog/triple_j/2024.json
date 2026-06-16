@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2024",
+  "year": 2024,
+  "name": "Triple J Hottest 100 \u2014 2024",
+  "tracks": [
+    {
+      "track_id": "c68a5b85a30f6d",
+      "title": "Beautiful Things",
+      "artist": "Benson Boone",
+      "rank": 1,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "60b09d6db8fbd8",
+      "title": "Espresso",
+      "artist": "Sabrina Carpenter",
+      "rank": 2,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "6901058578d6f6",
+      "title": "Birds of a Feather",
+      "artist": "Billie Eilish",
+      "rank": 3,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9f6f4766aa5fa5",
+      "title": "Texas Hold 'Em",
+      "artist": "Beyonc\u00e9",
+      "rank": 4,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "bedec1a62885c2",
+      "title": "I Had Some Help",
+      "artist": "Post Malone & Morgan Wallen",
+      "rank": 5,
+      "year": 2024,
+      "collection": "hottest_100_2024",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

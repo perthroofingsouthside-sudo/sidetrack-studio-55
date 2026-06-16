@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2005",
+  "year": 2005,
+  "name": "Triple J Hottest 100 \u2014 2005",
+  "tracks": [
+    {
+      "track_id": "211ca420c1dcd1",
+      "title": "I Bet You Look Good on the Dancefloor",
+      "artist": "Arctic Monkeys",
+      "rank": 1,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "5d38038fc0573c",
+      "title": "Hold You in My Arms",
+      "artist": "Ray LaMontagne",
+      "rank": 2,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2d52c599ed7d64",
+      "title": "Fix You",
+      "artist": "Coldplay",
+      "rank": 3,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "53b47451990f38",
+      "title": "Speed of Sound",
+      "artist": "Coldplay",
+      "rank": 4,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c81de5cfb11dcc",
+      "title": "Sex on Fire",
+      "artist": "Kings of Leon",
+      "rank": 5,
+      "year": 2005,
+      "collection": "hottest_100_2005",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

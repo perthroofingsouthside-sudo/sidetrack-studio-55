@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2000",
+  "year": 2000,
+  "name": "Triple J Hottest 100 \u2014 2000",
+  "tracks": [
+    {
+      "track_id": "621126d3c964df",
+      "title": "Last Goodbye",
+      "artist": "Jeff Buckley",
+      "rank": 1,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d1722a3d768c10",
+      "title": "Yellow",
+      "artist": "Coldplay",
+      "rank": 2,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c9db9617d8860d",
+      "title": "Californication",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 3,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "1bd9de53235af0",
+      "title": "In the End",
+      "artist": "Linkin Park",
+      "rank": 4,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "9856375a38df14",
+      "title": "Teenage Dirtbag",
+      "artist": "Wheatus",
+      "rank": 5,
+      "year": 2000,
+      "collection": "hottest_100_2000",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

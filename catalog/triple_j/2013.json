@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2013",
+  "year": 2013,
+  "name": "Triple J Hottest 100 \u2014 2013",
+  "tracks": [
+    {
+      "track_id": "ecf7229dadc6ac",
+      "title": "Riptide",
+      "artist": "Vance Joy",
+      "rank": 1,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c146014e1b2422",
+      "title": "Royals",
+      "artist": "Lorde",
+      "rank": 2,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "2ed25a2580cc5c",
+      "title": "Get Lucky",
+      "artist": "Daft Punk feat. Pharrell Williams",
+      "rank": 3,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "a1a6e1ab3c36ef",
+      "title": "Pompeii",
+      "artist": "Bastille",
+      "rank": 4,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "05de5793e055fe",
+      "title": "Take Me to Church",
+      "artist": "Hozier",
+      "rank": 5,
+      "year": 2013,
+      "collection": "hottest_100_2013",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

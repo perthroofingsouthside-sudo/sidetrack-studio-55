@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_1990",
+  "year": 1990,
+  "name": "Triple J Hottest 100 \u2014 1990",
+  "tracks": [
+    {
+      "track_id": "fe1e56404dce04",
+      "title": "Love Will Tear Us Apart",
+      "artist": "Joy Division",
+      "rank": 1,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "f6bf37ecb304a4",
+      "title": "Smells Like Teen Spirit",
+      "artist": "Nirvana",
+      "rank": 2,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c3acdfe7b07036",
+      "title": "Killing in the Name",
+      "artist": "Rage Against the Machine",
+      "rank": 3,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "005ba6ea86a88d",
+      "title": "Under the Bridge",
+      "artist": "Red Hot Chili Peppers",
+      "rank": 4,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c973892848d835",
+      "title": "Black",
+      "artist": "Pearl Jam",
+      "rank": 5,
+      "year": 1990,
+      "collection": "hottest_100_1990",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

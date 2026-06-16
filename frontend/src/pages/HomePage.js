@@ -8,7 +8,7 @@ import axios from "axios";
 import NowPlayingHero from "@/components/NowPlayingHero";
 
 export default function HomePage({
-  onSongRecognized, onTrackSelect, onOpenPlaylists, nowPlaying,
+  onSongRecognized, onTrackSelect, onOpenPlaylists, onOpenCatalog, nowPlaying,
   isPlaying, progress, togglePlayPause, handleSeek, openInStudio,
 }) {
   const [isListening, setIsListening] = useState(false);
@@ -221,6 +221,29 @@ export default function HomePage({
             Search
           </Button>
         </div>
+      </div>
+
+      {/* CATALOG CTA — bonus access to the 3,800-track Gamer library from Creator side */}
+      <div className="relative z-10 mt-5 w-full max-w-md" data-testid="discover-catalog-cta">
+        <button
+          onClick={() => onOpenCatalog && onOpenCatalog()}
+          data-testid="discover-open-catalog"
+          className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#FF6B00]/25 hover:border-[#FF6B00]/60 hover:bg-[#FF6B00]/5 transition-all text-left group"
+          style={{ background: "linear-gradient(90deg, rgba(255,107,0,0.05), rgba(57,255,20,0.04))" }}
+        >
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
+               style={{ background: "linear-gradient(135deg, rgba(255,107,0,0.18), rgba(57,255,20,0.12))" }}>
+            <ListMusic className="w-4 h-4 text-[#FF6B00]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <p className="text-xs font-black text-white">Hottest 100 + Top 200 Hip-Hop</p>
+              <span className="text-[8px] uppercase tracking-wider font-black text-[#39FF14] px-1.5 py-0.5 rounded-full border border-[#39FF14]/40">Bonus</span>
+            </div>
+            <p className="text-[10px] text-[#A0A0B0] truncate">Browse the Gamer-Mode catalog · 3,800+ tracks</p>
+          </div>
+          <span className="text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">Open →</span>
+        </button>
       </div>
 
       {/* YOUR PLAYLISTS — quick selector */}

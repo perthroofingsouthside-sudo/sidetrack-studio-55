@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2008",
+  "year": 2008,
+  "name": "Triple J Hottest 100 \u2014 2008",
+  "tracks": [
+    {
+      "track_id": "c81de5cfb11dcc",
+      "title": "Sex on Fire",
+      "artist": "Kings of Leon",
+      "rank": 1,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "401db44dc5e4fc",
+      "title": "Use Somebody",
+      "artist": "Kings of Leon",
+      "rank": 2,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "c0f5b44991d0bc",
+      "title": "Time to Pretend",
+      "artist": "MGMT",
+      "rank": 3,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "4efe0fdbf7dab1",
+      "title": "Electric Feel",
+      "artist": "MGMT",
+      "rank": 4,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "d67e9181fb298d",
+      "title": "Kids",
+      "artist": "MGMT",
+      "rank": 5,
+      "year": 2008,
+      "collection": "hottest_100_2008",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

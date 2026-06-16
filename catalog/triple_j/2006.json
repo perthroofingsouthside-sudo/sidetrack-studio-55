@@ -1,0 +1,52 @@
+{
+  "collection": "hottest_100_2006",
+  "year": 2006,
+  "name": "Triple J Hottest 100 \u2014 2006",
+  "tracks": [
+    {
+      "track_id": "3c8b8de5ea7ae4",
+      "title": "Knights of Cydonia",
+      "artist": "Muse",
+      "rank": 1,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "83f0ffa1166d8e",
+      "title": "Crazy",
+      "artist": "Gnarls Barkley",
+      "rank": 2,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "dadf441b891526",
+      "title": "Boy with a Coin",
+      "artist": "Iron & Wine",
+      "rank": 3,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "8d9f5cfc4e4593",
+      "title": "Chelsea Dagger",
+      "artist": "The Fratellis",
+      "rank": 4,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    },
+    {
+      "track_id": "3569a0d0a78602",
+      "title": "Steady, As She Goes",
+      "artist": "The Raconteurs",
+      "rank": 5,
+      "year": 2006,
+      "collection": "hottest_100_2006",
+      "source": "triple_j_hottest_100"
+    }
+  ]
+}

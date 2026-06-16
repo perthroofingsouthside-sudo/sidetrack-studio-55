@@ -10,6 +10,7 @@ import EditSharePage from "@/pages/EditSharePage";
 import StreamPage from "@/pages/StreamPage";
 import BattleArena from "@/pages/BattleArena";
 import PlaylistsPage from "@/pages/PlaylistsPage";
+import GamerTracksPage from "@/pages/GamerTracksPage";
 import DuetStudio from "@/pages/DuetStudio";
 import BecomeAStar from "@/pages/BecomeAStar";
 import SocialProfile from "@/pages/SocialProfile";
@@ -199,6 +200,7 @@ function App() {
             onSongRecognized={handleSongRecognized}
             onTrackSelect={handleTrackSelect}
             onOpenPlaylists={() => setCurrentView("playlists")}
+            onOpenCatalog={() => setCurrentView("catalog")}
             nowPlaying={nowPlaying}
             isPlaying={isPlaying}
             progress={progress}
@@ -222,7 +224,11 @@ function App() {
       case "battle":
         return <BattleArena currentSong={currentSong} onStartDuet={handleStartDuet} />;
       case "playlists":
-        return <PlaylistsPage onTrackSelect={handleTrackSelect} />;
+        return lane === "gamer"
+          ? <GamerTracksPage onTrackSelect={handleTrackSelect} />
+          : <PlaylistsPage onTrackSelect={handleTrackSelect} />;
+      case "catalog":
+        return <GamerTracksPage onTrackSelect={handleTrackSelect} />;
       case "star":
         return <BecomeAStar />;
       case "connect":
