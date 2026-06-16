@@ -257,6 +257,7 @@ async def create_gamer_recording(payload: GamerRecordingCreate):
         "lane": "gamer",
         "is_private": True,
         "share_to_social": False,  # HARD locked
+        "review_status": "pending_review",  # pending_review | kept | discarded
         "created_at": now,
     }
     await db.gamer_recordings.insert_one(doc.copy())
@@ -265,10 +266,44 @@ async def create_gamer_recording(payload: GamerRecordingCreate):
 
 
 @router.get("/gamer/recordings/{user_id}")
-async def list_gamer_recordings(user_id: str, limit: int = 20):
-    cursor = db.gamer_recordings.find({"user_id": user_id}, {"_id": 0}).sort("created_at", -1).limit(limit)
+async def list_gamer_recordings(user_id: str, limit: int = 20, status: str = None):
+    """List a user's Gamer recordings. Filter by `status` to narrow to backstage review queue."""
+    q = {"user_id": user_id}
+    if status in ("pending_review", "kept", "discarded"):
+        q["review_status"] = status
+    cursor = db.gamer_recordings.find(q, {"_id": 0}).sort("created_at", -1).limit(limit)
     items = await cursor.to_list(length=limit)
     return {"success": True, "recordings": items}
+
+
+class ReviewAction(BaseModel):
+    user_id: str
+    action: str  # "keep" | "discard"
+
+
+@router.post("/gamer/recordings/{recording_id}/review")
+async def review_recording(recording_id: str, payload: ReviewAction):
+    """Backstage keep/discard for a Gamer recording."""
+    if payload.action not in ("keep", "discard"):
+        raise HTTPException(status_code=400, detail="action must be keep or discard")
+    rec = await db.gamer_recordings.find_one({"id": recording_id, "user_id": payload.user_id}, {"_id": 0})
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recording not found")
+    new_status = "kept" if payload.action == "keep" else "discarded"
+    now = datetime.now(timezone.utc).isoformat()
+    if new_status == "discarded":
+        # Soft-delete: keep the document but mark discarded (allows undo).
+        await db.gamer_recordings.update_one(
+            {"id": recording_id},
+            {"$set": {"review_status": "discarded", "reviewed_at": now}},
+        )
+    else:
+        await db.gamer_recordings.update_one(
+            {"id": recording_id},
+            {"$set": {"review_status": "kept", "reviewed_at": now}},
+        )
+    logger.info(f"[Backstage] recording={recording_id} user={payload.user_id} → {new_status}")
+    return {"success": True, "status": new_status}
 
 
 # ── BATTLE OF THE BANDS — SPECTATOR HUB ───────────

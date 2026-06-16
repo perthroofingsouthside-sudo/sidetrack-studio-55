@@ -1,24 +1,21 @@
-import { Home, Music2, Mic2, Swords, ListMusic, Star, User, MessageSquare, Gamepad2, Sparkles } from "lucide-react";
+import { Home, Music2, Mic2, Swords, ListMusic, User, MessageSquare, Sparkles, Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-// Creator-lane items (Originals, social, battles)
+// Creator-lane items — Original music creation. NO Battle / NO Star (those are Gamer-only)
 const CREATOR_ITEMS = [
   { key: "home", icon: Home, label: "Discover" },
-  { key: "battle", icon: Swords, label: "Battle" },
-  { key: "star", icon: Star, label: "Star" },
   { key: "connect", icon: MessageSquare, label: "Connect" },
   { key: "studio", icon: Music2, label: "Studio" },
   { key: "record", icon: Mic2, label: "Record" },
   { key: "profile", icon: User, label: "Profile" },
 ];
 
-// Gamer-lane items (Private, skill-build, spectator hub)
+// Gamer-lane items — the full video-game experience.
+// Battle = karaoke / Become-a-Star contests · Tracks = in-game playlist · Backstage = recordings to review · Profile = avatar
 const GAMER_ITEMS = [
-  { key: "gamer", icon: Gamepad2, label: "Gamer" },
-  { key: "battle", icon: Swords, label: "Hub" },
+  { key: "battle", icon: Swords, label: "Battle" },
   { key: "playlists", icon: ListMusic, label: "Tracks" },
   { key: "backstage", icon: Sparkles, label: "Backstage" },
-  { key: "record", icon: Mic2, label: "Stage" },
   { key: "profile", icon: User, label: "Profile" },
 ];
 

@@ -16,6 +16,7 @@ import PricingPage from "@/pages/PricingPage";
 import ConnectPage from "@/pages/ConnectPage";
 import GamerPage from "@/pages/GamerPage";
 import BackstageScreen from "@/components/BackstageScreen";
+import BackstagePage from "@/pages/BackstagePage";
 import BottomNav from "@/components/BottomNav";
 import GlobalPlayer from "@/components/GlobalPlayer";
 import axios from "axios";
@@ -29,7 +30,7 @@ function App() {
     const params = new URLSearchParams(window.location.search);
     if (params.get("payment") || params.get("session_id")) return "pricing";
     const savedLane = localStorage.getItem("pp_lane") || "creator";
-    return savedLane === "gamer" ? "gamer" : "home";
+    return savedLane === "gamer" ? "battle" : "home";
   });
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
@@ -43,8 +44,9 @@ function App() {
     // Persist server-side
     const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
     axios.post(`${API}/lanes/set`, { user_id: uid, lane: newLane }).catch(() => {});
-    // Snap to a sensible default tab on lane switch
-    if (newLane === "gamer") setCurrentView("gamer");
+    // Snap to a sensible default tab on lane switch.
+    // Gamer → Battle (the video-game entry point). Creator → Discover home.
+    if (newLane === "gamer") setCurrentView("battle");
     else setCurrentView("home");
   }, []);
 
@@ -157,8 +159,8 @@ function App() {
         duration_sec: recording.duration || 0,
         blob_url: recording.url || null,
       }).catch((e) => console.error("Gamer save err", e));
-      toast.success("Saved privately — switching to Viewer");
-      setCurrentView("record"); // RecordingStudio's "viewer" layout handles playback
+      toast.success("Saved to Backstage — keep or discard");
+      setCurrentView("backstage");
       return;
     }
     setCurrentView("edit");
@@ -221,16 +223,18 @@ function App() {
               album: t.album || "", cover_url: t.cover_url || "", genre: t.genre || "",
               preview_url: t.preview_url || "",
             })}
-            onOpenBackstage={(t) => { setBackstageTrack(t); setCurrentView("backstage"); }}
+            onOpenBackstage={(t) => { setBackstageTrack(t); setCurrentView("backstage-intro"); }}
           />
         );
       case "backstage":
+        return <BackstagePage />;
+      case "backstage-intro":
         return (
           <BackstageScreen
             song={backstageTrack || currentSong}
             userId={localStorage.getItem("sidetrack_voter_id") || "anon"}
             onProceed={() => setCurrentView("record")}
-            onBack={() => setCurrentView("gamer")}
+            onBack={() => setCurrentView("battle")}
           />
         );
       case "pricing":
