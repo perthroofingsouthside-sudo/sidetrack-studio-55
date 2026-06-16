@@ -128,6 +128,13 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - **Connect message bar**: added Video Call (green) + Voice Call (orange) icon buttons to the left of the chat input; `startCall(user, { video })` now respects the video flag (voice-only doesn't request camera).
   - All testids exposed: `stadium-studio`, `stadium-header`, `date-chip`, `switch-classic-btn`, `stadium-song-title`, `stadium-song-artist`, `fire-count`, `heart-count`, `stem-mixer`, `stem-{drums|bass|keys|master}{,-slider,-db,-solo,-mute}`, `master-db`, `performance-area`, `stadium-waveform`, `stadium-perform-btn`, `stadium-chat`, `stadium-chat-feed`, `fan-level-tracker`, `say-something(-input|-send)`, `stadium-video-call-btn`, `stadium-voice-call-btn`, `stadium-progress-bar`, `bpm-pill`, `key-pill`, `mobile-tab-{mixer|chat}`, `dm-video-call-btn`, `dm-voice-call-btn`, `switch-stadium-btn`.
 
+- ✅ **Feb 16, 2026 — GAMER CREATION LAB (Bitmoji-style avatar builder)**:
+  - New composable SVG character (`components/GamerAvatar.js`) — 240×320 viewBox with layered parts (top → neck → head → face → hair/cap → instrument), radial glow backdrop driven by chosen top color
+  - **Customization categories**: Skin Tone (5) · Hair Style (6: short/curly/long/buzz/mohawk/hidden) · Hair Color (6) · Face Expression (3: cool/smile/wow) · Cap (none/baseball/beanie + 4 colors) · Top (hoodie/tee/jacket/vest + 6 colors) · Signature Instrument (6: guitar/bass/drums/mic/keys/dj)
+  - New **Creation Lab modal** (`components/CreationLab.js`) — 6 category tabs, live-preview pane (200 px), reset + cancel + neon orange→green gradient "Save Avatar" CTA; mobile-first stacks to single column
+  - Profile card now renders the full SVG character (88 px) instead of the previous lone Lucide icon. Verified persistence via `localStorage.pp_gamer_avatar`; live update after save reflects in the profile card
+  - **Testids exposed**: `creation-lab`, `creation-lab-preview`, `creation-lab-tabs`, `lab-tab-{skin|hair|face|cap|top|inst}`, `lab-panel-{skin|hair|face|cap|top|inst}`, `skin-{light|warm|tan|brown|deep}`, `hair-{style}`, `hair-color-{hex}`, `face-{cool|smile|wow}`, `cap-{none|cap|beanie}`, `cap-color-{hex}`, `top-{hoodie|tee|jacket|vest}`, `top-color-{hex}`, `inst-{guitar|bass|drums|mic|keys|dj}`, `creation-lab-save`, `creation-lab-cancel`, `creation-lab-reset`, `creation-lab-close`
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)

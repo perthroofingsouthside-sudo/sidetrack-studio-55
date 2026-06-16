@@ -1,11 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown, Upload, CheckCircle2, AlertCircle, Users, Heart, Camera, Gamepad2, Music2, Zap, Headphones, Sparkles, Guitar } from "lucide-react";
+import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown, Upload, CheckCircle2, AlertCircle, Users, Heart, Camera, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import GamerAvatar, { DEFAULT_GAMER_AVATAR } from "@/components/GamerAvatar";
+import CreationLab from "@/components/CreationLab";
 
 const TIER_LABELS = {
   stadium_vip: { name: "Stadium VIP", color: "#FF6B00", icon: Crown },
@@ -17,19 +19,7 @@ const TIER_LABELS = {
   under18_band: { name: "Young Band", color: "#39FF14", icon: Star },
 };
 
-// Gamer avatar builder palette
-const GAMER_ICONS = [
-  { key: "gamepad", Icon: Gamepad2 },
-  { key: "headphones", Icon: Headphones },
-  { key: "mic", Icon: Mic2 },
-  { key: "guitar", Icon: Guitar },
-  { key: "music", Icon: Music2 },
-  { key: "zap", Icon: Zap },
-  { key: "star", Icon: Star },
-  { key: "crown", Icon: Crown },
-  { key: "sparkles", Icon: Sparkles },
-];
-
+// Gamer avatar — palette swatches used for the profile card background gradient
 const GAMER_PALETTES = [
   { key: "neon-green", from: "#39FF14", to: "#0F1A0F" },
   { key: "neon-orange", from: "#FF6B00", to: "#1A0F08" },
@@ -48,8 +38,12 @@ export default function SocialProfile({ onNavigate }) {
   const [lane] = useState(() => localStorage.getItem("pp_lane") || "creator");
   const [photoUrl, setPhotoUrl] = useState(() => localStorage.getItem("pp_profile_photo") || "");
   const [gamerAvatar, setGamerAvatar] = useState(() => {
-    try { return JSON.parse(localStorage.getItem("pp_gamer_avatar") || "null") || { icon: "gamepad", palette: "neon-green" }; }
-    catch { return { icon: "gamepad", palette: "neon-green" }; }
+    try {
+      const stored = JSON.parse(localStorage.getItem("pp_gamer_avatar") || "null");
+      return { ...DEFAULT_GAMER_AVATAR, palette: "neon-orange", ...(stored || {}) };
+    } catch {
+      return { ...DEFAULT_GAMER_AVATAR, palette: "neon-orange" };
+    }
   });
   const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
   const fileInputRef = useRef(null);
@@ -114,8 +108,7 @@ export default function SocialProfile({ onNavigate }) {
     localStorage.setItem("pp_gamer_avatar", JSON.stringify(next));
   };
 
-  const currentPalette = GAMER_PALETTES.find(p => p.key === gamerAvatar.palette) || GAMER_PALETTES[0];
-  const CurrentGamerIcon = (GAMER_ICONS.find(i => i.key === gamerAvatar.icon) || GAMER_ICONS[0]).Icon;
+  const currentPalette = GAMER_PALETTES.find(p => p.key === gamerAvatar.palette) || GAMER_PALETTES[1];
 
   const tierKey = subStatus?.tier_key || "free";
   const tierInfo = TIER_LABELS[tierKey];
@@ -141,20 +134,22 @@ export default function SocialProfile({ onNavigate }) {
                 : "linear-gradient(90deg, #FF6B00, #39FF14)",
             }} />
             <div className="px-5 pb-5 -mt-10">
-              {/* AVATAR — lane-aware (Creator: photo / Gamer: builder) */}
+              {/* AVATAR — lane-aware (Creator: photo / Gamer: Creation Lab character) */}
               {lane === "gamer" ? (
                 <button
                   onClick={() => setShowAvatarBuilder(true)}
                   data-testid="gamer-avatar-edit"
-                  className="group w-20 h-20 rounded-2xl border-4 border-[#05050A] flex items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.03]"
+                  className="group w-20 h-20 rounded-2xl border-4 border-[#05050A] relative overflow-hidden transition-transform hover:scale-[1.03]"
                   style={{
                     background: `linear-gradient(135deg, ${currentPalette.from} 0%, ${currentPalette.to} 100%)`,
-                    boxShadow: `0 0 30px ${currentPalette.from}55`,
+                    boxShadow: `0 0 30px ${currentPalette.from}66`,
                   }}
-                  title="Customize Gamer avatar"
+                  title="Open Creation Lab"
                 >
-                  <CurrentGamerIcon className="w-9 h-9 text-white" style={{ filter: `drop-shadow(0 0 8px ${currentPalette.from})` }} />
-                  <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-[#05050A]/80 border border-[#39FF14]/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <GamerAvatar avatar={gamerAvatar} size={88} glowColor={currentPalette.from} showInstrument={false} />
+                  </div>
+                  <span className="absolute bottom-1 right-1 w-5 h-5 rounded-full bg-[#05050A]/85 border border-[#39FF14]/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                     <Sparkles className="w-2.5 h-2.5 text-[#39FF14]" />
                   </span>
                 </button>
@@ -328,78 +323,14 @@ export default function SocialProfile({ onNavigate }) {
       </ScrollArea>
 
       {/* Gamer Avatar Builder Modal */}
-      {showAvatarBuilder && lane === "gamer" && (
-        <div className="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4" data-testid="avatar-builder">
-          <div className="w-full max-w-md rounded-2xl border border-[#39FF14]/30 bg-[#0A0A0F] p-5 space-y-5"
-               style={{ boxShadow: "0 0 60px rgba(57,255,20,0.15)" }}>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-['Outfit'] text-lg font-black text-white">Build Your Gamer Avatar</h3>
-                <p className="text-[10px] text-[#5C5C6B] uppercase tracking-wider mt-0.5">Pick an icon + palette</p>
-              </div>
-              <Button onClick={() => setShowAvatarBuilder(false)} data-testid="avatar-builder-close"
-                variant="ghost" className="w-8 h-8 text-[#5C5C6B] hover:text-white p-0">×</Button>
-            </div>
-
-            {/* Preview */}
-            <div className="flex justify-center">
-              <div className="w-24 h-24 rounded-2xl flex items-center justify-center transition-all"
-                style={{
-                  background: `linear-gradient(135deg, ${currentPalette.from} 0%, ${currentPalette.to} 100%)`,
-                  boxShadow: `0 0 32px ${currentPalette.from}66`,
-                }}>
-                <CurrentGamerIcon className="w-11 h-11 text-white" style={{ filter: `drop-shadow(0 0 10px ${currentPalette.from})` }} />
-              </div>
-            </div>
-
-            {/* Icons grid */}
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold mb-2">Icon</p>
-              <div className="grid grid-cols-5 gap-2">
-                {GAMER_ICONS.map(({ key, Icon }) => (
-                  <button key={key} onClick={() => updateGamerAvatar({ icon: key })}
-                    data-testid={`avatar-icon-${key}`}
-                    className={`aspect-square rounded-xl flex items-center justify-center border-2 transition-all ${
-                      gamerAvatar.icon === key
-                        ? "border-[#39FF14] bg-[#39FF14]/10 shadow-[0_0_12px_rgba(57,255,20,0.3)]"
-                        : "border-white/10 bg-[#0F0F16] hover:border-white/25"
-                    }`}>
-                    <Icon className={`w-5 h-5 ${gamerAvatar.icon === key ? "text-[#39FF14]" : "text-[#5C5C6B]"}`} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Palette */}
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold mb-2">Palette</p>
-              <div className="grid grid-cols-6 gap-2">
-                {GAMER_PALETTES.map(p => (
-                  <button key={p.key} onClick={() => updateGamerAvatar({ palette: p.key })}
-                    data-testid={`avatar-palette-${p.key}`}
-                    className={`aspect-square rounded-xl border-2 transition-all ${
-                      gamerAvatar.palette === p.key
-                        ? "border-white scale-110"
-                        : "border-white/15 hover:border-white/40"
-                    }`}
-                    style={{
-                      background: `linear-gradient(135deg, ${p.from} 0%, ${p.to} 100%)`,
-                      boxShadow: gamerAvatar.palette === p.key ? `0 0 14px ${p.from}88` : "none",
-                    }}
-                    title={p.key}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <Button onClick={() => { setShowAvatarBuilder(false); toast.success("Avatar saved"); }}
-              data-testid="avatar-builder-save"
-              className="w-full h-10 rounded-xl bg-[#39FF14] hover:bg-[#39FF14]/90 text-[#05050A] font-bold text-sm"
-              style={{ boxShadow: "0 0 20px rgba(57,255,20,0.35)" }}>
-              Save Avatar
-            </Button>
-          </div>
-        </div>
+      {/* Bitmoji-style Creation Lab — Gamer-lane only */}
+      {lane === "gamer" && (
+        <CreationLab
+          open={showAvatarBuilder}
+          avatar={gamerAvatar}
+          onClose={() => setShowAvatarBuilder(false)}
+          onSave={(next) => updateGamerAvatar(next)}
+        />
       )}
     </div>
   );
