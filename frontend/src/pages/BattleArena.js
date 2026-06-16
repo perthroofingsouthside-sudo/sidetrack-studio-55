@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Swords, Trophy, Play, Pause, ThumbsUp, Plus, Mic, Square, ArrowLeft, Users, Flame, Star } from "lucide-react";
+import { Swords, Trophy, Play, Pause, ThumbsUp, Plus, Mic, Square, ArrowLeft, Users, Flame, Star, Palette } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
-import BattleStageBackdrop from "@/components/BattleStageBackdrop";
+import BattleStageBackdrop, { SKIN_KEYS, SKIN_LABELS } from "@/components/BattleStageBackdrop";
 
 export default function BattleArena({ currentSong, onStartDuet }) {
   const [view, setView] = useState("list"); // list | detail | submit | leaderboard
@@ -24,6 +24,14 @@ export default function BattleArena({ currentSong, onStartDuet }) {
     if (!id) { id = crypto.randomUUID(); localStorage.setItem("sidetrack_voter_id", id); }
     return id;
   });
+  const [stageSkin, setStageSkin] = useState(() => localStorage.getItem("pp_stage_skin") || "theater");
+  const [skinPickerOpen, setSkinPickerOpen] = useState(false);
+  const changeSkin = (k) => {
+    setStageSkin(k);
+    localStorage.setItem("pp_stage_skin", k);
+    setSkinPickerOpen(false);
+    toast.success(`Stage skin: ${SKIN_LABELS[k]?.label || k}`);
+  };
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -278,10 +286,52 @@ export default function BattleArena({ currentSong, onStartDuet }) {
 
   // List + Leaderboard view — the THEATRICAL Battle Stage
   const allSceneryCovers = [...battles, ...leaderboard];
+  // Unique artist list for the scrolling marquee strip
+  const marqueeArtists = (() => {
+    const seen = new Set();
+    const out = [];
+    [...battles, ...leaderboard].forEach((b) => {
+      const a = (b?.song_artist || b?.artist || "").trim();
+      if (a && !seen.has(a.toLowerCase())) { seen.add(a.toLowerCase()); out.push(a); }
+    });
+    return out.length ? out : ["Pocket Products", "Live Tonight", "Take The Mic", "Karaoke Stars"];
+  })();
   return (
     <div className="min-h-screen relative bg-[#05050A] overflow-x-hidden" data-testid="battle-arena">
       {/* Theater backdrop: curtains, spotlights, scattered album-cover scenery */}
-      <BattleStageBackdrop covers={allSceneryCovers} />
+      <BattleStageBackdrop covers={allSceneryCovers} skin={stageSkin} />
+
+      {/* Stage skin picker — floating top-left */}
+      <button
+        onClick={() => setSkinPickerOpen((v) => !v)}
+        data-testid="stage-skin-toggle"
+        className="absolute top-3 left-3 z-30 flex items-center gap-1.5 px-3 h-8 rounded-full border border-white/15 backdrop-blur-md text-[10px] uppercase tracking-wider font-black text-white"
+        style={{ background: "rgba(10,10,15,0.7)", boxShadow: "0 0 12px rgba(255,255,255,0.08)" }}
+      >
+        <Palette className="w-3 h-3 text-[#39FF14]" />
+        {SKIN_LABELS[stageSkin]?.label || "Stage"}
+      </button>
+      {skinPickerOpen && (
+        <div
+          data-testid="stage-skin-picker"
+          className="absolute top-12 left-3 z-30 rounded-2xl border border-white/15 backdrop-blur-md p-1.5 space-y-1"
+          style={{ background: "rgba(10,10,15,0.92)", boxShadow: "0 12px 32px rgba(0,0,0,0.6)" }}
+        >
+          {SKIN_KEYS.map((k) => (
+            <button
+              key={k}
+              data-testid={`stage-skin-${k}`}
+              onClick={() => changeSkin(k)}
+              className={`w-full flex items-center gap-2 px-3 h-8 rounded-full text-[11px] font-bold uppercase tracking-wider transition-all ${
+                stageSkin === k ? "bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/40" : "text-[#A0A0B0] hover:text-white hover:bg-white/5"
+              }`}
+            >
+              {SKIN_LABELS[k]?.label || k}
+              {stageSkin === k && <span className="ml-auto text-[#39FF14]">✓</span>}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Foreground content */}
       <div className="relative z-10">
@@ -314,7 +364,27 @@ export default function BattleArena({ currentSong, onStartDuet }) {
           </Button>
         </div>
 
-        <ScrollArea className="h-[calc(100vh-280px)]">
+        {/* Scrolling artist marquee */}
+        <div className="relative mx-3 my-3 h-8 overflow-hidden rounded-full border border-white/8" data-testid="artist-marquee"
+             style={{ background: "rgba(10,10,15,0.55)", backdropFilter: "blur(6px)" }}>
+          <div className="absolute inset-y-0 left-0 w-12 z-10 pointer-events-none"
+               style={{ background: "linear-gradient(90deg, rgba(5,5,10,0.95), transparent)" }} />
+          <div className="absolute inset-y-0 right-0 w-12 z-10 pointer-events-none"
+               style={{ background: "linear-gradient(270deg, rgba(5,5,10,0.95), transparent)" }} />
+          <div className="flex items-center gap-6 h-full whitespace-nowrap will-change-transform"
+               style={{ animation: "marqueeScroll 28s linear infinite" }}>
+            {/* Duplicate so the loop is seamless */}
+            {[...marqueeArtists, ...marqueeArtists].map((a, i) => (
+              <span key={`mq-${i}`} className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.25em]">
+                <Star className="w-2.5 h-2.5 text-[#FF6B00] fill-[#FF6B00]" />
+                <span className="text-white">{a}</span>
+                <span className="text-[#39FF14]">·</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-320px)]">
           <div className="px-4 space-y-6 pb-28">
             {/* Hall of Fame */}
             {leaderboard.length > 0 && (

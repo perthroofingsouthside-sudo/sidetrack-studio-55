@@ -214,6 +214,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* Battle Stage — pulsing footlight glow along the front edge */
+@keyframes footlightPulse {
+  from { opacity: 0.35; transform: scaleY(0.85); }
+  to   { opacity: 0.95; transform: scaleY(1.15); }
+}
+/* Ocean skin — rising bubbles */
+@keyframes oceanBubble {
+  0%   { transform: translateY(0)   scale(1);   opacity: 0; }
+  10%  { opacity: 0.6; }
+  100% { transform: translateY(-180px) scale(1.6); opacity: 0; }
+}
+/* Marquee — horizontal scrolling artist strip */
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+
 /* Active lyric line */
 .lyric-active {
   color: #39FF14;

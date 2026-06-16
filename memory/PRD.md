@@ -104,6 +104,12 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - **Zero `console.log`** statements in production code (only `console.error`/`console.debug` for monitoring)
   - Regression: 34/34 backend tests (iter-20 + iter-21) still PASS; `CI=true yarn build` clean
 
+- ✅ **Feb 16, 2026 — BATTLE STAGE ENHANCEMENTS**:
+  - **4-skin Stage Picker**: Theater (red velvet, classic), Rock Arena (purple lasers + violet curtains), Outer Space (starfield + nebula curtains), Underwater (vertical-drape cyan curtains + rising bubbles). Persisted to `localStorage.pp_stage_skin`. New testids: `stage-skin-toggle`, `stage-skin-picker`, `stage-skin-{theater|arena|space|ocean}`.
+  - **Scrolling artist marquee strip** under the title — auto-pulls unique artists from active battles + leaderboard, falls back to "Pocket Products / Live Tonight / Take The Mic / Karaoke Stars" when empty. 28s linear loop, edge gradients for clean fade.
+  - **Pulsing footlights** along the front edge of every stage — 12 alternating orange+green (or skin-themed) cones, `footlightPulse` 1.6s ease-in-out staggered animation.
+  - New CSS keyframes: `footlightPulse`, `oceanBubble`, `marqueeScroll`. Skin-specific decorative layers: 60-star field (space), 18 rising bubbles (ocean), 4 laser beams (arena).
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)
