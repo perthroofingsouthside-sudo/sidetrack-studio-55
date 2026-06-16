@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import log from "@/utils/log";
+import useJamWebRTC from "@/hooks/useJamWebRTC";
+import JamVideoGrid from "@/components/JamVideoGrid";
 
 const ROLES = ["vocals", "guitar", "bass", "drums", "keys"];
 
@@ -29,7 +31,21 @@ export default function JamRoomPanel({ song, onMembersChange }) {
   const [creating, setCreating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [myRole, setMyRole] = useState("vocals");
+  const [videoOn, setVideoOn] = useState(false);
   const pollRef = useRef(null);
+
+  // Live WebRTC video — only activates when user toggles videoOn AND is in a room
+  const {
+    localStream, peers, status: rtcStatus,
+    micMuted, camOff, toggleMic, toggleCam,
+  } = useJamWebRTC({
+    code: room?.code,
+    peerId: userId.current,
+    name: userName.current,
+    enabled: !!(room?.code && videoOn),
+    video: true,
+    audio: true,
+  });
 
   // Auto-join via ?jam=XXX
   useEffect(() => {
@@ -250,13 +266,31 @@ export default function JamRoomPanel({ song, onMembersChange }) {
         ))}
       </div>
 
+      {/* Video grid — only mounted when user opts in (saves bandwidth + perms) */}
+      {videoOn ? (
+        <JamVideoGrid
+          localStream={localStream}
+          peers={peers}
+          micMuted={micMuted}
+          camOff={camOff}
+          onToggleMic={toggleMic}
+          onToggleCam={toggleCam}
+          members={room.members || []}
+          myPeerId={userId.current}
+          status={rtcStatus}
+        />
+      ) : (
+        <Button onClick={() => setVideoOn(true)} data-testid="jam-start-video-btn"
+          className="w-full h-8 rounded-lg text-[10px] font-black uppercase tracking-wider bg-[#39FF14]/15 hover:bg-[#39FF14]/25 text-[#39FF14] border border-[#39FF14]/40">
+          Start Live Video
+        </Button>
+      )}
+
       {/* Leave */}
-      <Button onClick={doLeave} data-testid="jam-leave-btn"
+      <Button onClick={() => { setVideoOn(false); doLeave(); }} data-testid="jam-leave-btn"
         className="w-full h-7 rounded-lg text-[9px] font-bold border border-red-500/30 text-red-400 bg-transparent hover:bg-red-500/10">
         <LogOut className="w-3 h-3 mr-1" /> Leave Jam
       </Button>
-
-      <p className="text-[8px] text-[#5C5C6B] text-center italic">Video preview = mock · Real P2P next</p>
     </div>
   );
 }

@@ -74,6 +74,95 @@ async def ws_chat(ws: WebSocket, room: str):
         chat_mgr.disconnect(room, ws)
 
 
+# ── WebRTC Signaling for Jam Rooms ──
+# Lightweight in-memory peer registry per room. Each peer has a stable peer_id
+# that they choose (we use the local userId stored in localStorage so peer
+# identity is consistent across reconnects). Messages are routed by `target`.
+_jam_peers: dict = {}  # {room_code: {peer_id: WebSocket}}
+
+
+@app.websocket("/api/ws/jam/{code}")
+async def ws_jam_signal(ws: WebSocket, code: str):
+    """WebRTC signaling — relay offer/answer/ice between peers in a jam room.
+
+    Message protocol (JSON):
+      → from client on connect:   {"type":"hello", "peer_id":"abc", "name":"Joe"}
+      → relayed offer/answer/ice: {"type":"offer|answer|ice", "target":"peerB", "from":"peerA", "data":{...}}
+      ← peer-joined notification: {"type":"peer-joined", "peer_id":"abc", "name":"Joe", "peers":["abc","def"]}
+      ← peer-left notification:   {"type":"peer-left", "peer_id":"abc"}
+    """
+    await ws.accept()
+    code = (code or "").upper().strip()
+    room = _jam_peers.setdefault(code, {})
+    my_peer_id = None
+    my_name = "Peer"
+    try:
+        while True:
+            msg = await ws.receive_json()
+            mtype = msg.get("type")
+
+            if mtype == "hello":
+                my_peer_id = (msg.get("peer_id") or "").strip()
+                my_name = msg.get("name") or "Peer"
+                if not my_peer_id:
+                    await ws.send_json({"type": "error", "reason": "missing peer_id"})
+                    continue
+                # Disconnect any prior socket for this peer in this room
+                prior = room.get(my_peer_id)
+                if prior is not None and prior is not ws:
+                    try:
+                        await prior.close()
+                    except Exception:
+                        pass
+                room[my_peer_id] = ws
+                # Tell new peer the existing roster (excluding self)
+                existing = [pid for pid in room.keys() if pid != my_peer_id]
+                await ws.send_json({"type": "roster", "peers": existing, "you": my_peer_id})
+                # Notify existing peers of the new arrival
+                for pid, sock in list(room.items()):
+                    if pid == my_peer_id:
+                        continue
+                    try:
+                        await sock.send_json({"type": "peer-joined", "peer_id": my_peer_id, "name": my_name})
+                    except Exception:
+                        pass
+
+            elif mtype in ("offer", "answer", "ice"):
+                target = msg.get("target")
+                if not target or target not in room:
+                    continue
+                sock = room.get(target)
+                if sock is None:
+                    continue
+                try:
+                    await sock.send_json({
+                        "type": mtype,
+                        "from": my_peer_id,
+                        "data": msg.get("data"),
+                    })
+                except Exception:
+                    pass
+
+            elif mtype == "ping":
+                await ws.send_json({"type": "pong"})
+
+    except WebSocketDisconnect:
+        pass
+    except Exception:
+        pass
+    finally:
+        # Cleanup + notify peers
+        if my_peer_id and code in _jam_peers and _jam_peers[code].get(my_peer_id) is ws:
+            del _jam_peers[code][my_peer_id]
+            for pid, sock in list(_jam_peers[code].items()):
+                try:
+                    await sock.send_json({"type": "peer-left", "peer_id": my_peer_id})
+                except Exception:
+                    pass
+            if not _jam_peers[code]:
+                del _jam_peers[code]
+
+
 # ── Scheduled Cron: Band Activity Check ─────────
 # Runs every Sunday at 00:00 UTC. Sleeps until the next Sunday,
 # then executes the full band audit scan.

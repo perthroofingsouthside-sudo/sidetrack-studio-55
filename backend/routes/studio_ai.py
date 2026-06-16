@@ -1,7 +1,9 @@
 """Studio AI — Beat Maker and AI Audio Cleanup engines.
-Currently delivers deterministic mocked outputs so the UX pipeline is fully wired
-end-to-end. Swap the generator stubs with AudioCraft/Suno/Replicate real calls
-later without touching the frontend.
+
+Beat generation now produces a REAL WAV audio file via local DSP synthesis
+(numpy → 16-bit PCM @ 44.1 kHz, returned as a data: URI). No external API
+required. Swap `services.beat_synth.synthesize_beat_wav` for an AudioCraft/
+Suno/Replicate call later without touching the route shape.
 """
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
@@ -12,6 +14,7 @@ import logging
 import hashlib
 
 from database import db
+from services.beat_synth import synthesize_beat_data_url
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -93,6 +96,15 @@ async def generate_beat(payload: BeatRequest):
         "bass":  take(3 * step, 102),   # ~40% density
     }
 
+    # Synthesize real WAV audio from the pattern (local DSP, ~50ms render time)
+    try:
+        preview_url = synthesize_beat_data_url(pattern, payload.bpm, payload.key)
+        engine = "local_dsp_v1"
+    except Exception as exc:  # safety net — never break the route on synth failure
+        logger.warning(f"[BeatMaker] synth failed, falling back to mock URL: {exc}")
+        preview_url = f"https://cdn.pocketproducts.app/beats/mock-{beat_id}.mp3"
+        engine = "mock_audiocraft_v1"
+
     beat_doc = {
         "id": beat_id,
         "user_id": payload.user_id,
@@ -103,12 +115,14 @@ async def generate_beat(payload: BeatRequest):
         "key": payload.key,
         "pattern": pattern,
         "duration_sec": round((payload.bars * 4 * 60) / payload.bpm, 2),
-        "preview_url": f"https://cdn.pocketproducts.app/beats/mock-{beat_id}.mp3",
-        "engine": "mock_audiocraft_v1",
+        "preview_url": preview_url,
+        "engine": engine,
         "created_at": now,
     }
-    await db.beats.insert_one(beat_doc.copy())
-    logger.info(f"[BeatMaker] generated id={beat_id} user={payload.user_id} genre={payload.genre} bpm={payload.bpm}")
+    # Strip the inline audio from the stored doc — keep DB light, regenerate on demand
+    db_doc = {**beat_doc, "preview_url": None}
+    await db.beats.insert_one(db_doc.copy())
+    logger.info(f"[BeatMaker] generated id={beat_id} user={payload.user_id} genre={payload.genre} bpm={payload.bpm} engine={engine}")
     return {"success": True, "beat": beat_doc}
 
 

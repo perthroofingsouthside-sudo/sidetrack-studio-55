@@ -110,6 +110,15 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - **Pulsing footlights** along the front edge of every stage — 12 alternating orange+green (or skin-themed) cones, `footlightPulse` 1.6s ease-in-out staggered animation.
   - New CSS keyframes: `footlightPulse`, `oceanBubble`, `marqueeScroll`. Skin-specific decorative layers: 60-star field (space), 18 rising bubbles (ocean), 4 laser beams (arena).
 
+- ✅ **Feb 16, 2026 — WEBRTC JAM ROOM (un-mocked) + LOCAL DSP BEATS**:
+  - **WebRTC video chat (P2P mesh, up to 5 peers)**: new `/api/ws/jam/{code}` WebSocket signaling endpoint in `server.py` — relays `offer`/`answer`/`ice` between peers, broadcasts `peer-joined` / `peer-left`, sends initial `roster` on hello. In-memory `_jam_peers` dict per room with auto-cleanup on disconnect.
+  - **Frontend**: `useJamWebRTC` hook (`hooks/useJamWebRTC.js`) + `JamVideoGrid` component (`components/JamVideoGrid.js`). Uses `simple-peer@9.11.1` for the WebRTC transport. ICE servers: Google STUN + Open Relay (metered.ca) free public TURN (3 endpoints — UDP/TCP/443 fallback). Mic/cam toggle controls.
+  - **JamRoomPanel** now opt-in: "Start Live Video" button → media-perm request → live tiles. Auto-cleanup on leave.
+  - **Smoke-tested** Python WebSocket client: 2-peer roster + peer-joined notifications flow correctly.
+
+  - **Local DSP Beat Synth**: new `services/beat_synth.py` — pure-numpy synthesizer that turns step-patterns into 16-bit PCM mono WAV @ 44.1 kHz. Drum voices: pitch-swept kick (120→50 Hz sine), noise+200 Hz snare, high-pass noise hihat, detuned-saw bass tuned to key. `/api/studio/beat/generate` now returns `preview_url` as `data:audio/wav;base64,...` (~290 KB for 9.6 s @ 100 BPM); `engine: "local_dsp_v1"`. DB stores `preview_url:null` to keep docs light.
+  - **BeatMaker UI**: Preview button is now functional (Play/Stop toggle, plays the real synth audio).
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)

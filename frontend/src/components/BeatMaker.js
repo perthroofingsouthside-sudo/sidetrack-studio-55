@@ -22,10 +22,33 @@ export default function BeatMaker({ userId }) {
   const [generating, setGenerating] = useState(false);
   const [beat, setBeat] = useState(null);
   const [humming, setHumming] = useState(false);
+  const [previewing, setPreviewing] = useState(false);
   const humStreamRef = useRef(null);
   const humCtxRef = useRef(null);
   const humPitchesRef = useRef([]);
   const humRafRef = useRef(null);
+  const audioRef = useRef(null);
+
+  const previewBeat = () => {
+    if (!beat?.preview_url) return;
+    // Re-use audio element so toggling works
+    if (previewing && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setPreviewing(false);
+      return;
+    }
+    if (!audioRef.current || audioRef.current.src !== beat.preview_url) {
+      if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+      audioRef.current = new Audio(beat.preview_url);
+      audioRef.current.onended = () => setPreviewing(false);
+    }
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().then(() => setPreviewing(true)).catch(() => {
+      toast.error("Preview playback blocked");
+      setPreviewing(false);
+    });
+  };
 
   // Lightweight autocorrelation pitch detector for hum input
   const detectPitch = (buf, sampleRate) => {
@@ -282,8 +305,12 @@ export default function BeatMaker({ userId }) {
             ))}
           </div>
 
-          <Button variant="ghost" className="w-full h-8 rounded-lg text-[10px] font-bold border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/10" data-testid="beat-preview-btn">
-            <Play className="w-3 h-3 mr-1.5" /> Preview (Mock)
+          <Button onClick={previewBeat} variant="ghost"
+            className="w-full h-8 rounded-lg text-[10px] font-bold border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/10"
+            data-testid="beat-preview-btn">
+            {previewing
+              ? <><Square className="w-3 h-3 mr-1.5" /> Stop Preview</>
+              : <><Play className="w-3 h-3 mr-1.5" /> Preview Beat</>}
           </Button>
         </div>
       )}
