@@ -157,12 +157,13 @@ export default function HomePage({
 
       {/* Logo + Title */}
       <div className="relative z-10 mb-6 animate-fade-in" data-testid="discover-logo">
-        <div className="w-16 h-16 mx-auto mb-3 rounded-2xl bg-[#FF6B00]/10 border border-[#FF6B00]/30 flex items-center justify-center glow-orange">
-          <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-            <path d="M8 30V10L16 6V34L8 30Z" fill="#FF6B00"/>
-            <path d="M18 28V12L26 8V32L18 28Z" fill="#39FF14" opacity="0.8"/>
-            <path d="M28 26V14L34 11V29L28 26Z" fill="#FF6B00" opacity="0.6"/>
-          </svg>
+        <div className="w-20 h-20 mx-auto mb-3 flex items-center justify-center">
+          <img
+            src="/logo.png"
+            alt="Pocket Products"
+            className="w-full h-full object-contain"
+            style={{ filter: "drop-shadow(0 0 18px rgba(255,107,0,0.55)) drop-shadow(0 0 32px rgba(57,255,20,0.18))" }}
+          />
         </div>
         <h1 className="font-['Outfit'] text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-center">
           <span className="text-white">Pocket </span>

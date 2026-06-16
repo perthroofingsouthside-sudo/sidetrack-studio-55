@@ -85,12 +85,13 @@ export default function ConnectPage() {
     setNewDmUser("");
   };
 
-  const startCall = async (user) => {
+  const startCall = async (user, opts = { video: true }) => {
     setCallUser(user);
     setCallActive(true);
+    setCameraOn(!!opts.video);
     setView("call");
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: !!opts.video, audio: true });
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
     } catch (err) {
@@ -227,7 +228,25 @@ export default function ConnectPage() {
 
         {/* Input */}
         <div className="px-4 py-3 border-t border-white/5">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => startCall(activeConvo.other_user, { video: true })}
+              data-testid="dm-video-call-btn"
+              variant="ghost"
+              title="Start video call"
+              className="h-11 w-11 rounded-xl bg-[#39FF14]/12 border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/20 shrink-0"
+            >
+              <Video className="w-4 h-4" />
+            </Button>
+            <Button
+              onClick={() => startCall(activeConvo.other_user, { video: false })}
+              data-testid="dm-voice-call-btn"
+              variant="ghost"
+              title="Start voice call"
+              className="h-11 w-11 rounded-xl bg-[#FF6B00]/12 border border-[#FF6B00]/30 text-[#FF6B00] hover:bg-[#FF6B00]/20 shrink-0"
+            >
+              <Phone className="w-4 h-4" />
+            </Button>
             <Input data-testid="dm-input" value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Type a message..."
