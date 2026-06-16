@@ -119,6 +119,15 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - **Local DSP Beat Synth**: new `services/beat_synth.py` — pure-numpy synthesizer that turns step-patterns into 16-bit PCM mono WAV @ 44.1 kHz. Drum voices: pitch-swept kick (120→50 Hz sine), noise+200 Hz snare, high-pass noise hihat, detuned-saw bass tuned to key. `/api/studio/beat/generate` now returns `preview_url` as `data:audio/wav;base64,...` (~290 KB for 9.6 s @ 100 BPM); `engine: "local_dsp_v1"`. DB stores `preview_url:null` to keep docs light.
   - **BeatMaker UI**: Preview button is now functional (Play/Stop toggle, plays the real synth audio).
 
+- ✅ **Feb 16, 2026 — STADIUM RECORD PAGE + LOGO REFRESH + CONNECT CALL BUTTONS**:
+  - **New default Record layout** (`pages/StadiumStudio.js`) — 3-pane stadium UI: vertical stem mixer (Drums/Bass/Keys/Master) w/ neon green dB meters + S/M buttons → centre performance frame w/ live LED + neon-orange animated canvas waveform + fire 🔥/heart ❤️ counters → right pane stadium chat w/ avatar tiles, Fan Level "Legend" XP tracker + "Say something…" bar w/ **Video Call + Voice Call** icons. Mobile (<lg) stacks vertically w/ Mixer/Chat tab switcher.
+  - **Bottom synced progress bar** (`fixed bottom: 84px`) — elapsed/total time, gradient seekbar, **BPM 128** orange pill + **KEY E MIN** green pill.
+  - "Yesterday" date chip — neon-orange glass-morphism (translucent fill + 1 px orange border + 14 px orange glow + inset glow + 12 px backdrop blur).
+  - **Classic toggle** — `pp_record_mode` localStorage flag persists choice; existing `RecordingStudio` Live Stage is reachable via "Classic" pill in stadium header, and the classic Live Stage sidebar now has a "Stadium" gradient pill to swap back.
+  - **Logo refresh**: replaced the inline 3-bar SVG monogram on Discover with `/logo.png` (PP monogram, no mouse). Drop-shadow neon glow preserved.
+  - **Connect message bar**: added Video Call (green) + Voice Call (orange) icon buttons to the left of the chat input; `startCall(user, { video })` now respects the video flag (voice-only doesn't request camera).
+  - All testids exposed: `stadium-studio`, `stadium-header`, `date-chip`, `switch-classic-btn`, `stadium-song-title`, `stadium-song-artist`, `fire-count`, `heart-count`, `stem-mixer`, `stem-{drums|bass|keys|master}{,-slider,-db,-solo,-mute}`, `master-db`, `performance-area`, `stadium-waveform`, `stadium-perform-btn`, `stadium-chat`, `stadium-chat-feed`, `fan-level-tracker`, `say-something(-input|-send)`, `stadium-video-call-btn`, `stadium-voice-call-btn`, `stadium-progress-bar`, `bpm-pill`, `key-pill`, `mobile-tab-{mixer|chat}`, `dm-video-call-btn`, `dm-voice-call-btn`, `switch-stadium-btn`.
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)

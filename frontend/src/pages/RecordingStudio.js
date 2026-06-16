@@ -32,7 +32,7 @@ const SOCIAL_LINKS = [
   { key: "youtube", label: "YT Live", color: "#FF0000", url: "https://studio.youtube.com/channel/UC/livestreaming", icon: "m10 15 5.19-3L10 9v6m11.56-7.83c.13.47.22 1.1.28 1.9.07.8.1 1.49.1 2.09L22 12c0 2.19-.16 3.8-.44 4.83-.25.9-.83 1.48-1.73 1.73-.47.13-1.33.22-2.65.28-1.3.07-2.49.1-3.59.1L12 19c-4.19 0-6.8-.16-7.83-.44-.9-.25-1.48-.83-1.73-1.73-.13-.47-.22-1.1-.28-1.9-.07-.8-.1-1.49-.1-2.09L2 12c0-2.19.16-3.8.44-4.83.25-.9.83-1.48 1.73-1.73.47-.13 1.33-.22 2.65-.28 1.3-.07 2.49-.1 3.59-.1L12 5c4.19 0 6.8.16 7.83.44.9.25 1.48.83 1.73 1.73Z" },
 ];
 
-export default function RecordingStudio({ song, onSongSelect, onRecordingComplete, onBack }) {
+export default function RecordingStudio({ song, onSongSelect, onRecordingComplete, onBack, onSwitchStadium }) {
   const [mode, setMode] = useState("audio");
   const [layout, setLayout] = useState("stadium");
   const [isRecording, setIsRecording] = useState(false);
@@ -178,6 +178,16 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
         {/* Layout Tabs — vertical stack below brand */}
         <div className="px-2 pt-2 pb-1.5 border-b border-white/5" data-testid="layout-selector">
           <p className="text-[8px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold mb-1.5 px-1">View</p>
+          {onSwitchStadium && (
+            <Button
+              data-testid="switch-stadium-btn"
+              onClick={onSwitchStadium}
+              className="w-full h-8 mb-1 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start font-black uppercase tracking-wider bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A] hover:opacity-90"
+            >
+              <Camera className="w-3 h-3 shrink-0" />
+              <span className="truncate">Stadium</span>
+            </Button>
+          )}
           <div className="flex flex-col gap-1">
             {LAYOUTS.map((l) => (
               <Button key={l.key} data-testid={`layout-${l.key}`}

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import HomePage from "@/pages/HomePage";
 import PlayerStudio from "@/pages/PlayerStudio";
 import RecordingStudio from "@/pages/RecordingStudio";
+import StadiumStudio from "@/pages/StadiumStudio";
 import EditSharePage from "@/pages/EditSharePage";
 import StreamPage from "@/pages/StreamPage";
 import BattleArena from "@/pages/BattleArena";
@@ -37,6 +38,12 @@ function App() {
   // ── Two-Lane Ecosystem ─────────────────────────
   const [lane, setLaneState] = useState(() => localStorage.getItem("pp_lane") || "creator");
   const [backstageTrack, setBackstageTrack] = useState(null);
+  // Record-page layout — "stadium" is the new default, "classic" falls back to RecordingStudio (Live Stage)
+  const [recordMode, setRecordMode] = useState(() => localStorage.getItem("pp_record_mode") || "stadium");
+  const switchRecordMode = (m) => {
+    setRecordMode(m);
+    localStorage.setItem("pp_record_mode", m);
+  };
 
   const setLane = useCallback((newLane) => {
     setLaneState(newLane);
@@ -267,12 +274,18 @@ function App() {
           />
         );
       case "record":
-        return (
+        return recordMode === "stadium" ? (
+          <StadiumStudio
+            song={currentSong}
+            onSwitchClassic={() => switchRecordMode("classic")}
+          />
+        ) : (
           <RecordingStudio
             song={currentSong}
             onSongSelect={handleTrackSelectForRecord}
             onRecordingComplete={handleRecordingComplete}
             onBack={() => setCurrentView("studio")}
+            onSwitchStadium={() => switchRecordMode("stadium")}
           />
         );
       case "edit":
