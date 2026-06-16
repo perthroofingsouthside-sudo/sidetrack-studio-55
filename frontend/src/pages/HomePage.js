@@ -5,8 +5,12 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import NowPlayingHero from "@/components/NowPlayingHero";
 
-export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlaylists, nowPlaying }) {
+export default function HomePage({
+  onSongRecognized, onTrackSelect, onOpenPlaylists, nowPlaying,
+  isPlaying, progress, togglePlayPause, handleSeek, openInStudio,
+}) {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState("");
@@ -15,10 +19,18 @@ export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlayli
   const [hipHop, setHipHop] = useState([]);
   const [altRock, setAltRock] = useState([]);
   const [playlists, setPlaylists] = useState([]);
+  // When something is playing, allow user to *temporarily* override the hero
+  // to find another track (search/recognize). Reset to hero on track change.
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
   const streamRef = useRef(null);
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
+
+  // Reset the overlay whenever the playing track changes so the hero re-appears
+  useEffect(() => {
+    setShowSearchOverlay(false);
+  }, [nowPlaying?.id]);
 
   useEffect(() => {
     return () => {
@@ -119,6 +131,22 @@ export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlayli
   };
 
   return (
+    <>
+      {/* IMMERSIVE NOW-PLAYING HERO — shown whenever a track is playing on Discover.
+          Users can tap recognize/search to overlay the hero with the picker layout. */}
+      {nowPlaying && !showSearchOverlay && (
+        <NowPlayingHero
+          nowPlaying={nowPlaying}
+          isPlaying={isPlaying}
+          progress={progress}
+          togglePlayPause={togglePlayPause}
+          handleSeek={handleSeek}
+          openInStudio={openInStudio}
+          onTapRecognize={() => { setShowSearchOverlay(true); startListening(); }}
+          onTapSearch={() => setShowSearchOverlay(true)}
+        />
+      )}
+      {(!nowPlaying || showSearchOverlay) && (
     <div className="min-h-screen flex flex-col items-center justify-start relative overflow-hidden px-4 pt-10 pb-16"
          data-testid="home-page">
       {/* Background abstract */}
@@ -283,7 +311,21 @@ export default function HomePage({ onSongRecognized, onTrackSelect, onOpenPlayli
           ))}
         </div>
       )}
+
+      {/* Back-to-now-playing pill when overlay is shown */}
+      {nowPlaying && showSearchOverlay && (
+        <button
+          onClick={() => setShowSearchOverlay(false)}
+          data-testid="back-to-now-playing"
+          className="fixed top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-9 rounded-full border border-[#39FF14]/40 bg-[#0F0F16]/90 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#39FF14]"
+          style={{ boxShadow: "0 0 18px rgba(57,255,20,0.25)" }}
+        >
+          <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" /> Back to Now Playing
+        </button>
+      )}
     </div>
+      )}
+    </>
   );
 }
 

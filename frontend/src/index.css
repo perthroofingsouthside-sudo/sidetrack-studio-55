@@ -196,6 +196,16 @@ h1, h2, h3, h4, h5, h6 {
   animation: fade-in 0.4s ease-out forwards;
 }
 
+/* Vinyl spin — outer ring slowly rotates while a preview plays */
+@keyframes vinyl-spin-kf {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.vinyl-spin {
+  animation: vinyl-spin-kf 8s linear infinite;
+}
+
+
 /* Active lyric line */
 .lyric-active {
   color: #39FF14;

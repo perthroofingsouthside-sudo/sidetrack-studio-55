@@ -193,6 +193,11 @@ function App() {
             onTrackSelect={handleTrackSelect}
             onOpenPlaylists={() => setCurrentView("playlists")}
             nowPlaying={nowPlaying}
+            isPlaying={isPlaying}
+            progress={progress}
+            togglePlayPause={togglePlayPause}
+            handleSeek={handleSeek}
+            openInStudio={openInStudio}
           />
         );
       case "stream":

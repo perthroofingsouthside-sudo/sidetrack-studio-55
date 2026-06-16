@@ -51,8 +51,8 @@ OWNERSHIP_NAMES = {
 }
 OWNERSHIP_FINANCE_TOTAL_PAYMENTS = 12
 
-# Tiers locked behind ownership (discounted tiers)
-LOCKED_TIERS = {"student", "family", "adult_band", "under18_band", "couple_duo"}
+# Tiers locked behind ownership (discounted tiers) — single source of truth in `platform.py`.
+from routes.platform import LOCKED_TIERS
 
 
 class CheckoutRequest(BaseModel):

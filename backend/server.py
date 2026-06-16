@@ -129,6 +129,19 @@ async def start_band_cron():
     logger.info("[BandCron] Background task registered")
 
 
+@app.on_event("startup")
+async def ensure_ttl_indexes():
+    """Create TTL indexes on ephemeral Studio AI collections so old docs auto-purge after 30 days."""
+    from database import db
+    THIRTY_DAYS = 60 * 60 * 24 * 30
+    for coll in ("beats", "cleanup_jobs"):
+        try:
+            await db[coll].create_index("created_at", expireAfterSeconds=THIRTY_DAYS, name="ttl_created_at_30d")
+            logger.info(f"[TTL] {coll}.created_at TTL=30d ensured")
+        except Exception as e:  # pragma: no cover
+            logger.warning(f"[TTL] could not create TTL on {coll}: {e}")
+
+
 # ── CORS ────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,

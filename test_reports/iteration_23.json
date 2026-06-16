@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 23 — P1 immersive NowPlayingHero on Discover + P2 hygiene (LOCKED_TIERS dedupe, MongoDB TTL indexes). Backend regression 100% PASS (17/17 iter-21 tests + TTL indexes verified expireAfterSeconds=2592000 on both beats and cleanup_jobs collections; startup logs confirm '[TTL] beats.created_at TTL=30d ensured' and '[TTL] cleanup_jobs.created_at TTL=30d ensured'; LOCKED_TIERS now imported from routes.platform in payments.py — single source of truth confirmed). Frontend smoke at 430x932 confirmed 6/8 P1 criteria PASS but found 1 BLOCKING BUG: picking a DIFFERENT track from the overlaid search-results (i.e. while a track is already playing) does NOT update nowPlaying state, so the hero never re-appears and the global mini-player still shows the OLD track. This breaks the third P1 acceptance criterion ('hero re-appears with the new track and search overlay resets automatically').",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Pick a 2nd/different track from overlaid Discover search-results while a track is already playing",
+        "issue": "nowPlaying state does NOT update — UI symptoms: (a) NowPlayingHero never re-appears (showSearchOverlay stays true because useEffect on nowPlaying.id never fires), (b) [data-testid='back-to-now-playing'] pill remains stuck visible, (c) the global bottom mini-player still shows the previous track title ('One More Time'/Daft Punk) instead of the newly clicked 'Call Out My Name'/Weeknd. 'Playback failed' toast appears (expected in headless), but per the request note nowPlaying should still update even when audio.play() rejects — it does on the FIRST pick but NOT on the 2nd pick. Root cause is likely in App.js L77-93 playTrack(): setNowPlaying(track) (L88) runs synchronously BEFORE audio.play().catch(...), so the state SHOULD update — but the visible behaviour proves it does not on subsequent calls. Suspect attachProgressListener (L91) attaches an audio 'error' event handler that resets nowPlaying back to null/old value when the new audio errors in headless, OR there's a stale-closure / useCallback dep issue causing the cleanup of the previous audio (L80-83) to also fire a setNowPlaying back to the old track via a deferred listener. Main agent should add console.log in playTrack to confirm setNowPlaying is reached, and audit attachProgressListener for any setNowPlaying side-effects on 'error'/'ended' events.",
+        "affected_selectors": ["[data-testid='now-playing-hero']", "[data-testid='back-to-now-playing']", "[data-testid='hero-track-title']"],
+        "priority": "HIGH",
+        "blocks_p1_criterion_3": true,
+        "also_blocks": "Could not verify hero-open-studio-btn → currentView='studio' transition (P1 criterion 4) because the hero never re-appears to expose the button on the 2nd track. Should be re-tested after the bug is fixed (the button itself is correctly rendered in the DOM on the first hero, as confirmed)."
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration21_two_lane.py",
+    "/app/test_reports/pytest/iter23_iter21_rerun.xml",
+    "/app/test_reports/iteration_23.json"
+  ],
+  "action_items": [
+    "FIX HIGH: Trace why setNowPlaying in App.js playTrack does not update React state on the 2nd consecutive call (when a track is already playing). Inspect attachProgressListener (App.js, near L70-93) for any setNowPlaying(null) / setNowPlaying(prev) side-effects bound to audio 'error' or 'ended' events, and verify the audio cleanup at L80-83 does NOT fire those listeners against the previous audio after the new setNowPlaying has run.",
+    "After fix, re-verify P1 criterion 3 (hero reappears with new track + overlay resets) and criterion 4 (hero-open-studio-btn switches currentView to 'studio')."
+  ],
+  "critical_code_review_comments": [
+    "App.js L88-92 playTrack: setNowPlaying(track) is called BEFORE audio.play() — correct order — but no 'error' event listener is shown here. If attachProgressListener (referenced L91) attaches a generic error handler that calls setNowPlaying(null) or similar on audio decode failure, this would explain the regression on the 2nd pick (1st pick has no prior audio to error, so no listener fires).",
+    "NowPlayingHero.js — clean, all 11 required testids present, formatTime used, vinyl-spin class applied conditionally on isPlaying. No issues.",
+    "HomePage.js L31-33 — useEffect([nowPlaying?.id]) is the right reset trigger; this code IS correct but never gets a chance to run on the 2nd pick because nowPlaying.id isn't actually changing.",
+    "routes/payments.py L54-55 — clean LOCKED_TIERS import from routes.platform; eliminates the prior duplicate. Verified locked tier (e.g. 'student') still 403s on /api/payments/checkout without ownership.",
+    "server.py L132-143 — TTL hook correctly creates expireAfterSeconds=2592000 indexes on both beats and cleanup_jobs; idempotent (re-runs on every startup with same index name 'ttl_created_at_30d'). Mongo confirms both indexes present.",
+    "Suggest splitting App.js (347 lines, lots of callbacks + 8 different track-select handlers). Reaching the 'too many callbacks in one file' threshold — could extract audio/playback into a usePlayback hook for clarity and easier debugging of bugs like the one reported above."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (17/17 iter-21 pass + TTL indexes verified + LOCKED_TIERS dedupe verified)",
+    "frontend": "75% — 6/8 P1+regression criteria PASS (empty-state, first-track-hero with all testids, search-overlay+back-pill, return-to-hero, hero structure including hero-open-studio-btn rendered); 1/8 BLOCKED BUG (2nd track pick — nowPlaying does not update); 1/8 UNVERIFIED (open-in-studio CTA, blocked by the bug)."
+  },
+  "test_credentials": "None — anonymous app, localStorage 'pp_lane'='creator'.",
+  "seed_data_creation": "None.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "P1 hero ALL testids verified rendering correctly on the FIRST track pick (One More Time / Daft Punk) at viewport 430x932: [now-playing-hero, hero-now-playing-label, hero-album-art, hero-track-title, hero-track-artist, hero-seek-bar, hero-time-elapsed, hero-controls, hero-recognize-btn, hero-play-pause-btn, hero-search-btn, hero-open-studio-btn]. hero-search-btn correctly overlays the home-page layout with [back-to-now-playing] pill. Tapping the pill returns to hero. BUG: picking a 2nd track ('Call Out My Name' from 'the weeknd' search results) while one is already playing does NOT update nowPlaying state (verified via bottom mini-player STILL showing 'One More Time' AND hero failing to reappear AND back-pill remaining visible). Suspect audio 'error' event handler in attachProgressListener (App.js) is firing setNowPlaying(old/null) on the new Audio()'s synthetic error in headless. To reproduce: creator-lane → nav-home → search 'daft punk' → click discover-result-0 → wait for hero → click hero-search-btn → search 'the weeknd' → click discover-result-0 → observe hero does not reappear within 3+ seconds. Backend is fully clean — no action needed there. Watermark click-interception workaround (page.evaluate click) is still required for right-edge nav from iter-22.",
+  "rca of the issue": "App.js playTrack (L77-93) calls setNowPlaying(track) at L88 BEFORE audio.play() — so the React state update should commit regardless of playback failure. The fact that bottom-mini-player still shows the previous track ('One More Time') after a 2nd pick proves nowPlaying is NOT being updated to the new track. Most likely cause: attachProgressListener (L91) attaches an 'error' event listener to the new Audio that calls setNowPlaying(null) or some prior-state restore when the audio errors out in headless (audio.play() rejects with NotAllowedError or similar). On the FIRST pick there's no previously-set nowPlaying to compare against / there's no prior audio to clean up at L80-83, so the bug is masked. On 2nd pick, after the new audio errors, the listener fires and overwrites the state. Mitigation: (1) Move the audio.play().catch into a useEffect that only sets isPlaying=false on rejection but does NOT touch nowPlaying. (2) In attachProgressListener, ensure the 'error' handler does not setNowPlaying back; it should only setIsPlaying(false). (3) Defensive: wrap the audio cleanup at L80-83 to remove ALL listeners (incl. 'error') before assigning to null so stale listeners on the old audio cannot fire setNowPlaying(prev) after the new track is set."
+}
