@@ -98,12 +98,20 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - ✅ Ownership Model with discount-tier gating
 
 ## Pending / Backlog (P2)
-- Refactor `BecomeAStar.js` (700+ lines, complexity 119) into wizard sub-components
-- Refactor `BattleArena.js` and `ConnectPage.js` for component complexity
+- ✅ **Feb 16, 2026 — REFACTOR COMPLETE**:
+  - `PlayerStudio.js` 866 → 432 lines (extracted `StudioSearchScreen`, `ChordDots`, `formatTime`)
+  - `RecordingStudio.js` 734 → 528 lines (extracted `TrimModal`, `RecordSearchScreen`, `GuitarDiagram`)
+  - New modules: `components/studio/{StudioSearchScreen,ChordDots}.js`, `components/recording/{TrimModal,RecordSearchScreen,GuitarDiagram}.js`, `utils/format.js`
+  - All 5 React hook-dependency warnings fixed (BackstageScreen, ConnectPage, DuetStudio, PlaylistsPage, PlayerStudio) — `CI=true yarn build` now compiles with **ZERO warnings**.
+  - Regression: backend pytest 17/17 still PASS, frontend 8/8 regression smoke PASS (`/app/test_reports/iteration_22.json`)
+- Refactor `BecomeAStar.js` (732 lines, complexity 119) into wizard sub-components — not reachable from nav after lane restructure (only via `currentView="star"` route, no entry point in BottomNav). LOW priority.
 - Add MongoDB TTL indexes on `beats.created_at` and `cleanup_jobs.created_at` (30-day)
 - De-duplicate `LOCKED_TIERS` set (currently exists in both `payments.py` and `platform.py`) — import from single source
 - Wire real AudioCraft/Suno engine into `/studio/beat/generate` (currently mocked)
 - Wire real DSP into `/studio/cleanup` (currently returns profile only)
+- Un-mock WebRTC P2P video in `JamRoomPanel`
+- Real OAuth (YouTube/TikTok) integration in `PublishPanel`
+- Build "song-is-playing" immersive Discover UI (hero now-playing card behind, mini-controls foreground)
 
 ## Testing
 - `/app/backend/tests/test_iteration20_ownership.py` — 17 tests, 100% pass
