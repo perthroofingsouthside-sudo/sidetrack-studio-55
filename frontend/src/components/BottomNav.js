@@ -11,9 +11,9 @@ const CREATOR_ITEMS = [
 ];
 
 // Gamer-lane items — the full video-game experience.
-// Battle = karaoke / Become-a-Star contests · Tracks = in-game playlist · Backstage = recordings to review · Profile = avatar
+// Battle Stage = karaoke / Become-a-Star contests · Tracks = in-game playlist · Backstage = recordings to review · Profile = avatar
 const GAMER_ITEMS = [
-  { key: "battle", icon: Swords, label: "Battle" },
+  { key: "battle", icon: Swords, label: "Battle Stage" },
   { key: "playlists", icon: ListMusic, label: "Tracks" },
   { key: "backstage", icon: Sparkles, label: "Backstage" },
   { key: "profile", icon: User, label: "Profile" },

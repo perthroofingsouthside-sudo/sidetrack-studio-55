@@ -105,6 +105,11 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - Regression: 34/34 backend tests (iter-20 + iter-21) still PASS; `CI=true yarn build` clean
 
 ## Pending / Backlog (P2)
+- ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
+  - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)
+  - New `components/BattleStageBackdrop.js` — theater backdrop with red side-curtains, perspective stage-floor lines, dual orange+green spotlight cones, 14-slot scattered album-cover scenery (auto-populated from `battles` + `leaderboard`), and animated sparkle "stage dust"
+  - `BattleArena.js` list view rebuilt with marquee title ("BATTLE STAGE" in white+neon-orange w/ glow), "ON STAGE TONIGHT" live badge, "TAKE THE STAGE" CTA, "Hall of Fame" + "Tonight's Battles" section headers, "X ON STAGE · LIVE" per battle card, glowing card hover scale
+  - New CSS keyframe: `stageDust` (3-axis float + scale + opacity)
 - ✅ **Feb 16, 2026 — CODE QUALITY PASS 2**:
   - 98 ruff blocking errors auto-fixed: 34 E701 multi-statement lines (`community.py`, `platform.py` reformatted), 53 `== True/False` in test files → idiomatic truth checks, 6 unused f-strings stripped
   - Memoized `upcomingChords` in `RecordingStudio.js` (was filter+slice on every tick = ~10 Hz wasted CPU during playback)

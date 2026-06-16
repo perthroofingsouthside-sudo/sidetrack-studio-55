@@ -206,6 +206,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 
+/* Battle Stage — floating stage dust particles */
+@keyframes stageDust {
+  0%   { transform: translateY(0)   translateX(0)  scale(1);   opacity: 0.2; }
+  50%  { transform: translateY(-8px) translateX(4px) scale(1.4); opacity: 0.7; }
+  100% { transform: translateY(0)   translateX(-4px) scale(1);   opacity: 0.2; }
+}
+
+
 /* Active lyric line */
 .lyric-active {
   color: #39FF14;

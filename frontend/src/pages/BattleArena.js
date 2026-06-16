@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Swords, Trophy, Play, Pause, ThumbsUp, Plus, Mic, Square, ArrowLeft, Users, Flame } from "lucide-react";
+import { Swords, Trophy, Play, Pause, ThumbsUp, Plus, Mic, Square, ArrowLeft, Users, Flame, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import BattleStageBackdrop from "@/components/BattleStageBackdrop";
 
 export default function BattleArena({ currentSong, onStartDuet }) {
   const [view, setView] = useState("list"); // list | detail | submit | leaderboard
@@ -275,82 +276,143 @@ export default function BattleArena({ currentSong, onStartDuet }) {
     );
   }
 
-  // List + Leaderboard view
+  // List + Leaderboard view — the THEATRICAL Battle Stage
+  const allSceneryCovers = [...battles, ...leaderboard];
   return (
-    <div className="min-h-screen bg-[#05050A]" data-testid="battle-arena">
-      <div className="px-4 pt-6 pb-2 flex items-center justify-between">
-        <div>
-          <h1 className="font-['Outfit'] text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <Swords className="w-6 h-6 text-[#FF6B00]" />
-            <span className="text-white">Cover</span>
-            <span className="text-[#39FF14]">Battle</span>
-          </h1>
-          <p className="text-[#606070] text-xs mt-1">Record covers, get votes, climb the ranks</p>
-        </div>
-        <Button data-testid="create-battle-btn" onClick={createBattle} className="h-10 px-4 bg-[#FF6B00] hover:bg-[#FF8533] rounded-2xl text-sm font-bold gap-1.5 glow-orange">
-          <Plus className="w-4 h-4" /> New Battle
-        </Button>
-      </div>
+    <div className="min-h-screen relative bg-[#05050A] overflow-x-hidden" data-testid="battle-arena">
+      {/* Theater backdrop: curtains, spotlights, scattered album-cover scenery */}
+      <BattleStageBackdrop covers={allSceneryCovers} />
 
-      <ScrollArea className="h-[calc(100vh-160px)]">
-        <div className="px-4 space-y-6 pb-24">
-          {/* Leaderboard */}
-          {leaderboard.length > 0 && (
-            <section data-testid="leaderboard-section">
-              <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-[#FF6B00]" /> Top Covers
+      {/* Foreground content */}
+      <div className="relative z-10">
+        {/* Marquee header */}
+        <div className="px-4 pt-8 pb-3 flex flex-col items-center text-center" data-testid="battle-stage-header">
+          {/* "ON STAGE TONIGHT" mini-marquee */}
+          <div className="flex items-center gap-1.5 px-3 h-7 rounded-full border border-[#39FF14]/40 mb-3"
+               style={{ background: "rgba(57,255,20,0.06)", boxShadow: "0 0 18px rgba(57,255,20,0.18)" }}>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#39FF14]">On Stage Tonight</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" />
+          </div>
+          {/* Big marquee title */}
+          <h1 className="font-['Outfit'] font-black uppercase leading-none tracking-tight"
+              style={{ textShadow: "0 0 22px rgba(255,107,0,0.55), 0 0 48px rgba(255,107,0,0.25)" }}>
+            <span className="block text-4xl sm:text-5xl text-white">Battle</span>
+            <span className="block text-5xl sm:text-6xl text-[#FF6B00]">Stage</span>
+          </h1>
+          {/* Twinkling stars around title */}
+          <div className="flex items-center gap-2 mt-2 mb-3">
+            <Star className="w-3 h-3 text-[#39FF14] fill-[#39FF14] animate-pulse" />
+            <p className="text-[11px] text-[#A0A0B0] font-bold tracking-wider uppercase">Record · Compete · Win The Spotlight</p>
+            <Star className="w-3 h-3 text-[#39FF14] fill-[#39FF14] animate-pulse" />
+          </div>
+          {/* New Battle CTA */}
+          <Button data-testid="create-battle-btn" onClick={createBattle}
+            className="h-11 px-6 rounded-full text-sm font-black uppercase tracking-wider gap-2 bg-gradient-to-r from-[#FF6B00] to-[#FF8533] text-white hover:scale-105 transition-transform"
+            style={{ boxShadow: "0 0 24px rgba(255,107,0,0.55), 0 8px 20px rgba(0,0,0,0.4)" }}>
+            <Plus className="w-4 h-4" /> Take The Stage
+          </Button>
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-280px)]">
+          <div className="px-4 space-y-6 pb-28">
+            {/* Hall of Fame */}
+            {leaderboard.length > 0 && (
+              <section data-testid="leaderboard-section">
+                <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.3em] font-black text-[#39FF14] mb-3 flex items-center gap-2 justify-center">
+                  <Trophy className="w-4 h-4" /> Hall of Fame
+                </h3>
+                <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
+                  {leaderboard.slice(0, 5).map((cover, idx) => (
+                    <div key={cover.id} data-testid={`leaderboard-${idx}`}
+                      className="flex-shrink-0 w-44 rounded-2xl p-3 relative border"
+                      style={{
+                        background: "rgba(15,15,22,0.85)",
+                        borderColor: idx === 0 ? "rgba(255,107,0,0.5)" : "rgba(255,255,255,0.08)",
+                        boxShadow: idx === 0 ? "0 0 24px rgba(255,107,0,0.35)" : "0 4px 14px rgba(0,0,0,0.4)",
+                      }}>
+                      {idx === 0 && (
+                        <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF8533] flex items-center justify-center"
+                             style={{ boxShadow: "0 0 14px rgba(255,107,0,0.7)" }}>
+                          <Trophy className="w-3.5 h-3.5 text-white" />
+                        </div>
+                      )}
+                      {cover.song_cover_url && <img src={cover.song_cover_url} alt="" className="w-full h-24 rounded-lg object-cover mb-2" />}
+                      <p className="text-xs font-bold text-white truncate">{cover.title}</p>
+                      <p className="text-[10px] text-[#A0A0B0] truncate">{cover.song_title}</p>
+                      <div className="flex items-center gap-1 mt-1.5">
+                        <ThumbsUp className="w-3 h-3 text-[#39FF14]" />
+                        <span className="text-xs font-black text-[#39FF14]">{cover.votes}</span>
+                        <span className="text-[9px] text-[#5C5C6B] ml-auto uppercase tracking-wider font-bold">#{idx + 1}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Tonight's Battles */}
+            <section data-testid="active-battles">
+              <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.3em] font-black text-[#FF6B00] mb-3 flex items-center gap-2 justify-center">
+                <Flame className="w-4 h-4" /> Tonight's Battles
               </h3>
-              <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
-                {leaderboard.slice(0, 5).map((cover, idx) => (
-                  <div key={cover.id} className="flex-shrink-0 w-40 surface-card p-3 relative">
-                    {idx === 0 && <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF6B00] rounded-full flex items-center justify-center"><Trophy className="w-3 h-3 text-black" /></div>}
-                    {cover.song_cover_url && <img src={cover.song_cover_url} alt="" className="w-full h-24 rounded-lg object-cover mb-2" />}
-                    <p className="text-xs font-medium text-white truncate">{cover.title}</p>
-                    <p className="text-[10px] text-[#606070] truncate">{cover.song_title}</p>
-                    <div className="flex items-center gap-1 mt-1">
-                      <ThumbsUp className="w-3 h-3 text-[#39FF14]" />
-                      <span className="text-xs font-bold text-[#39FF14]">{cover.votes}</span>
+              {battles.length === 0 && (
+                <div className="rounded-2xl p-8 text-center border border-[#FF6B00]/20"
+                     style={{ background: "rgba(255,107,0,0.04)" }}
+                     data-testid="empty-battles">
+                  <Swords className="w-14 h-14 text-[#FF6B00]/30 mx-auto mb-3 animate-pulse" />
+                  <p className="text-sm text-white font-bold mb-1">The stage is empty…</p>
+                  <p className="text-xs text-[#A0A0B0] mb-3">Be the first to grab the mic tonight!</p>
+                  <p className="text-[10px] text-[#FF6B00] uppercase tracking-wider font-black">Pick a song & tap "Take The Stage"</p>
+                </div>
+              )}
+              <div className="space-y-2.5">
+                {battles.map((battle) => (
+                  <div key={battle.id}
+                    onClick={() => openBattle(battle)}
+                    className="rounded-2xl p-3.5 flex items-center gap-3 cursor-pointer transition-all border group hover:scale-[1.01]"
+                    style={{
+                      background: "rgba(15,15,22,0.85)",
+                      borderColor: "rgba(255,107,0,0.18)",
+                      boxShadow: "0 6px 18px rgba(0,0,0,0.4)",
+                    }}
+                    data-testid={`battle-card-${battle.id}`}>
+                    {battle.song_cover_url ? (
+                      <div className="relative flex-shrink-0">
+                        <img src={battle.song_cover_url} alt="" className="w-16 h-16 rounded-xl object-cover" />
+                        <div className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#FF6B00] flex items-center justify-center"
+                             style={{ boxShadow: "0 0 10px rgba(255,107,0,0.6)" }}>
+                          <Swords className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#FF6B00]/20 to-[#39FF14]/15 flex items-center justify-center flex-shrink-0">
+                        <Swords className="w-6 h-6 text-[#FF6B00]" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-black text-white truncate group-hover:text-[#FF6B00] transition-colors">{battle.song_title}</p>
+                      <p className="text-[11px] text-[#A0A0B0] truncate">{battle.song_artist}</p>
+                      <div className="flex items-center gap-2 mt-1.5">
+                        <span className="text-[10px] text-[#FF6B00] flex items-center gap-1 font-bold uppercase tracking-wider">
+                          <Users className="w-3 h-3" />{battle.cover_count || 0} on stage
+                        </span>
+                        <span className="text-[10px] text-[#39FF14] flex items-center gap-1 font-bold uppercase tracking-wider">
+                          <Flame className="w-3 h-3" />Live
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
+                      <span className="text-[8px] uppercase tracking-wider text-[#FF6B00] font-black">Enter</span>
+                      <Swords className="w-5 h-5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
                     </div>
                   </div>
                 ))}
               </div>
             </section>
-          )}
-
-          {/* Active Battles */}
-          <section data-testid="active-battles">
-            <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-              <Flame className="w-4 h-4 text-[#FF3B30]" /> Active Battles
-            </h3>
-            {battles.length === 0 && (
-              <div className="surface-card p-8 text-center">
-                <Swords className="w-12 h-12 text-[#FF6B00]/20 mx-auto mb-3" />
-                <p className="text-sm text-[#606070] mb-3">No active battles yet</p>
-                <p className="text-xs text-[#FF6B00]">Select a song and create the first battle!</p>
-              </div>
-            )}
-            <div className="space-y-2">
-              {battles.map((battle) => (
-                <div key={battle.id} onClick={() => openBattle(battle)} className="surface-card p-4 flex items-center gap-3 cursor-pointer hover:border-[#FF6B00]/30 transition-all group" data-testid={`battle-card-${battle.id}`}>
-                  {battle.song_cover_url ? (
-                    <img src={battle.song_cover_url} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
-                  ) : (
-                    <div className="w-14 h-14 rounded-xl bg-[#FF6B00]/10 flex items-center justify-center flex-shrink-0"><Swords className="w-6 h-6 text-[#FF6B00]" /></div>
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00] transition-colors">{battle.song_title}</p>
-                    <p className="text-xs text-[#606070] truncate">{battle.song_artist}</p>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[10px] text-[#FF6B00] flex items-center gap-1"><Users className="w-3 h-3" />{battle.cover_count || 0} covers</span>
-                    </div>
-                  </div>
-                  <Swords className="w-5 h-5 text-[#606070] group-hover:text-[#FF6B00] transition-colors flex-shrink-0" />
-                </div>
-              ))}
-            </div>
-          </section>
-        </div>
-      </ScrollArea>
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 }
