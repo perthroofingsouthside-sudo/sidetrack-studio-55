@@ -102,16 +102,14 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - `PlayerStudio.js` 866 → 432 lines (extracted `StudioSearchScreen`, `ChordDots`, `formatTime`)
   - `RecordingStudio.js` 734 → 528 lines (extracted `TrimModal`, `RecordSearchScreen`, `GuitarDiagram`)
   - New modules: `components/studio/{StudioSearchScreen,ChordDots}.js`, `components/recording/{TrimModal,RecordSearchScreen,GuitarDiagram}.js`, `utils/format.js`
-  - All 5 React hook-dependency warnings fixed (BackstageScreen, ConnectPage, DuetStudio, PlaylistsPage, PlayerStudio) — `CI=true yarn build` now compiles with **ZERO warnings**.
-  - Regression: backend pytest 17/17 still PASS, frontend 8/8 regression smoke PASS (`/app/test_reports/iteration_22.json`)
-- Refactor `BecomeAStar.js` (732 lines, complexity 119) into wizard sub-components — not reachable from nav after lane restructure (only via `currentView="star"` route, no entry point in BottomNav). LOW priority.
-- Add MongoDB TTL indexes on `beats.created_at` and `cleanup_jobs.created_at` (30-day)
-- De-duplicate `LOCKED_TIERS` set (currently exists in both `payments.py` and `platform.py`) — import from single source
+  - All 5 React hook-dependency warnings fixed — `CI=true yarn build` compiles with **ZERO warnings**.
+- ✅ **Feb 16, 2026 — P1 IMMERSIVE DISCOVER**: `NowPlayingHero` component on Discover. When a track is playing, the page transforms into a full-bleed blurred-album-art hero with vinyl-style cover, title/artist, neon gradient seek bar, mic/play-pause/search controls and "Open in Studio" CTA. `[hero-search-btn]` overlays the original search layout with a `[back-to-now-playing]` pill. Self-tested live: hero re-appears with new track metadata when user picks a 2nd track. (`/app/test_reports/iteration_23.json`)
+- ✅ **Feb 16, 2026 — P2 HYGIENE**: Deduplicated `LOCKED_TIERS` (now imported from `routes.platform` in `payments.py`). Added MongoDB TTL indexes (`expireAfterSeconds=2592000`) on `beats.created_at` and `cleanup_jobs.created_at` via `server.py` startup hook.
+- Refactor `BecomeAStar.js` (732 lines, complexity 119) — not reachable from nav after lane restructure. LOW priority.
 - Wire real AudioCraft/Suno engine into `/studio/beat/generate` (currently mocked)
 - Wire real DSP into `/studio/cleanup` (currently returns profile only)
-- Un-mock WebRTC P2P video in `JamRoomPanel`
-- Real OAuth (YouTube/TikTok) integration in `PublishPanel`
-- Build "song-is-playing" immersive Discover UI (hero now-playing card behind, mini-controls foreground)
+- Un-mock WebRTC P2P video in `JamRoomPanel` — requires real signaling server
+- Real OAuth (YouTube/TikTok) integration in `PublishPanel` — requires user-provided OAuth credentials
 
 ## Testing
 - `/app/backend/tests/test_iteration20_ownership.py` — 17 tests, 100% pass
