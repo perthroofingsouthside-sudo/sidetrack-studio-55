@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef } from "react";
-import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown, Upload, CheckCircle2, AlertCircle, Users, Heart, Camera, Sparkles } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown, Upload, CheckCircle2, AlertCircle, Users, Heart, Camera, Sparkles, Swords, Eye, Play, Pause, Radio, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -46,6 +46,12 @@ export default function SocialProfile({ onNavigate }) {
     }
   });
   const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
+  // New profile data — Battle stats, playlists, kept recordings ("My Raps")
+  const [battleSnapshot, setBattleSnapshot] = useState(null);
+  const [playlists, setPlaylists] = useState([]);
+  const [raps, setRaps] = useState([]);
+  const [playingRap, setPlayingRap] = useState(null);
+  const rapAudioRef = useRef(null);
   const fileInputRef = useRef(null);
   const userId = useRef(
     localStorage.getItem("sidetrack_voter_id") ||
@@ -55,7 +61,41 @@ export default function SocialProfile({ onNavigate }) {
   useEffect(() => {
     loadSubStatus();
     loadLiveStats();
+    loadProfileExtras();
+    return () => { if (rapAudioRef.current) rapAudioRef.current.pause(); };
   }, []);
+
+  const loadProfileExtras = useCallback(async () => {
+    const uid = userId.current;
+    try {
+      const [battle, pls, recs] = await Promise.all([
+        axios.get(`${API}/rap-battles/me/${encodeURIComponent(uid)}`),
+        axios.get(`${API}/playlists`, { params: { owner: uid } }),
+        axios.get(`${API}/gamer/recordings/${encodeURIComponent(uid)}?status=kept&limit=12`),
+      ]);
+      setBattleSnapshot(battle.data || null);
+      setPlaylists(pls.data?.playlists || []);
+      setRaps(recs.data?.recordings || []);
+    } catch (err) {
+      console.error("[Profile] extras load failed:", err);
+    }
+  }, []);
+
+  const togglePlayRap = (rec) => {
+    if (!rec.blob_url) { toast.message("No playback file"); return; }
+    if (playingRap === rec.id) {
+      rapAudioRef.current?.pause();
+      setPlayingRap(null);
+      return;
+    }
+    if (rapAudioRef.current) rapAudioRef.current.pause();
+    const audio = new Audio(rec.blob_url);
+    audio.onended = () => setPlayingRap(null);
+    audio.onerror = () => { setPlayingRap(null); toast.error("Playback unavailable"); };
+    audio.play().catch(() => { setPlayingRap(null); toast.error("Playback blocked"); });
+    rapAudioRef.current = audio;
+    setPlayingRap(rec.id);
+  };
 
   const loadSubStatus = async () => {
     try {
@@ -115,11 +155,17 @@ export default function SocialProfile({ onNavigate }) {
   const isBand = subStatus?.is_band;
   const uploadStatus = subStatus?.upload_status;
 
+  // Aggregate likes + views across kept raps (used in stats card)
+  const totalRapLikes = raps.reduce((s, r) => s + (r.likes || 0), 0);
+  const totalRapViews = raps.reduce((s, r) => s + (r.views || 0), 0);
+  const battleWins = battleSnapshot?.user?.lifetime_wins ?? 0;
+  const battleLosses = battleSnapshot?.user?.lifetime_losses ?? 0;
+
   const stats = [
-    { label: "Battles", value: liveStats?.battles ?? 0, icon: Trophy, color: "#FF6B00" },
-    { label: "Stars", value: liveStats?.stars ?? 0, icon: Star, color: "#39FF14" },
-    { label: "Playlists", value: liveStats?.playlists ?? 0, icon: ListMusic, color: "#FF6B00" },
-    { label: "Votes", value: liveStats?.total_votes ?? 0, icon: Heart, color: "#39FF14" },
+    { label: "Battle Wins",  value: battleWins,                       icon: Trophy,    color: "#FF6B00", testId: "stat-wins" },
+    { label: "Battle Losses", value: battleLosses,                    icon: Swords,    color: "#5C5C6B", testId: "stat-losses" },
+    { label: "Likes",        value: (liveStats?.total_votes ?? 0) + totalRapLikes, icon: Heart, color: "#39FF14", testId: "stat-likes" },
+    { label: "Views",        value: totalRapViews + (liveStats?.battles ?? 0) * 10, icon: Eye, color: "#39FF14", testId: "stat-views" },
   ];
 
   return (
@@ -292,10 +338,10 @@ export default function SocialProfile({ onNavigate }) {
             </div>
           )}
 
-          {/* Stats Grid — Live from DB */}
-          <div className="grid grid-cols-2 gap-3" data-testid="profile-stats">
+          {/* Stats Grid — Live from DB + Rap Battle lifetime W/L */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="profile-stats">
             {stats.map((s) => (
-              <div key={s.label} className="surface-card p-4 text-center">
+              <div key={s.label} className="surface-card p-4 text-center" data-testid={s.testId}>
                 <s.icon className="w-5 h-5 mx-auto mb-2" style={{ color: s.color }} />
                 <p className="text-2xl font-['Outfit'] font-black text-white">{s.value}</p>
                 <p className="text-[10px] text-[#5C5C6B] uppercase tracking-[0.15em] font-bold mt-1">{s.label}</p>
@@ -303,17 +349,14 @@ export default function SocialProfile({ onNavigate }) {
             ))}
           </div>
 
-          {/* Activity Feed */}
-          <section data-testid="activity-feed">
-            <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-3 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#39FF14]" /> Recent Activity
-            </h3>
-            <div className="surface-card p-8 text-center">
-              <Mic2 className="w-10 h-10 text-[#FF6B00]/15 mx-auto mb-3" />
-              <p className="text-sm text-[#5C5C6B]">Your activity will appear here</p>
-              <p className="text-xs text-[#5C5C6B]/60 mt-1">Record covers, enter battles, and create playlists to build your profile</p>
-            </div>
-          </section>
+          {/* BATTLE STATUS — current active match + recent battles */}
+          <BattleStatusSection snapshot={battleSnapshot} onNavigate={onNavigate} />
+
+          {/* PERSONAL PLAYLISTS — curated from Discover */}
+          <PlaylistsSection playlists={playlists} onNavigate={onNavigate} />
+
+          {/* MY RAPS — 60-second raps the user has kept */}
+          <MyRapsSection raps={raps} playingId={playingRap} onToggle={togglePlayRap} />
 
           {/* Share Profile */}
           <Button variant="ghost" className="w-full border border-white/5 text-[#5C5C6B] gap-2 rounded-2xl" data-testid="share-profile-btn">
@@ -333,5 +376,212 @@ export default function SocialProfile({ onNavigate }) {
         />
       )}
     </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────────── */
+
+function BattleStatusSection({ snapshot, onNavigate }) {
+  const active = snapshot?.active_battle;
+  const inQueue = snapshot?.in_queue;
+  const history = (snapshot?.history || []).slice(0, 5);
+
+  return (
+    <section data-testid="profile-battle-status">
+      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
+        <Swords className="w-3.5 h-3.5" /> Battle Status
+      </h3>
+
+      {active ? (
+        <button
+          onClick={() => onNavigate && onNavigate("connect")}
+          data-testid="profile-active-battle"
+          className="w-full text-left rounded-2xl border border-[#FF6B00]/40 p-3.5 flex items-center gap-3 hover:border-[#FF6B00]/70 transition-all"
+          style={{ background: "linear-gradient(135deg, rgba(255,107,0,0.10), rgba(57,255,20,0.04))", boxShadow: "0 0 18px rgba(255,107,0,0.18)" }}
+        >
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/20 flex-shrink-0">
+            <Radio className={`w-5 h-5 text-[#FF6B00] ${active.status === "live" ? "animate-pulse" : ""}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-white truncate">
+              vs <span className="text-[#39FF14]">{active.user_a === snapshot.user?.user_id ? active.profile_b.display_name : active.profile_a.display_name}</span>
+            </p>
+            <p className="text-[10px] uppercase tracking-wider text-[#FF6B00] font-bold">
+              {active.status === "pending_agreement" ? "Awaiting agreement"
+                : active.status === "agreed" ? "Ready to go live"
+                : "LIVE — drop your bars"}
+            </p>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6B00]">Open →</span>
+        </button>
+      ) : inQueue ? (
+        <button
+          onClick={() => onNavigate && onNavigate("connect")}
+          data-testid="profile-queue-card"
+          className="w-full text-left rounded-2xl border border-[#39FF14]/30 p-3.5 flex items-center gap-3"
+          style={{ background: "rgba(57,255,20,0.05)" }}
+        >
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#39FF14]/15 flex-shrink-0">
+            <Users className="w-5 h-5 text-[#39FF14]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-white">Searching for an opponent…</p>
+            <p className="text-[10px] uppercase tracking-wider text-[#39FF14] font-bold">In matchmaking queue</p>
+          </div>
+        </button>
+      ) : (
+        <button
+          onClick={() => onNavigate && onNavigate("connect")}
+          data-testid="profile-register-cta"
+          className="w-full text-left rounded-2xl border border-dashed border-[#FF6B00]/30 p-3.5 flex items-center gap-3 hover:border-[#FF6B00]/60 hover:bg-[#FF6B00]/5 transition-all"
+        >
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/10 flex-shrink-0">
+            <Swords className="w-5 h-5 text-[#FF6B00]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-black text-white">Not registered for a battle</p>
+            <p className="text-[10px] text-[#5C5C6B]">Head to Connect → Battle Hub to enter the queue.</p>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6B00]">Register →</span>
+        </button>
+      )}
+
+      {history.length > 0 && (
+        <div className="mt-2 space-y-1.5" data-testid="profile-battle-history">
+          <p className="text-[9px] uppercase tracking-[0.25em] text-[#5C5C6B] font-black pl-1 mb-1">Recent battles</p>
+          {history.map((b) => {
+            const meId = snapshot.user?.user_id;
+            const opp = b.user_a === meId ? b.profile_b : b.profile_a;
+            const won = b.winner && b.winner === meId;
+            const tied = !b.winner;
+            return (
+              <div key={b.id} className="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-white/5"
+                style={{ background: "rgba(15,15,22,0.4)" }} data-testid={`battle-history-${b.id}`}>
+                <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${
+                  won ? "bg-[#39FF14]/15 text-[#39FF14]"
+                    : tied ? "bg-white/8 text-[#A0A0B0]"
+                    : "bg-red-500/15 text-red-400"
+                }`}>
+                  {won ? "W" : tied ? "T" : "L"}
+                </span>
+                <span className="flex-1 text-xs font-bold text-white truncate">vs {opp.display_name}</span>
+                <span className="text-[9px] text-[#5C5C6B]">{b.votes_a || 0}-{b.votes_b || 0}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PlaylistsSection({ playlists, onNavigate }) {
+  return (
+    <section data-testid="profile-playlists">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#39FF14] flex items-center gap-1.5">
+          <ListMusic className="w-3.5 h-3.5" /> Personal Playlists
+        </h3>
+        <button
+          onClick={() => onNavigate && onNavigate("playlists")}
+          data-testid="profile-playlists-manage"
+          className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider"
+        >
+          Manage →
+        </button>
+      </div>
+      {playlists.length === 0 ? (
+        <button
+          onClick={() => onNavigate && onNavigate("home")}
+          data-testid="profile-playlists-empty"
+          className="w-full rounded-2xl border border-dashed border-[#39FF14]/25 p-4 flex items-center gap-3 hover:border-[#39FF14]/50 hover:bg-[#39FF14]/5 transition-all text-left"
+        >
+          <ListMusic className="w-9 h-9 text-[#39FF14]/40 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-sm font-bold text-white">No playlists yet</p>
+            <p className="text-[10px] text-[#5C5C6B]">Save songs from Discover to build your collection.</p>
+          </div>
+        </button>
+      ) : (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="profile-playlists-row">
+          {playlists.slice(0, 10).map((pl, idx) => (
+            <button
+              key={pl.id || idx}
+              onClick={() => onNavigate && onNavigate("playlists")}
+              data-testid={`profile-playlist-${idx}`}
+              className="flex-shrink-0 w-28 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2"
+            >
+              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+                {pl.cover_url
+                  ? <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
+                  : <ListMusic className="w-7 h-7 text-[#39FF14]/40" />}
+              </div>
+              <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
+              <p className="text-[10px] text-[#5C5C6B] truncate">
+                {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
+              </p>
+            </button>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function MyRapsSection({ raps, playingId, onToggle }) {
+  return (
+    <section data-testid="profile-my-raps">
+      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
+        <Mic2 className="w-3.5 h-3.5" /> My Raps · 60s
+      </h3>
+      {raps.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center" data-testid="profile-my-raps-empty">
+          <Mic2 className="w-9 h-9 text-[#FF6B00]/20 mx-auto mb-2" />
+          <p className="text-sm font-bold text-white">No raps posted yet</p>
+          <p className="text-[10px] text-[#5C5C6B] mt-1">Battles &amp; Backstage performances you keep will show here.</p>
+        </div>
+      ) : (
+        <div className="space-y-2" data-testid="profile-my-raps-list">
+          {raps.map((r) => {
+            const isPlaying = playingId === r.id;
+            return (
+              <div
+                key={r.id}
+                data-testid={`profile-rap-${r.id}`}
+                className="rounded-2xl border border-white/5 hover:border-[#FF6B00]/30 transition-all p-3 flex items-center gap-3"
+                style={{ background: "rgba(15,15,22,0.5)" }}
+              >
+                <button
+                  onClick={() => onToggle(r)}
+                  data-testid={`profile-rap-play-${r.id}`}
+                  className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                    isPlaying ? "bg-[#FF6B00]" : "bg-[#FF6B00]/15 hover:bg-[#FF6B00]/25"
+                  }`}
+                  style={isPlaying ? { boxShadow: "0 0 16px rgba(255,107,0,0.45)" } : undefined}
+                >
+                  {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-[#FF6B00] ml-0.5" />}
+                </button>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-white truncate">{r.song_title || "Untitled rap"}</p>
+                  <p className="text-[10px] text-[#5C5C6B] truncate flex items-center gap-1.5">
+                    <Clock className="w-2.5 h-2.5" />
+                    {Math.round(r.duration_sec || 0)}s
+                    {r.artist && ` · ${r.artist}`}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2.5 text-[10px] font-bold text-[#5C5C6B] flex-shrink-0">
+                  <span className="flex items-center gap-1" data-testid={`profile-rap-likes-${r.id}`}>
+                    <Heart className="w-3 h-3 text-[#39FF14]" /> {r.likes || 0}
+                  </span>
+                  <span className="flex items-center gap-1" data-testid={`profile-rap-views-${r.id}`}>
+                    <Eye className="w-3 h-3 text-[#FF6B00]" /> {r.views || 0}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
   );
 }
