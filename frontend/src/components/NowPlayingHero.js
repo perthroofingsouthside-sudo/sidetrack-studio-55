@@ -2,7 +2,7 @@
    Replaces the normal Discover layout when a track is playing, with a
    full-bleed blurred album-art backdrop, animated vinyl, and inline controls. */
 import { useRef } from "react";
-import { Play, Pause, Music2, Search, Mic } from "lucide-react";
+import { Play, Pause, Music2, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatTime } from "@/utils/format";
 
@@ -12,8 +12,6 @@ export default function NowPlayingHero({
   progress,
   togglePlayPause,
   handleSeek,
-  openInStudio,
-  onTapRecognize,
   onTapSearch,
 }) {
   const seekRef = useRef(null);
@@ -121,18 +119,8 @@ export default function NowPlayingHero({
           </div>
         </div>
 
-        {/* Controls row */}
+        {/* Controls row — strictly utility: play/pause + back-to-search */}
         <div className="flex items-center justify-center gap-5 mt-7" data-testid="hero-controls">
-          <Button
-            onClick={onTapRecognize}
-            data-testid="hero-recognize-btn"
-            variant="ghost"
-            className="w-12 h-12 rounded-full border border-[#FF6B00]/30 text-[#FF6B00] hover:bg-[#FF6B00]/10 hover:border-[#FF6B00]"
-            title="Recognize another song"
-          >
-            <Mic className="w-4 h-4" />
-          </Button>
-
           <Button
             onClick={togglePlayPause}
             data-testid="hero-play-pause-btn"
@@ -148,27 +136,17 @@ export default function NowPlayingHero({
             onClick={onTapSearch}
             data-testid="hero-search-btn"
             variant="ghost"
-            className="w-12 h-12 rounded-full border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/10 hover:border-[#39FF14]"
-            title="Search for another"
+            className="h-11 px-5 rounded-full border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/10 hover:border-[#39FF14] gap-2"
+            title="Back to search"
           >
             <Search className="w-4 h-4" />
+            <span className="text-[11px] font-black uppercase tracking-wider">Search</span>
           </Button>
         </div>
 
-        {/* Open in Studio CTA */}
-        <Button
-          onClick={() => openInStudio && openInStudio(nowPlaying)}
-          data-testid="hero-open-studio-btn"
-          className="mt-7 h-11 px-7 rounded-full bg-[#39FF14] hover:bg-[#39FF14]/85 text-[#05050A] font-black text-sm tracking-wider uppercase"
-          style={{ boxShadow: "0 0 24px rgba(57,255,20,0.45)" }}
-        >
-          <Music2 className="w-4 h-4 mr-2" />
-          Open in Studio
-        </Button>
-
         {/* Hint */}
         <p className="text-[10px] text-[#5C5C6B] mt-5 uppercase tracking-wider text-center">
-          Tap the mic to recognize another · tap search to browse
+          Tap search to find another track
         </p>
       </div>
     </div>

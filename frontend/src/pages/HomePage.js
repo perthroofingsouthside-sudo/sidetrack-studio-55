@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Mic, Loader2, Search, ListMusic, Plus } from "lucide-react";
+import { Search, ListMusic, Plus, Play, Pause, Loader2, Check, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -7,133 +7,151 @@ import { API } from "@/App";
 import axios from "axios";
 import NowPlayingHero from "@/components/NowPlayingHero";
 
+/**
+ * Discover — Creator Lane Utility Tab
+ *
+ * Strictly three things:
+ *  1. SEARCH the ~3,800 track Hottest 100 + Top 200 Hip-Hop catalog.
+ *  2. LISTEN via the global player (and the NowPlayingHero overlay).
+ *  3. PLAYLISTS — quick access + inline "Add to playlist" on each result.
+ *
+ * No mic recognition, no Battle buttons, no Studio CTAs. Other lanes/tabs
+ * handle those flows.
+ */
 export default function HomePage({
-  onSongRecognized, onTrackSelect, onOpenPlaylists, onOpenCatalog, nowPlaying,
+  onTrackSelect, onOpenPlaylists, nowPlaying,
   isPlaying, progress, togglePlayPause, handleSeek, openInStudio,
 }) {
-  const [isListening, setIsListening] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState([]);
-  const [hipHop, setHipHop] = useState([]);
-  const [altRock, setAltRock] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [mosaic, setMosaic] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  // When something is playing, allow user to *temporarily* override the hero
-  // to find another track (search/recognize). Reset to hero on track change.
+  // When something is playing, allow user to temporarily override the hero
+  // to find another track. Reset to hero on track change.
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
-  const mediaRecorderRef = useRef(null);
-  const chunksRef = useRef([]);
-  const streamRef = useRef(null);
+  // Track id of result whose "add-to-playlist" picker is open
+  const [pickerOpen, setPickerOpen] = useState(null);
+  // Track ids that just got added (to flash a check)
+  const [justAdded, setJustAdded] = useState({});
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
 
-  // Reset the overlay whenever the playing track changes so the hero re-appears
-  useEffect(() => {
-    setShowSearchOverlay(false);
-  }, [nowPlaying?.id]);
+  useEffect(() => { setShowSearchOverlay(false); }, [nowPlaying?.id]);
 
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
-    };
-  }, []);
-
-  // Load side rail albums on mount (Hip-Hop left, Alt-Rock right) + user playlists
+  // Load initial mosaic (random sample of catalog) + user playlists
   useEffect(() => {
     const load = async () => {
       try {
-        const [hh1, hh2, ar1, ar2, pls] = await Promise.all([
-          axios.get(`${API}/music/search?q=${encodeURIComponent("hip hop")}&limit=20`),
-          axios.get(`${API}/music/search?q=${encodeURIComponent("rap")}&limit=20`),
-          axios.get(`${API}/music/search?q=${encodeURIComponent("alternative rock")}&limit=20`),
-          axios.get(`${API}/music/search?q=${encodeURIComponent("indie rock")}&limit=20`),
-          axios.get(`${API}/playlists?owner=${encodeURIComponent(userId.current)}`),
+        const [hh, ar, pls] = await Promise.all([
+          axios.get(`${API}/gamer/catalog/tracks`, { params: { collection: "hip_hop_top_200", limit: 12, offset: 0 } }),
+          axios.get(`${API}/gamer/catalog/tracks`, { params: { collection: "hottest_100", limit: 12, offset: 0 } }),
+          axios.get(`${API}/playlists`, { params: { owner: userId.current } }),
         ]);
-        const pickFour = (lists) => {
-          const seen = new Set();
-          const out = [];
-          for (const list of lists) {
-            for (const t of (list || [])) {
-              const key = t.cover_url;
-              if (!key || seen.has(key)) continue;
-              seen.add(key);
-              out.push(t);
-              if (out.length >= 4) return out;
-            }
-          }
-          return out;
-        };
-        setHipHop(pickFour([hh1.data?.tracks, hh2.data?.tracks]));
-        setAltRock(pickFour([ar1.data?.tracks, ar2.data?.tracks]));
+        const merged = [...(hh.data?.tracks || []), ...(ar.data?.tracks || [])]
+          .filter(t => t.cover_url)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 12);
+        setMosaic(merged);
         setPlaylists(pls.data?.playlists || []);
-      } catch (err) { console.error("[Discover] side-rail load failed:", err); }
+      } catch (err) { console.error("[Discover] mosaic load failed:", err); }
     };
     load();
   }, []);
 
-  const startListening = async () => {
+  const refreshPlaylists = useCallback(async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
-      mediaRecorderRef.current = mediaRecorder;
-      chunksRef.current = [];
-      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      mediaRecorder.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop());
-        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-        await recognizeSong(blob);
-      };
-      mediaRecorder.start();
-      setIsListening(true);
-      setTimeout(() => {
-        if (mediaRecorder.state === "recording") { mediaRecorder.stop(); setIsListening(false); }
-      }, 5000);
-    } catch (err) { toast.error("Microphone access denied"); }
+      const pls = await axios.get(`${API}/playlists`, { params: { owner: userId.current } });
+      setPlaylists(pls.data?.playlists || []);
+    } catch (err) { /* silent */ }
+  }, []);
+
+  const doSearch = useCallback(async () => {
+    const q = query.trim();
+    if (!q) return;
+    setSearching(true);
+    setHasSearched(true);
+    try {
+      const res = await axios.get(`${API}/gamer/catalog/tracks`, {
+        params: { q, limit: 30, offset: 0, enrich: true },
+      });
+      setResults(res.data?.tracks || []);
+    } catch (err) {
+      toast.error("Search failed");
+      setResults([]);
+    } finally { setSearching(false); }
+  }, [query]);
+
+  const clearSearch = () => {
+    setQuery("");
+    setResults([]);
+    setHasSearched(false);
   };
 
-  const stopListening = () => {
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.stop();
-      setIsListening(false);
+  const trackToSong = (t) => ({
+    id: t.track_id || t.id || crypto.randomUUID(),
+    title: t.title,
+    artist: t.artist,
+    album: t.album || "",
+    cover_url: t.cover_url || "",
+    genre: t.genre || "",
+    preview_url: t.preview_url || "",
+  });
+
+  const pickTrack = (t) => {
+    const song = trackToSong(t);
+    if (!song.preview_url) {
+      toast.info("Preview unavailable for this track");
+      return;
+    }
+    onTrackSelect && onTrackSelect(song);
+  };
+
+  const addToPlaylist = async (track, playlist) => {
+    try {
+      await axios.post(`${API}/playlists/${playlist.id}/tracks`, {
+        track_id: track.track_id || track.id,
+        title: track.title || "",
+        artist: track.artist || "",
+        album: track.album || "",
+        cover_url: track.cover_url || "",
+        preview_url: track.preview_url || "",
+        duration_ms: track.duration_ms || 0,
+      });
+      toast.success(`Added to ${playlist.name}`);
+      setPickerOpen(null);
+      setJustAdded(prev => ({ ...prev, [track.track_id || track.id]: true }));
+      setTimeout(() => setJustAdded(prev => {
+        const next = { ...prev };
+        delete next[track.track_id || track.id];
+        return next;
+      }), 1800);
+      refreshPlaylists();
+    } catch (err) {
+      console.error("[Discover] add-to-playlist failed:", err);
+      toast.error("Couldn't add to playlist");
     }
   };
 
-  const recognizeSong = async (blob) => {
-    setIsProcessing(true);
+  const createPlaylistAndAdd = async (track) => {
+    const name = window.prompt("New playlist name");
+    if (!name?.trim()) return;
     try {
-      const formData = new FormData();
-      formData.append("audio", blob, "recording.webm");
-      const res = await axios.post(`${API}/recognize`, formData, { headers: { "Content-Type": "multipart/form-data" } });
-      if (res.data.success && res.data.song) {
-        toast.success(`Recognized: ${res.data.song.title}`);
-        onSongRecognized && onSongRecognized(res.data.song);
-      } else {
-        toast.error("Couldn't recognize this track — try again");
+      const res = await axios.post(`${API}/playlists`, {
+        name: name.trim(), is_public: false, owner: userId.current,
+      });
+      const newPl = res.data?.playlist;
+      if (newPl?.id) {
+        await addToPlaylist(track, newPl);
       }
     } catch (err) {
-      toast.error("Recognition failed. Please try again.");
-    } finally { setIsProcessing(false); }
-  };
-
-  const doSearch = useCallback(async () => {
-    if (!query.trim()) return;
-    setSearching(true);
-    try {
-      const res = await axios.get(`${API}/music/search?q=${encodeURIComponent(query)}&limit=20`);
-      setResults(res.data?.tracks || []);
-    } catch (err) { toast.error("Search failed"); }
-    finally { setSearching(false); }
-  }, [query]);
-
-  const pickTrack = (t) => {
-    if (onTrackSelect) onTrackSelect(t);
+      toast.error("Couldn't create playlist");
+    }
   };
 
   return (
     <>
-      {/* IMMERSIVE NOW-PLAYING HERO — shown whenever a track is playing on Discover.
-          Users can tap recognize/search to overlay the hero with the picker layout. */}
+      {/* IMMERSIVE NOW-PLAYING — shown while a track is streaming on Discover */}
       {nowPlaying && !showSearchOverlay && (
         <NowPlayingHero
           nowPlaying={nowPlaying}
@@ -142,250 +160,350 @@ export default function HomePage({
           togglePlayPause={togglePlayPause}
           handleSeek={handleSeek}
           openInStudio={openInStudio}
-          onTapRecognize={() => { setShowSearchOverlay(true); startListening(); }}
           onTapSearch={() => setShowSearchOverlay(true)}
         />
       )}
       {(!nowPlaying || showSearchOverlay) && (
-    <div className="min-h-screen flex flex-col items-center justify-start relative overflow-hidden px-4 pt-10 pb-16"
-         data-testid="home-page">
-      {/* Background abstract */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-[#FF6B00]/5 blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-[#39FF14]/5 blur-[100px]" />
-      </div>
-
-      {/* Logo + Title */}
-      <div className="relative z-10 mb-6 animate-fade-in" data-testid="discover-logo">
-        <div className="w-20 h-20 mx-auto mb-3 flex items-center justify-center">
-          <img
-            src="/logo.png"
-            alt="Pocket Products"
-            className="w-full h-full object-contain"
-            style={{ filter: "drop-shadow(0 0 18px rgba(255,107,0,0.55)) drop-shadow(0 0 32px rgba(57,255,20,0.18))" }}
-          />
-        </div>
-        <h1 className="font-['Outfit'] text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tighter text-center">
-          <span className="text-white">Pocket </span>
-          <span className="text-[#FF6B00] glow-text-orange">Products</span>
-        </h1>
-        <p className="text-[#A0A0B0] text-xs sm:text-sm mt-2 text-center font-['Manrope']">Recognize. Separate. Create.</p>
-      </div>
-
-      {/* Mic with radar rings */}
-      <div className="relative z-10 flex items-center justify-center" data-testid="recognize-section">
-        {isListening && (
-          <>
-            <div className="absolute w-40 h-40 rounded-full border border-[#FF6B00]/30 animate-pulse-ring" style={{ animationDelay: "0s" }} />
-            <div className="absolute w-56 h-56 rounded-full border border-[#FF6B00]/20 animate-pulse-ring" style={{ animationDelay: "0.5s" }} />
-            <div className="absolute w-72 h-72 rounded-full border border-[#FF6B00]/10 animate-pulse-ring" style={{ animationDelay: "1s" }} />
-          </>
-        )}
-        <Button
-          data-testid="shazam-button"
-          onClick={isListening ? stopListening : startListening}
-          disabled={isProcessing}
-          className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-full flex items-center justify-center transition-all duration-300 ${
-            isListening ? "bg-[#FF6B00] glow-orange scale-110"
-              : isProcessing ? "bg-[#12121A] border border-white/10"
-              : "bg-[#12121A] border border-[#FF6B00]/40 hover:border-[#FF6B00] hover:glow-orange hover:-translate-y-1"
-          }`}
-        >
-          {isProcessing ? <Loader2 className="w-9 h-9 text-[#FF6B00] animate-spin" />
-            : <Mic className={`w-9 h-9 ${isListening ? "text-white" : "text-[#FF6B00]"}`} />}
-        </Button>
-      </div>
-
-      <p className="relative z-10 mt-4 text-xs text-[#A0A0B0] font-['Manrope'] text-center" data-testid="status-text">
-        {isProcessing ? "Analyzing audio..." : isListening ? "Listening... Tap to stop" : "Tap to recognize a song"}
-      </p>
-
-      {/* SEARCH BAR — below the mic */}
-      <div className="relative z-10 mt-7 w-full max-w-md" data-testid="discover-search">
-        <div className="flex gap-2">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C5C6B]" />
-            <Input
-              data-testid="discover-search-input"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && doSearch()}
-              placeholder="Search songs, artists, albums..."
-              className="pl-10 h-11 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF6B00]/50 text-sm rounded-xl"
-            />
+        <div className="min-h-screen relative overflow-hidden px-4 pt-8 pb-16" data-testid="home-page">
+          {/* Ambient background */}
+          <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#FF6B00]/6 blur-[140px]" />
+            <div className="absolute bottom-0 right-0 w-[420px] h-[420px] rounded-full bg-[#39FF14]/5 blur-[120px]" />
           </div>
-          <Button onClick={doSearch} disabled={searching} data-testid="discover-search-btn"
-            className="h-11 px-5 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-sm"
-            style={{ boxShadow: "0 0 18px rgba(255,107,0,0.35)" }}>
-            {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4 mr-1.5" />}
-            Search
-          </Button>
-        </div>
-      </div>
 
-      {/* CATALOG CTA — bonus access to the 3,800-track Gamer library from Creator side */}
-      <div className="relative z-10 mt-5 w-full max-w-md" data-testid="discover-catalog-cta">
-        <button
-          onClick={() => onOpenCatalog && onOpenCatalog()}
-          data-testid="discover-open-catalog"
-          className="w-full flex items-center gap-3 p-3 rounded-xl border border-[#FF6B00]/25 hover:border-[#FF6B00]/60 hover:bg-[#FF6B00]/5 transition-all text-left group"
-          style={{ background: "linear-gradient(90deg, rgba(255,107,0,0.05), rgba(57,255,20,0.04))" }}
-        >
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"
-               style={{ background: "linear-gradient(135deg, rgba(255,107,0,0.18), rgba(57,255,20,0.12))" }}>
-            <ListMusic className="w-4 h-4 text-[#FF6B00]" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-1.5">
-              <p className="text-xs font-black text-white">Hottest 100 + Top 200 Hip-Hop</p>
-              <span className="text-[8px] uppercase tracking-wider font-black text-[#39FF14] px-1.5 py-0.5 rounded-full border border-[#39FF14]/40">Bonus</span>
+          <div className="relative z-10 max-w-2xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5" data-testid="discover-header">
+              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                style={{ background: "rgba(255,107,0,0.12)", boxShadow: "0 0 22px rgba(255,107,0,0.25)" }}>
+                <Search className="w-5 h-5 text-[#FF6B00]" />
+              </div>
+              <div>
+                <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  <span className="text-[#FF6B00] glow-text-orange">Discover</span>
+                </h1>
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
+                  Search · Listen · Save
+                </p>
+              </div>
             </div>
-            <p className="text-[10px] text-[#A0A0B0] truncate">Browse the Gamer-Mode catalog · 3,800+ tracks</p>
-          </div>
-          <span className="text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">Open →</span>
-        </button>
-      </div>
 
-      {/* YOUR PLAYLISTS — quick selector */}
-      <div className="relative z-10 mt-5 w-full max-w-md" data-testid="discover-playlists">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-1.5">
-            <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />
-            <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black">Your Playlists</p>
-          </div>
-          <button
-            onClick={() => onOpenPlaylists && onOpenPlaylists()}
-            data-testid="discover-playlists-manage"
-            className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider transition-colors"
-          >
-            Manage →
-          </button>
-        </div>
-
-        {playlists.length === 0 ? (
-          <button
-            onClick={() => onOpenPlaylists && onOpenPlaylists()}
-            data-testid="discover-playlists-empty"
-            className="w-full flex items-center gap-3 p-3 rounded-xl border border-dashed border-[#39FF14]/25 hover:border-[#39FF14]/60 hover:bg-[#39FF14]/5 transition-all text-left group"
-          >
-            <div className="w-10 h-10 rounded-lg bg-[#39FF14]/10 flex items-center justify-center group-hover:bg-[#39FF14]/20 transition-colors">
-              <Plus className="w-4 h-4 text-[#39FF14]" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold text-white">Create a playlist</p>
-              <p className="text-[10px] text-[#5C5C6B]">Tap to start collecting your tracks</p>
-            </div>
-          </button>
-        ) : (
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="discover-playlists-row">
-            {playlists.slice(0, 8).map((pl, idx) => (
-              <button
-                key={pl.id || idx}
-                onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
-                data-testid={`discover-playlist-${idx}`}
-                className="flex-shrink-0 w-28 rounded-xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
-              >
-                <div className="w-full aspect-square rounded-lg overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
-                  {pl.cover_url ? (
-                    <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <ListMusic className="w-7 h-7 text-[#39FF14]/40 group-hover:text-[#39FF14] transition-colors" />
+            {/* SEARCH BAR */}
+            <div className="mb-4" data-testid="discover-search">
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C5C6B]" />
+                  <Input
+                    data-testid="discover-search-input"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && doSearch()}
+                    placeholder="Search the catalog…  songs, artists"
+                    className="pl-10 pr-9 h-12 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF6B00]/50 text-sm rounded-2xl"
+                  />
+                  {query && (
+                    <button
+                      onClick={clearSearch}
+                      data-testid="discover-search-clear"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C6B] hover:text-white text-xs font-bold"
+                      aria-label="Clear search"
+                    >
+                      ✕
+                    </button>
                   )}
                 </div>
-                <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
-                <p className="text-[10px] text-[#5C5C6B] truncate">
-                  {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
+                <Button
+                  onClick={doSearch}
+                  disabled={searching || !query.trim()}
+                  data-testid="discover-search-btn"
+                  className="h-12 px-5 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40"
+                  style={{ boxShadow: "0 0 18px rgba(255,107,0,0.35)" }}
+                >
+                  {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
+                </Button>
+              </div>
+              <p className="mt-1.5 text-[10px] text-[#5C5C6B]">
+                Searching the Hottest 100 + Top 200 Hip-Hop library · 3,800+ tracks
+              </p>
+            </div>
+
+            {/* YOUR PLAYLISTS — utility row */}
+            <div className="mb-5" data-testid="discover-playlists">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-1.5">
+                  <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black">Your Playlists</p>
+                </div>
+                <button
+                  onClick={() => onOpenPlaylists && onOpenPlaylists()}
+                  data-testid="discover-playlists-manage"
+                  className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider transition-colors"
+                >
+                  Manage →
+                </button>
+              </div>
+
+              {playlists.length === 0 ? (
+                <button
+                  onClick={() => onOpenPlaylists && onOpenPlaylists()}
+                  data-testid="discover-playlists-empty"
+                  className="w-full flex items-center gap-3 p-3 rounded-2xl border border-dashed border-[#39FF14]/25 hover:border-[#39FF14]/60 hover:bg-[#39FF14]/5 transition-all text-left"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
+                    <Plus className="w-4 h-4 text-[#39FF14]" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-white">Create your first playlist</p>
+                    <p className="text-[10px] text-[#5C5C6B]">Save tracks you love for later</p>
+                  </div>
+                </button>
+              ) : (
+                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="discover-playlists-row">
+                  {playlists.slice(0, 10).map((pl, idx) => (
+                    <button
+                      key={pl.id || idx}
+                      onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
+                      data-testid={`discover-playlist-${idx}`}
+                      className="flex-shrink-0 w-28 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
+                    >
+                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+                        {pl.cover_url ? (
+                          <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <ListMusic className="w-7 h-7 text-[#39FF14]/40 group-hover:text-[#39FF14] transition-colors" />
+                        )}
+                      </div>
+                      <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
+                      <p className="text-[10px] text-[#5C5C6B] truncate">
+                        {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
+                      </p>
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => onOpenPlaylists && onOpenPlaylists()}
+                    data-testid="discover-playlists-add"
+                    className="flex-shrink-0 w-28 rounded-2xl border border-dashed border-white/10 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all flex flex-col items-center justify-center p-2 gap-1.5"
+                  >
+                    <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
+                      <Plus className="w-4 h-4 text-[#39FF14]" />
+                    </div>
+                    <p className="text-[10px] text-[#5C5C6B] font-bold uppercase tracking-wider">New</p>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* SEARCH RESULTS or MOSAIC */}
+            {hasSearched ? (
+              <div className="space-y-1.5" data-testid="discover-search-results">
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-2 flex items-center justify-between">
+                  <span>{results.length > 0 ? `${results.length} Result${results.length === 1 ? "" : "s"}` : "No matches"}</span>
+                  {results.length > 0 && (
+                    <button onClick={clearSearch} className="text-[#5C5C6B] hover:text-white text-[10px] font-bold normal-case tracking-normal">
+                      Clear
+                    </button>
+                  )}
                 </p>
-              </button>
-            ))}
-            <button
-              onClick={() => onOpenPlaylists && onOpenPlaylists()}
-              data-testid="discover-playlists-add"
-              className="flex-shrink-0 w-28 rounded-xl border border-dashed border-white/10 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all flex flex-col items-center justify-center p-2 gap-1.5"
-            >
-              <div className="w-9 h-9 rounded-lg bg-[#39FF14]/10 flex items-center justify-center">
-                <Plus className="w-4 h-4 text-[#39FF14]" />
+                {results.length === 0 && !searching && (
+                  <div className="py-10 rounded-2xl border border-dashed border-white/10 text-center">
+                    <p className="text-sm font-bold text-white">No tracks matched &ldquo;{query}&rdquo;</p>
+                    <p className="text-[11px] text-[#5C5C6B] mt-1">Try a different artist or song name.</p>
+                  </div>
+                )}
+                {results.map((t, idx) => (
+                  <ResultRow
+                    key={t.track_id || t.id || idx}
+                    track={t}
+                    idx={idx}
+                    nowPlayingId={nowPlaying?.id}
+                    isPlaying={isPlaying}
+                    pickerOpen={pickerOpen === (t.track_id || t.id)}
+                    setPickerOpen={(open) => setPickerOpen(open ? (t.track_id || t.id) : null)}
+                    onPick={() => pickTrack(t)}
+                    onAdd={(pl) => addToPlaylist(t, pl)}
+                    onCreatePlaylist={() => createPlaylistAndAdd(t)}
+                    playlists={playlists}
+                    justAdded={!!justAdded[t.track_id || t.id]}
+                  />
+                ))}
               </div>
-              <p className="text-[10px] text-[#5C5C6B] font-bold uppercase tracking-wider">New</p>
-            </button>
+            ) : (
+              <CoverMosaic tracks={mosaic} onPick={pickTrack} />
+            )}
           </div>
-        )}
-      </div>
 
-      {/* SIDE ALBUM RAILS — hidden on tiny screens, shown sm+ */}
-      <SideRail side="left" label="Hip-Hop" tracks={hipHop} onPick={pickTrack} />
-      <SideRail side="right" label="Alt-Rock" tracks={altRock} onPick={pickTrack} />
-
-      {/* Search Results */}
-      {results.length > 0 && (
-        <div className="relative z-10 w-full max-w-md mt-6 space-y-1.5" data-testid="discover-search-results">
-          <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-2">Results</p>
-          {results.slice(0, 12).map((t, idx) => (
-            <button key={t.id || idx} onClick={() => pickTrack(t)} data-testid={`discover-result-${idx}`}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5 transition-all text-left">
-              <div className="w-10 h-10 rounded-lg overflow-hidden border border-white/5 flex-shrink-0">
-                {t.cover_url ? <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" />
-                  : <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF6B00] text-sm font-bold">{t.title?.[0] || "?"}</div>}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-bold text-white truncate">{t.title}</p>
-                <p className="text-[10px] text-[#5C5C6B] truncate">{t.artist}</p>
-              </div>
+          {/* Back-to-now-playing pill when overlay is shown */}
+          {nowPlaying && showSearchOverlay && (
+            <button
+              onClick={() => setShowSearchOverlay(false)}
+              data-testid="back-to-now-playing"
+              className="fixed top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-9 rounded-full border border-[#39FF14]/40 bg-[#0F0F16]/90 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#39FF14]"
+              style={{ boxShadow: "0 0 18px rgba(57,255,20,0.25)" }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" /> Back to Now Playing
             </button>
-          ))}
+          )}
         </div>
-      )}
-
-      {/* Back-to-now-playing pill when overlay is shown */}
-      {nowPlaying && showSearchOverlay && (
-        <button
-          onClick={() => setShowSearchOverlay(false)}
-          data-testid="back-to-now-playing"
-          className="fixed top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-9 rounded-full border border-[#39FF14]/40 bg-[#0F0F16]/90 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#39FF14]"
-          style={{ boxShadow: "0 0 18px rgba(57,255,20,0.25)" }}
-        >
-          <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" /> Back to Now Playing
-        </button>
-      )}
-    </div>
       )}
     </>
   );
 }
 
-function SideRail({ side, label, tracks, onPick }) {
-  if (!tracks || tracks.length === 0) return null;
-  const isLeft = side === "left";
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function ResultRow({
+  track, idx, nowPlayingId, isPlaying, pickerOpen, setPickerOpen,
+  onPick, onAdd, onCreatePlaylist, playlists, justAdded,
+}) {
+  const isCurrent = nowPlayingId === (track.track_id || track.id);
   return (
     <div
-      className={`hidden md:flex absolute ${isLeft ? "left-4 lg:left-8" : "right-4 lg:right-8"} top-1/2 -translate-y-1/2 z-10 flex-col gap-3`}
-      data-testid={`discover-rail-${side}`}
+      data-testid={`discover-result-${idx}`}
+      className={`flex items-center gap-3 p-2.5 rounded-2xl border transition-all ${
+        isCurrent
+          ? "border-[#FF6B00]/50 bg-[#FF6B00]/8"
+          : "border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5"
+      }`}
     >
-      <p className={`text-[10px] uppercase tracking-[0.3em] font-black ${isLeft ? "text-[#FF6B00]" : "text-[#39FF14]"} ${isLeft ? "text-left" : "text-right"}`}>
-        {label}
-      </p>
-      {tracks.map((t, idx) => (
-        <button
-          key={t.id || `${side}-${idx}`}
-          onClick={() => onPick(t)}
-          data-testid={`discover-rail-${side}-${idx}`}
-          className="group block animate-float"
-          style={{ animationDelay: `${idx * 0.2}s` }}
-        >
-          <div className={`w-24 h-24 lg:w-28 lg:h-28 rounded-2xl overflow-hidden border ${isLeft ? "border-[#FF6B00]/25 hover:border-[#FF6B00]" : "border-[#39FF14]/25 hover:border-[#39FF14]"} transition-all hover:-translate-y-1`}
-            style={{ boxShadow: isLeft ? "0 0 24px rgba(255,107,0,0.12)" : "0 0 24px rgba(57,255,20,0.12)" }}>
-            {t.cover_url ? (
-              <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" />
-            ) : (
-              <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
-                <Mic className={`w-7 h-7 ${isLeft ? "text-[#FF6B00]/30" : "text-[#39FF14]/30"}`} />
-              </div>
-            )}
+      <button
+        onClick={onPick}
+        data-testid={`discover-result-play-${idx}`}
+        className={`relative w-11 h-11 rounded-xl overflow-hidden border flex-shrink-0 group ${
+          isCurrent ? "border-[#FF6B00]/60" : "border-white/5"
+        }`}
+        aria-label={`Play ${track.title}`}
+      >
+        {track.cover_url ? (
+          <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF6B00] text-sm font-bold">
+            {track.title?.[0] || "?"}
           </div>
-          <p className={`text-[10px] mt-1.5 truncate max-w-[112px] font-bold text-white/80 group-hover:text-white ${isLeft ? "text-left" : "text-right"}`}>{t.title}</p>
-          <p className={`text-[9px] truncate max-w-[112px] text-[#5C5C6B] ${isLeft ? "text-left" : "text-right"}`}>{t.artist}</p>
-        </button>
-      ))}
+        )}
+        <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${
+          isCurrent ? "bg-[#05050A]/55 opacity-100" : "bg-[#05050A]/55 opacity-0 group-hover:opacity-100"
+        }`}>
+          {isCurrent && isPlaying
+            ? <Pause className="w-4 h-4 text-white" />
+            : <Play className="w-4 h-4 text-white ml-0.5" />}
+        </div>
+      </button>
+
+      <button
+        onClick={onPick}
+        className="min-w-0 flex-1 text-left"
+        data-testid={`discover-result-info-${idx}`}
+      >
+        <p className={`text-sm font-bold truncate ${isCurrent ? "text-[#FF6B00]" : "text-white"}`}>
+          {track.title}
+        </p>
+        <p className="text-[11px] text-[#5C5C6B] truncate">
+          {track.artist}{track.year ? ` · ${track.year}` : ""}
+        </p>
+      </button>
+
+      {/* Add-to-playlist */}
+      <div className="relative flex-shrink-0">
+        {justAdded ? (
+          <div className="w-9 h-9 rounded-xl bg-[#39FF14]/15 flex items-center justify-center"
+               data-testid={`discover-result-added-${idx}`}>
+            <Check className="w-4 h-4 text-[#39FF14]" />
+          </div>
+        ) : (
+          <button
+            onClick={(e) => { e.stopPropagation(); setPickerOpen(!pickerOpen); }}
+            data-testid={`discover-result-add-${idx}`}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+              pickerOpen
+                ? "bg-[#39FF14]/20 text-[#39FF14]"
+                : "bg-white/5 hover:bg-[#39FF14]/15 text-[#5C5C6B] hover:text-[#39FF14]"
+            }`}
+            aria-label="Add to playlist"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
+        {pickerOpen && (
+          <div
+            className="absolute right-0 top-11 z-30 w-56 rounded-2xl border border-white/10 bg-[#0A0A12] shadow-2xl p-1.5 space-y-0.5 max-h-72 overflow-y-auto"
+            style={{ boxShadow: "0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(57,255,20,0.08)" }}
+            data-testid={`discover-playlist-picker-${idx}`}
+          >
+            <p className="px-2 pt-1.5 pb-1 text-[9px] uppercase tracking-[0.25em] text-[#5C5C6B] font-black">
+              Add to playlist
+            </p>
+            {playlists.length === 0 && (
+              <p className="px-2 py-3 text-[11px] text-[#5C5C6B]">No playlists yet.</p>
+            )}
+            {playlists.map((pl) => (
+              <button
+                key={pl.id}
+                onClick={(e) => { e.stopPropagation(); onAdd(pl); }}
+                data-testid={`discover-playlist-pick-${idx}-${pl.id}`}
+                className="w-full flex items-center gap-2 px-2 py-2 rounded-xl hover:bg-[#39FF14]/8 text-left transition-colors"
+              >
+                <div className="w-7 h-7 rounded-lg bg-[#39FF14]/10 flex items-center justify-center flex-shrink-0">
+                  {pl.cover_url
+                    ? <img src={pl.cover_url} alt="" className="w-full h-full object-cover rounded-lg" />
+                    : <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />}
+                </div>
+                <span className="text-xs font-bold text-white truncate flex-1">{pl.name}</span>
+              </button>
+            ))}
+            <button
+              onClick={(e) => { e.stopPropagation(); onCreatePlaylist(); }}
+              data-testid={`discover-playlist-create-${idx}`}
+              className="w-full flex items-center gap-2 px-2 py-2 rounded-xl border border-dashed border-[#39FF14]/30 hover:bg-[#39FF14]/8 text-left transition-colors mt-1"
+            >
+              <div className="w-7 h-7 rounded-lg bg-[#39FF14]/10 flex items-center justify-center flex-shrink-0">
+                <Plus className="w-3.5 h-3.5 text-[#39FF14]" />
+              </div>
+              <span className="text-xs font-black text-[#39FF14] uppercase tracking-wider">New playlist</span>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function CoverMosaic({ tracks, onPick }) {
+  if (!tracks || tracks.length === 0) return null;
+  return (
+    <div data-testid="discover-mosaic">
+      <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-2 flex items-center gap-1.5">
+        <ChevronDown className="w-3 h-3" /> From the catalog
+      </p>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+        {tracks.map((t, idx) => (
+          <button
+            key={t.track_id || t.id || idx}
+            onClick={() => onPick(t)}
+            data-testid={`discover-mosaic-${idx}`}
+            className="group relative aspect-square rounded-2xl overflow-hidden border border-white/5 hover:border-[#FF6B00]/50 transition-all"
+            style={{ boxShadow: "0 6px 22px rgba(0,0,0,0.45)" }}
+          >
+            {t.cover_url ? (
+              <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            ) : (
+              <div className="w-full h-full bg-[#12121A]" />
+            )}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-[#05050A]/40 to-transparent opacity-90" />
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="w-10 h-10 rounded-full bg-[#FF6B00] flex items-center justify-center"
+                   style={{ boxShadow: "0 0 22px rgba(255,107,0,0.55)" }}>
+                <Play className="w-4 h-4 text-white ml-0.5" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-2 text-left">
+              <p className="text-[11px] font-black text-white truncate">{t.title}</p>
+              <p className="text-[9px] text-white/60 truncate">{t.artist}</p>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

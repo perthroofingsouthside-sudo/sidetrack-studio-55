@@ -199,10 +199,8 @@ function App() {
       case "home":
         return (
           <HomePage
-            onSongRecognized={handleSongRecognized}
             onTrackSelect={handleTrackSelect}
             onOpenPlaylists={() => setCurrentView("playlists")}
-            onOpenCatalog={() => setCurrentView("catalog")}
             nowPlaying={nowPlaying}
             isPlaying={isPlaying}
             progress={progress}
