@@ -39,6 +39,8 @@ function App() {
   // ── Two-Lane Ecosystem ─────────────────────────
   const [lane, setLaneState] = useState(() => localStorage.getItem("pp_lane") || "creator");
   const [backstageTrack, setBackstageTrack] = useState(null);
+  // Track that was sent from Tracks → Battle Stage; consumed once on mount of BattleArena
+  const [pendingBattleSong, setPendingBattleSong] = useState(null);
   // Record-page layout — "stadium" is the new default, "classic" falls back to RecordingStudio (Live Stage)
   const [recordMode, setRecordMode] = useState(() => localStorage.getItem("pp_record_mode") || "stadium");
   const switchRecordMode = (m) => {
@@ -222,13 +224,19 @@ function App() {
           />
         );
       case "battle":
-        return <BattleArena currentSong={currentSong} onStartDuet={handleStartDuet} />;
+        return <BattleArena currentSong={currentSong} pendingBattleSong={pendingBattleSong} onPendingBattleConsumed={() => setPendingBattleSong(null)} onStartDuet={handleStartDuet} />;
       case "playlists":
         return lane === "gamer"
-          ? <GamerTracksPage onTrackSelect={handleTrackSelect} />
+          ? <GamerTracksPage
+              onTrackSelect={handleTrackSelect}
+              onBattleTrack={(song) => { setCurrentSong(song); setPendingBattleSong(song); setCurrentView("battle"); }}
+            />
           : <PlaylistsPage onTrackSelect={handleTrackSelect} />;
       case "catalog":
-        return <GamerTracksPage onTrackSelect={handleTrackSelect} />;
+        return <GamerTracksPage
+          onTrackSelect={handleTrackSelect}
+          onBattleTrack={(song) => { setCurrentSong(song); setPendingBattleSong(song); setCurrentView("battle"); }}
+        />;
       case "star":
         return <BecomeAStar />;
       case "connect":

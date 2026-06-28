@@ -149,6 +149,13 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - **Index-as-key**: 2 flagged spots were 16-segment dB meter + 5 piano keys (static, never reordered) — converted to descriptive keys (`seg-${idx}`, `bk-${x}`) for best practice
   - Backend pytest 34/34 still PASS; production build clean; smoke screenshot confirms Gamer Tracks page intact
 
+- ✅ **Feb 16, 2026 — TRACKS TAB DUAL-MODE PLAYER**:
+  - **Play button** (green) per row plays iTunes preview audio in-place; sticky "Now Playing" mini-bar pinned above BottomNav shows current track + Stop + Battle CTA
+  - **Battle button** (orange gradient) per row: stops audio immediately, sets `pendingBattleSong` in App state, navigates to Battle Stage. BattleArena auto-creates the battle on mount via `useEffect([pendingBattleSong])` and routes straight into the active GamerStage
+  - **Independent use**: catalog page works as a standalone music browser — start/stop multiple previews, browse 250+ seed tracks (3,800+ once you drop in the full catalog), search/filter without ever entering battle
+  - **Verified live**: Hottest 100 2025 → Play track #1 → preview plays + Now Playing bar appears → click BATTLE → audio stops, "Battle created!" toast, GamerStage opens with "LOVE WILL TEAR US APART" in header, lyrics rail green, avatar centred, falling notes on right
+  - New testids: `catalog-play-{i}`, `catalog-battle-{i}`, `catalog-now-playing`, `catalog-now-playing-title`, `catalog-now-playing-battle`, `catalog-stop-btn`
+
 ## Pending / Backlog (P2)
 - ✅ **Feb 16, 2026 — BATTLE STAGE REDESIGN** (kid-friendly Gamer-lane experience):
   - Tab renamed: `Battle` → `Battle Stage` (Gamer-lane label only; route key still `battle`)

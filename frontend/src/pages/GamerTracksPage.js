@@ -1,12 +1,13 @@
 /* GamerTracksPage — Gamer-Mode primary catalog browser.
    Two collections: Triple J Hottest 100 (year-picker 1990-2025) and Top 200 Hip-Hop.
    Powered by /api/gamer/catalog/*. */
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import axios from "axios";
-import { Loader2, Music2, Trophy, Flame, Search, Calendar, Disc3 } from "lucide-react";
+import { Loader2, Music2, Trophy, Flame, Search, Calendar, Disc3, Play, Pause, Swords } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
 import { API } from "@/App";
 
 const COLLECTIONS = [
@@ -14,14 +15,67 @@ const COLLECTIONS = [
   { key: "hip_hop_top_200", label: "Top 200 Hip-Hop", Icon: Flame,   accent: "#39FF14" },
 ];
 
-export default function GamerTracksPage({ onTrackSelect }) {
+export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
   const [collection, setCollection] = useState("hottest_100");
   const [years, setYears] = useState([]);
-  const [year, setYear] = useState(null);          // null = all years
+  const [year, setYear] = useState(null);
   const [q, setQ] = useState("");
   const [tracks, setTracks] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
+  // Audio listening player — independent of battle flow
+  const [playingId, setPlayingId] = useState(null);
+  const audioRef = useRef(null);
+
+  // Cleanup audio when page unmounts
+  useEffect(() => () => {
+    if (audioRef.current) { audioRef.current.pause(); audioRef.current = null; }
+  }, []);
+
+  const stopAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    setPlayingId(null);
+  }, []);
+
+  const togglePlay = useCallback((t) => {
+    if (playingId === t.track_id) { stopAudio(); return; }
+    stopAudio();
+    if (!t.preview_url) {
+      toast.info("No preview available for this track");
+      return;
+    }
+    const a = new Audio(t.preview_url);
+    a.volume = 0.85;
+    a.onended = () => setPlayingId(null);
+    a.onerror = () => { setPlayingId(null); toast.error("Playback failed"); };
+    audioRef.current = a;
+    a.play().then(() => setPlayingId(t.track_id)).catch(() => {
+      toast.error("Playback blocked — tap again");
+      setPlayingId(null);
+    });
+  }, [playingId, stopAudio]);
+
+  const enterBattle = useCallback((t) => {
+    // Spec: stop listening immediately, then transition to Battle Stage with this song loaded
+    stopAudio();
+    const song = {
+      id: t.track_id,
+      title: t.title,
+      artist: t.artist,
+      album: t.album || (t.collection?.includes("hottest_100") ? `Hottest 100 — ${t.year}` : "Top 200 Hip-Hop"),
+      cover_url: t.cover_url || "",
+      preview_url: t.preview_url || "",
+      genre: t.source === "top_200_hip_hop" ? "hip_hop" : "alt_rock",
+      year: t.year,
+      rank: t.rank,
+    };
+    toast.success(`Loading "${t.title}" into Battle Stage…`);
+    if (onBattleTrack) onBattleTrack(song);
+    else if (onTrackSelect) onTrackSelect(song);
+  }, [stopAudio, onBattleTrack, onTrackSelect]);
 
   // Load year picker once
   useEffect(() => {
@@ -146,21 +200,14 @@ export default function GamerTracksPage({ onTrackSelect }) {
               <p className="text-[11px] text-[#5C5C6B]">Try a different year or clear your search.</p>
             </div>
           )}
-          {tracks.map((t, i) => (
-            <button key={t.track_id || i}
+          {tracks.map((t, i) => {
+            const isPlaying = playingId === t.track_id;
+            return (
+            <div key={t.track_id || i}
               data-testid={`catalog-track-${i}`}
-              onClick={() => onTrackSelect && onTrackSelect({
-                id: t.track_id,
-                title: t.title,
-                artist: t.artist,
-                album: t.album || (t.collection?.includes("hottest_100") ? `Hottest 100 — ${t.year}` : "Top 200 Hip-Hop"),
-                cover_url: t.cover_url || "",
-                genre: t.source === "top_200_hip_hop" ? "hip_hop" : "alt_rock",
-                preview_url: t.preview_url || "",
-                year: t.year,
-                rank: t.rank,
-              })}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5 transition-all text-left group">
+              className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl border transition-all ${
+                isPlaying ? "border-[#39FF14]/50 bg-[#39FF14]/8 shadow-[0_0_18px_rgba(57,255,20,0.18)]" : "border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5"
+              }`}>
               {/* Rank badge */}
               <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-['Outfit'] font-black text-sm"
                 style={{
@@ -182,20 +229,70 @@ export default function GamerTracksPage({ onTrackSelect }) {
               </div>
               {/* Title / artist */}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white truncate group-hover:text-[#FF6B00] transition-colors">{t.title}</p>
-                <p className="text-[11px] text-[#A0A0B0] truncate">{t.artist}</p>
+                <p className={`text-sm font-bold truncate ${isPlaying ? "text-[#39FF14]" : "text-white"}`}>{t.title}</p>
+                <p className="text-[11px] text-[#A0A0B0] truncate">{t.artist}{t.year > 0 ? ` · ${t.year}` : ""}</p>
               </div>
-              {/* Year chip — Hottest 100 only */}
-              {t.year > 0 && (
-                <span className="hidden sm:inline-flex items-center px-2 h-6 rounded-full border border-white/10 text-[10px] font-black tracking-wider text-[#A0A0B0]" data-testid={`catalog-track-${i}-year`}>
-                  {t.year}
-                </span>
-              )}
-              <span className="text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Play</span>
-            </button>
-          ))}
+              {/* Play (listen) */}
+              <button onClick={() => togglePlay(t)}
+                data-testid={`catalog-play-${i}`}
+                title={isPlaying ? "Stop" : "Play preview"}
+                className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
+                  isPlaying
+                    ? "bg-[#39FF14] text-[#05050A] shadow-[0_0_14px_rgba(57,255,20,0.55)]"
+                    : "bg-white/5 border border-white/10 text-[#39FF14] hover:bg-[#39FF14]/15"
+                }`}>
+                {isPlaying ? <Pause className="w-4 h-4" fill="currentColor" /> : <Play className="w-4 h-4" fill="currentColor" />}
+              </button>
+              {/* Battle (action) */}
+              <button onClick={() => enterBattle(t)}
+                data-testid={`catalog-battle-${i}`}
+                title="Take this song to the Battle Stage"
+                className="px-3 h-9 rounded-full flex items-center gap-1.5 flex-shrink-0 bg-gradient-to-r from-[#FF6B00] to-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider transition-all hover:scale-105"
+                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.45)" }}>
+                <Swords className="w-3 h-3" />
+                Battle
+              </button>
+            </div>
+            );
+          })}
         </div>
       </ScrollArea>
+
+      {/* Now-playing mini bar — surfaces the listening track without leaving the catalog */}
+      {playingId && (() => {
+        const t = tracks.find((x) => x.track_id === playingId);
+        if (!t) return null;
+        return (
+          <div className="fixed left-2 right-2 sm:left-6 sm:right-6 z-20 rounded-2xl border border-[#39FF14]/40 backdrop-blur-md"
+            style={{ bottom: "84px", background: "rgba(10,15,10,0.92)", boxShadow: "0 0 30px rgba(57,255,20,0.25)" }}
+            data-testid="catalog-now-playing">
+            <div className="flex items-center gap-3 p-2.5">
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 border border-[#39FF14]/30">
+                {t.cover_url ? <img src={t.cover_url} alt="" className="w-full h-full object-cover" />
+                  : <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Music2 className="w-4 h-4 text-[#5C5C6B]" /></div>}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" />
+                  <p className="text-[9px] uppercase tracking-wider font-black text-[#39FF14]">Now Playing · Preview</p>
+                </div>
+                <p className="text-xs font-bold text-white truncate mt-0.5" data-testid="catalog-now-playing-title">{t.title}</p>
+                <p className="text-[10px] text-[#A0A0B0] truncate">{t.artist}</p>
+              </div>
+              <button onClick={stopAudio} data-testid="catalog-stop-btn"
+                className="w-8 h-8 rounded-full bg-white/5 border border-white/10 text-white flex items-center justify-center hover:bg-white/10">
+                <Pause className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={() => enterBattle(t)} data-testid="catalog-now-playing-battle"
+                className="px-3 h-8 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5"
+                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.5)" }}>
+                <Swords className="w-3 h-3" />
+                Battle
+              </button>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

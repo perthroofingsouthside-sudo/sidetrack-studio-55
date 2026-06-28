@@ -7,8 +7,9 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import BattleStageBackdrop, { SKIN_KEYS, SKIN_LABELS } from "@/components/BattleStageBackdrop";
+import GamerStage from "@/pages/GamerStage";
 
-export default function BattleArena({ currentSong, onStartDuet }) {
+export default function BattleArena({ currentSong, pendingBattleSong, onPendingBattleConsumed, onStartDuet }) {
   const [view, setView] = useState("list"); // list | detail | submit | leaderboard
   const [battles, setBattles] = useState([]);
   const [selectedBattle, setSelectedBattle] = useState(null);
@@ -59,7 +60,8 @@ export default function BattleArena({ currentSong, onStartDuet }) {
 
   const openBattle = async (battle) => {
     setSelectedBattle(battle);
-    setView("detail");
+    // Per user spec: clicking a battle goes STRAIGHT to the active Stage.
+    setView("stage");
     try {
       const res = await axios.get(`${API}/battles/${battle.id}`);
       if (res.data.success) {
@@ -69,17 +71,24 @@ export default function BattleArena({ currentSong, onStartDuet }) {
     } catch (err) { toast.error("Failed to load battle"); }
   };
 
-  const createBattle = async () => {
-    if (!currentSong) {
+  // Original detail/voting view is still reachable via "Vote" CTA
+  const openBattleDetail = (battle) => {
+    setSelectedBattle(battle);
+    setView("detail");
+  };
+
+  const createBattle = async (override) => {
+    const songToUse = override || currentSong;
+    if (!songToUse) {
       toast.info("Select a song from Stream or Discover first!");
       return;
     }
     try {
       const res = await axios.post(`${API}/battles`, {
-        song_title: currentSong.title,
-        song_artist: currentSong.artist,
-        song_cover_url: currentSong.cover_url || "",
-        challenge_text: `Cover "${currentSong.title}" by ${currentSong.artist}!`,
+        song_title: songToUse.title,
+        song_artist: songToUse.artist,
+        song_cover_url: songToUse.cover_url || "",
+        challenge_text: `Cover "${songToUse.title}" by ${songToUse.artist}!`,
       });
       if (res.data.success) {
         toast.success("Battle created!");
@@ -88,6 +97,15 @@ export default function BattleArena({ currentSong, onStartDuet }) {
       }
     } catch (err) { toast.error("Failed to create battle"); }
   };
+
+  // Auto-create + enter Stage when arriving from Tracks tab with a pending song
+  useEffect(() => {
+    if (pendingBattleSong) {
+      createBattle(pendingBattleSong);
+      if (onPendingBattleConsumed) onPendingBattleConsumed();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingBattleSong]);
 
   // Recording
   const startRecording = async () => {
@@ -182,6 +200,10 @@ export default function BattleArena({ currentSong, onStartDuet }) {
   const fmtDur = (s) => `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
   // --- VIEWS ---
+  if (view === "stage" && selectedBattle) {
+    return <GamerStage battle={selectedBattle} onExit={() => setView("list")} />;
+  }
+
   if (view === "submit" && selectedBattle) {
     return (
       <div className="min-h-screen bg-[#05050A]" data-testid="battle-submit">
