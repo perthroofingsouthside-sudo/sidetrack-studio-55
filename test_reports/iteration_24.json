@@ -1,0 +1,41 @@
+{
+  "summary": "Full backend + frontend testing of the new Rap Battle Hub (Connect tab, Creator lane). 15/15 backend tests passed covering register/match → agree → coin flip → beat generation → go-live → live voting (with dedup + participant block) → finish/archive → leaderboard → quarterly tournament → namespace isolation vs the older /api/battles route. Frontend: end-to-end UI flow verified — Battle Hub CTA, register, queue, match-found active card with both rapper W/L slots, agree → first-mover banner (Coin Flip: 'QA Alpha goes first'), go-live → BattleLiveStage with countdown (00:58 ticking) + 60s beat progress bar + audio autoplay, participant-side correctly hides vote buttons and shows 'drop your bars' message, archive section after finish shows vote-A/vote-B buttons, viewer voting from archive successfully increments votes_a server-side, Quarterly Global Contest card shows 'Q2 · 2026 · 3 days left', and Top Ranked leaderboard renders.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Battle Hub leaderboard", "issues": ["Top Ranked list shows duplicate display names (e.g. multiple rows of 'QA Alpha' / 'QA Bravo') from prior test runs accumulating in battle_users collection — by design (we don't dedupe by display_name), but in production seeded with real users this won't be visible. Non-blocking."]},
+      {"screen": "Global (any page that mounts a list)", "issues": ["React console warning: 'Encountered two children with the same key' (key fragment c973892848d835 / f6bf37ecb304a4) — not coming from BattleHub code (its list uses u.user_id and battle.id keys which are unique). Likely a pre-existing issue in another component on the home/Connect surface. Worth a quick audit by main agent but does not affect battle functionality."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_rap_battles.py",
+    "/app/test_reports/pytest/iteration24_rap_battles.xml"
+  ],
+  "action_items": [
+    "(Optional) Investigate the 'duplicate key' React warning surfaced on the Connect/Home pages — not from BattleHub but pollutes the console.",
+    "(Optional) Consider adding an idempotency guard or display-name uniqueness when seeding test users — purely cosmetic for the leaderboard preview."
+  ],
+  "critical_code_review_comments": [
+    "routes/battles.py: /rap-battles/{battle_id} GET is declared AFTER /rap-battles/archive, /rap-battles/leaderboard and /rap-battles/tournament/current — route ordering is correct, FastAPI won't shadow the named routes. Verified by test_route_namespace_isolation.",
+    "routes/battles.py finish endpoint correctly archives with timedelta(days=7) and increments lifetime_wins/losses; ties result in no winner credited (good).",
+    "Vote endpoint properly enforces 1-per-voter (409) and blocks participants (403); also allows voting on archived battles within the 7-day window (410 after expiry).",
+    "BattleLiveStage uses audio.onended + finishedRef to prevent double-finish; manual finish button surfaces if elapsed>=60 in case audio.onended doesn't fire (e.g. muted tab). Good defensive coding.",
+    "BattleHub polling cleanly stops when no longer in queue / pending / agreed, and BattleLiveStage's 2s polling matches the spec.",
+    "Minor: BattleHub.register catches any error to show 'Couldn't register' — fine, but the 'in_match' branch in the toast is shown only when status==='in_match'; backend returns that key only when an active battle already exists. Consistent."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_rap_battles.py (new)"
+  ],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "100% of asserted flows"},
+  "test_credentials": "N/A — feature uses sidetrack_voter_id from localStorage; no auth.",
+  "seed_data_creation": "Per-run unique users with uuid suffix (qa_alpha_{6hex}, qa_bravo_{6hex}, qa_v_{6hex}); persists in MongoDB battle_users / battles collections. Archive entries auto-expire after 7 days.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend test suite at /app/backend/tests/test_rap_battles.py is fully self-contained — uses uuid suffixes so re-runs don't collide. Frontend: BattleHub mounts via setView('battle-hub') in ConnectPage when [data-testid='open-battle-hub'] is clicked. Multi-user flows can be simulated by calling the backend /api/rap-battles/* endpoints directly while a single browser session represents one rapper (we used Bravo via direct backend calls).",
+  "rca of the issue": "No bugs found. Implementation matches the PRD: registration → auto-match (longest-waiting pair) → agree both → coin-flip on equal lifetime wins → 60s beat data URL generated server-side → /go-live transitions status → 1-vote-per-voter live polling → /finish archives 7 days and updates lifetime counters → archive section still accepts viewer votes within the TTL → leaderboard & quarterly tournament endpoints return the expected shape."
+}

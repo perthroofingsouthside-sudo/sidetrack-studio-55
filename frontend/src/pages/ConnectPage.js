@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { MessageCircle, Video, Phone, Send, ArrowLeft, UserPlus, Music2, Check, X, Mic, Camera, CameraOff, MicOff, PhoneOff } from "lucide-react";
+import { MessageCircle, Video, Phone, Send, ArrowLeft, UserPlus, Music2, Check, X, Mic, Camera, CameraOff, MicOff, PhoneOff, Swords, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import BattleHub from "@/components/BattleHub";
 
 export default function ConnectPage() {
-  const [view, setView] = useState("inbox"); // inbox | chat | call
+  const [view, setView] = useState("inbox"); // inbox | chat | call | battle-hub
   const [conversations, setConversations] = useState([]);
   const [activeConvo, setActiveConvo] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -140,6 +141,17 @@ export default function ConnectPage() {
       toast.success(`Jam invite sent to ${activeConvo.other_user}!`);
     } catch { toast.error("Failed to send invite"); }
   };
+
+  // ── BATTLE HUB VIEW ──
+  if (view === "battle-hub") {
+    return (
+      <BattleHub
+        userId={username || userId.current}
+        displayName={username || userId.current}
+        onBack={() => setView("inbox")}
+      />
+    );
+  }
 
   // ── CALL VIEW ──
   if (view === "call") {
@@ -274,6 +286,34 @@ export default function ConnectPage() {
             </Button>
           </div>
 
+          {/* BATTLE HUB CTA — Rap Battle matchmaking entry point */}
+          <button
+            onClick={() => setView("battle-hub")}
+            data-testid="open-battle-hub"
+            className="w-full text-left rounded-2xl border border-[#FF6B00]/30 hover:border-[#FF6B00]/60 transition-all p-3.5 flex items-center gap-3 group relative overflow-hidden"
+            style={{
+              background: "linear-gradient(135deg, rgba(255,107,0,0.12), rgba(57,255,20,0.05))",
+              boxShadow: "0 0 24px rgba(255,107,0,0.18)",
+            }}
+          >
+            <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-[#FF6B00]/15 blur-2xl" />
+            <div className="relative z-10 w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/20 flex-shrink-0">
+              <Swords className="w-5 h-5 text-[#FF6B00]" />
+            </div>
+            <div className="relative z-10 flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <p className="text-sm font-black text-white">Rap Battle Hub</p>
+                <Trophy className="w-3 h-3 text-[#39FF14]" />
+              </div>
+              <p className="text-[10px] text-[#A0A0B0] truncate">
+                Register · auto-match · 60s beat · live voting · Top 200 quarterly
+              </p>
+            </div>
+            <span className="relative z-10 text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+              Enter →
+            </span>
+          </button>
+
           {/* New DM Input */}
           {showNewDm && (
             <div className="flex gap-2" data-testid="new-dm-section">
@@ -324,7 +364,7 @@ export default function ConnectPage() {
               <div className="text-center py-12 surface-card rounded-2xl">
                 <MessageCircle className="w-10 h-10 text-[#FF6B00]/15 mx-auto mb-3" />
                 <p className="text-sm text-[#5C5C6B]">No messages yet</p>
-                <p className="text-xs text-[#5C5C6B]/60 mt-1">Tap "New Message" to start a conversation</p>
+                <p className="text-xs text-[#5C5C6B]/60 mt-1">Tap &ldquo;New Message&rdquo; to start a conversation</p>
               </div>
             ) : (
               <div className="space-y-1">
