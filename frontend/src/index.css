@@ -218,6 +218,22 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes footlightPulse {
   from { opacity: 0.35; transform: scaleY(0.85); }
   to   { opacity: 0.95; transform: scaleY(1.15); }
+
+/* Backstage Cinema — phase animations */
+@keyframes handoffWalk {
+  0%   { transform: translateY(40px) scale(0.6); opacity: 0; }
+  40%  { transform: translateY(0) scale(1);     opacity: 1; }
+  100% { transform: translateY(0) scale(1.05);  opacity: 1; }
+}
+@keyframes curtainOpenL { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@keyframes curtainOpenR { from { transform: translateX(0); } to { transform: translateX(100%); } }
+@keyframes whitewash    { 0% { opacity: 0; } 60% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes zoomIn {
+  0%   { transform: scale(0.2); opacity: 0; }
+  60%  { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1);    opacity: 1; }
+}
+
 }
 /* Ocean skin — rising bubbles */
 @keyframes oceanBubble {

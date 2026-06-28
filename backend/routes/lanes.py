@@ -306,6 +306,67 @@ async def review_recording(recording_id: str, payload: ReviewAction):
     return {"success": True, "status": new_status}
 
 
+class ShareScope(BaseModel):
+    user_id: str
+    show_on_both: bool
+
+
+@router.post("/gamer/recordings/{recording_id}/share-scope")
+async def set_share_scope(recording_id: str, payload: ShareScope):
+    """Toggle whether a Kept Gamer recording mirrors to the Creator profile.
+
+    Licensing lock: this NEVER enables external streaming distribution — it
+    only mirrors visibility inside Pocket Products itself.
+    """
+    rec = await db.gamer_recordings.find_one({"id": recording_id, "user_id": payload.user_id}, {"_id": 0})
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recording not found")
+    await db.gamer_recordings.update_one(
+        {"id": recording_id},
+        {"$set": {"show_on_both": bool(payload.show_on_both),
+                  "external_distribution_locked": True}},
+    )
+    return {"success": True, "show_on_both": bool(payload.show_on_both)}
+
+
+@router.post("/gamer/recordings/{recording_id}/view")
+async def add_view(recording_id: str):
+    """Increment the view counter. If mirrored, the same doc serves both lanes."""
+    res = await db.gamer_recordings.find_one_and_update(
+        {"id": recording_id},
+        {"$inc": {"views": 1}},
+        return_document=False,
+    )
+    if not res:
+        raise HTTPException(status_code=404, detail="Recording not found")
+    rec = await db.gamer_recordings.find_one({"id": recording_id}, {"_id": 0})
+    return {"success": True, "views": rec.get("views", 0)}
+
+
+class LikeAction(BaseModel):
+    user_id: str
+
+
+@router.post("/gamer/recordings/{recording_id}/like")
+async def add_like(recording_id: str, payload: LikeAction):
+    """Toggle like — same counter shared across both lane profiles when mirrored."""
+    rec = await db.gamer_recordings.find_one({"id": recording_id}, {"_id": 0})
+    if not rec:
+        raise HTTPException(status_code=404, detail="Recording not found")
+    likers = set(rec.get("likers", []))
+    if payload.user_id in likers:
+        likers.remove(payload.user_id)
+        liked = False
+    else:
+        likers.add(payload.user_id)
+        liked = True
+    await db.gamer_recordings.update_one(
+        {"id": recording_id},
+        {"$set": {"likers": list(likers), "likes": len(likers)}},
+    )
+    return {"success": True, "liked": liked, "likes": len(likers)}
+
+
 # ── BATTLE OF THE BANDS — SPECTATOR HUB ───────────
 
 @router.get("/spectator/hub")
