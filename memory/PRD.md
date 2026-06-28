@@ -182,6 +182,37 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - Un-mock WebRTC P2P video in `JamRoomPanel` — requires real signaling server
 - Real OAuth (YouTube/TikTok) integration in `PublishPanel` — requires user-provided OAuth credentials
 
+## Feb 28, 2026 — Discover refined to strict utility
+- Rewrote `pages/HomePage.js` (Creator-lane Discover). Strictly Search + Listen + Playlists.
+- Removed Mic Shazam, Gamer-catalog CTA, iTunes side rails, "Open in Studio" hero CTA.
+- Search now hits `/api/gamer/catalog/tracks?q=...&enrich=true` (3,800-track library).
+- Inline "+" → "Add to playlist" picker per result + "Create playlist" inline.
+- Default mosaic of catalog covers when no search active.
+
+## Feb 28, 2026 — Rap Battle Hub (Connect tab)
+- NEW backend module `/app/backend/routes/battles.py` (router prefix `/api/rap-battles/...`).
+  - `POST /register` — join matchmaking queue (auto-pair on each call).
+  - `POST /{id}/agree` — both must agree; first_mover = higher lifetime_wins or coin flip.
+  - `POST /{id}/go-live` — generates 60-second beat (via `services/beat_synth`) and sets status='live'.
+  - `POST /{id}/vote` — 1 vote per voter_id; participants blocked.
+  - `POST /{id}/finish` — archives 7 days, increments W/L counters.
+  - `GET /archive`, `GET /leaderboard?limit=200`, `GET /tournament/current` (quarterly Top 200).
+  - Route ordering fixed; namespace prefix `rap-battles` avoids collision with community `/battles/{id}`.
+- NEW frontend components:
+  - `components/BattleHub.js` — register card, queue card, active-match card, archive list, tournament card, Top 10 leaderboard.
+  - `components/BattleLiveStage.js` — auto-plays the 60s beat (data:audio/wav;base64), countdown, 2s vote polling, finishes on `audio.onended`.
+- `pages/ConnectPage.js` — added `[data-testid='open-battle-hub']` CTA + `view='battle-hub'` branch.
+- Tested 15/15 backend + full frontend flow (iteration_24).
+
+## Feb 28, 2026 — Profile page (Creator lane)
+- `pages/SocialProfile.js` extended with 4 new sections (Identity already existed):
+  - Stats Dashboard — Battle Wins/Losses (from `/api/rap-battles/me`), Likes/Views (aggregated from kept recordings).
+  - Battle Status — current registration (register CTA / queue / active match) with deep-link to Connect → Battle Hub. Recent battle history rows with W/L/T badge.
+  - Personal Playlists — horizontal row of user's saved playlists with Manage → Discover link.
+  - My Raps · 60s — kept recordings from `/api/gamer/recordings/{user_id}?status=kept`, with play/pause + likes + views.
+- Sub-components `BattleStatusSection`, `PlaylistsSection`, `MyRapsSection` live in-file (588 lines total).
+- Tested frontend 8/8 testable flows passed (iteration_25); active-battle card verified via code review.
+
 ## Testing
 - `/app/backend/tests/test_iteration20_ownership.py` — 17 tests, 100% pass
 - `/app/test_reports/iteration_20.json` — backend 100%, frontend pricing 100%, BeatMaker + RecordingStudio self-tested via screenshots (avatar-ring count=5, live-cleanup-toggle visible, beat-maker mounts on track load).
