@@ -146,6 +146,25 @@ export default function BackstagePage() {
                   ? "Performances you keep will show up here."
                   : "Discarded performances live here in case you change your mind."}
             </p>
+            {tab === "kept" && (
+              <Button
+                onClick={() => setCinemaRec({
+                  id: "demo-cinematic",
+                  song_title: "Demo Performance",
+                  artist: "Pocket Products",
+                  duration_sec: 32,
+                  blob_url: null,
+                  created_at: new Date().toISOString(),
+                  views: 0,
+                  likes: 0,
+                })}
+                data-testid="backstage-demo-cinema"
+                className="mt-4 h-9 px-4 rounded-full text-[10px] font-black bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1.5 uppercase tracking-wider"
+                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.45)" }}
+              >
+                <Film className="w-3 h-3" /> Preview Cinematic Intro
+              </Button>
+            )}
           </div>
         ) : (
           <div className="space-y-2" data-testid="backstage-list">

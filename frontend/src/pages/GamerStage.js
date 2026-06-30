@@ -14,8 +14,8 @@ const PERFORMANCE_MODES = [
   { key: "rap",    label: "Rap",    inst: "dj",     face: "cool",  Icon: Headphones },
 ];
 
-// Guitar Hero lane palette — kid-friendly neon
-const LANE_COLORS = ["#FF6B00", "#00E0FF", "#FF4FB1", "#FFEB3B"]; // orange, cyan, magenta, yellow
+// Guitar Hero lane palette — strict Pocket Products brand (Orange + Green, with tonal variants)
+const LANE_COLORS = ["#FF6B00", "#39FF14", "#FFA64D", "#7FFF8E"]; // orange, green, light-orange, light-green
 
 // Bezier light-trail background (SVG)
 function LightTrails() {
@@ -28,19 +28,19 @@ function LightTrails() {
           <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="trail2" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#00E0FF" stopOpacity="0" />
-          <stop offset="50%" stopColor="#00E0FF" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#00E0FF" stopOpacity="0" />
+          <stop offset="0%" stopColor="#39FF14" stopOpacity="0" />
+          <stop offset="50%" stopColor="#39FF14" stopOpacity="0.45" />
+          <stop offset="100%" stopColor="#39FF14" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="trail3" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FF4FB1" stopOpacity="0" />
-          <stop offset="50%" stopColor="#FF4FB1" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#FF4FB1" stopOpacity="0" />
+          <stop offset="0%" stopColor="#FFA64D" stopOpacity="0" />
+          <stop offset="50%" stopColor="#FFA64D" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#FFA64D" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="trail4" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#B57BFF" stopOpacity="0" />
-          <stop offset="50%" stopColor="#B57BFF" stopOpacity="0.4" />
-          <stop offset="100%" stopColor="#B57BFF" stopOpacity="0" />
+          <stop offset="0%" stopColor="#7FFF8E" stopOpacity="0" />
+          <stop offset="50%" stopColor="#7FFF8E" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#7FFF8E" stopOpacity="0" />
         </linearGradient>
       </defs>
       <path d="M 0 10 Q 30 0 50 30 T 100 20"   stroke="url(#trail1)" strokeWidth="0.6" fill="none">
@@ -404,7 +404,7 @@ export default function GamerStage({ battle, onExit }) {
         <aside data-testid="notes-pane" className="relative rounded-2xl border border-white/8 overflow-hidden"
           style={{ background: "linear-gradient(180deg, #0a0a18, #050508)" }}>
           <div className="px-3 pt-3 pb-2 border-b border-white/10 flex items-center justify-between">
-            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#00E0FF]">Notes</p>
+            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#39FF14]">Notes</p>
             <p className="text-[9px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold">{bpm} BPM</p>
           </div>
           <div className="absolute inset-0 top-9">

@@ -241,6 +241,12 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - Sub-components `BattleStatusSection`, `PlaylistsSection`, `MyRapsSection` live in-file (588 lines total).
 - Tested frontend 8/8 testable flows passed (iteration_25); active-battle card verified via code review.
 
-## Testing
-- `/app/backend/tests/test_iteration20_ownership.py` — 17 tests, 100% pass
-- `/app/test_reports/iteration_20.json` — backend 100%, frontend pricing 100%, BeatMaker + RecordingStudio self-tested via screenshots (avatar-ring count=5, live-cleanup-toggle visible, beat-maker mounts on track load).
+## Mar 1, 2026 — CONTEST LAUNCH POLISH (iteration_33 follow-up)
+- **Strict brand palette enforcement**: removed every off-brand accent (cyan #00E0FF, magenta #FF4FB1, purple #B57BFF, yellow #FFEB3B) across:
+  - `GamerStage.js` — Guitar Hero `LANE_COLORS` re-palette → Orange / Green / Light-Orange (#FFA64D) / Light-Green (#7FFF8E); LightTrails SVG gradient re-tints (trail2/3/4); "Notes" label color from cyan → electric green.
+  - `BackstageCinema.js` — curtain crack & spotlight gradients yellow → green; like-button heart violation pink → green.
+  - `SocialProfile.js` — `GAMER_PALETTES` trimmed of purple/cyan/pink, replaced with on-brand `ember` and `mint` tonal variants.
+- **Backstage Cinema demoability fix**: added `[data-testid='backstage-demo-cinema']` "Preview Cinematic Intro" CTA in the empty state of the Kept tab. Contest reviewers can now experience the 9-phase cinematic sequence (Backstage POV → Handoff → Stage Walk → Crowd Reveal → Zoom Avatar → Playback) without needing seeded recordings. Uses a synthetic `demo-cinematic` recording fixture; the API view/like POSTs fail silently as expected.
+- **iteration_33 mobile-StadiumStudio FAIL invalidated**: self-tested at 390x844, `[data-testid='stadium-studio']` count = 1, mounts correctly. Test agent had a flaky run.
+- **Pricing flow**: deferred per user direction ("don't worry about prices what so ever"). PricingPage.js remains orphaned-but-present; can be wired into the router post-launch.
+- Build/lint clean for all modified files. Pre-existing `<span> in <option>` hydration warning still present (not source-located in app code — likely a transient Sonner / Radix internal; non-blocking).

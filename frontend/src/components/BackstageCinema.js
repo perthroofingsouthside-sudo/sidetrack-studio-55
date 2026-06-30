@@ -146,7 +146,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
           <div className="absolute inset-y-0 right-0 w-1/2"
             style={{ background: "repeating-linear-gradient(90deg, #2a0000 0px, #6b0000 12px, #4a0000 24px)" }} />
           {/* Curtain crack revealing distant stage light */}
-          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-gradient-to-b from-[#FF6B00] via-[#FFEB3B] to-[#FF6B00]"
+          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-gradient-to-b from-[#FF6B00] via-[#39FF14] to-[#FF6B00]"
             style={{ boxShadow: "0 0 60px #FF6B00, 0 0 120px rgba(255,107,0,0.4)" }} />
           <p className="relative z-10 text-[10px] uppercase tracking-[0.4em] font-black text-white/40">Backstage</p>
         </div>
@@ -179,7 +179,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
           <div className="absolute inset-y-0 right-0 origin-right animate-[curtainOpenR_1.8s_ease-in_both]"
             style={{ width: "50%", background: "repeating-linear-gradient(90deg, #2a0000 0px, #6b0000 12px, #4a0000 24px)" }} />
           <div className="absolute inset-0 animate-[whitewash_1.8s_ease-in_both]"
-            style={{ background: "radial-gradient(circle at center, #FFEB3B 0%, #FF6B00 30%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle at center, #39FF14 0%, #FF6B00 30%, transparent 70%)" }} />
         </div>
       )}
 
@@ -268,7 +268,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
               </div>
               <button onClick={toggleLike} data-testid="cinema-like-btn"
                 className={`flex items-center gap-1.5 px-2 h-7 rounded-full border transition-all ${
-                  liked ? "bg-[#FF4FB1]/15 border-[#FF4FB1]/50 text-[#FF4FB1]" : "border-white/10 text-white hover:border-[#FF4FB1]/40"
+                  liked ? "bg-[#39FF14]/15 border-[#39FF14]/50 text-[#39FF14]" : "border-white/10 text-white hover:border-[#39FF14]/40"
                 }`}>
                 <Heart className="w-3 h-3" fill={liked ? "currentColor" : "none"} />
                 <span className="text-[11px] font-black">{likes.toLocaleString()}</span>

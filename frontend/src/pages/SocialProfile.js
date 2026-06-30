@@ -19,14 +19,14 @@ const TIER_LABELS = {
   under18_band: { name: "Young Band", color: "#39FF14", icon: Star },
 };
 
-// Gamer avatar — palette swatches used for the profile card background gradient
+// Gamer avatar — palette swatches used for the profile card background gradient.
+// Strict Pocket Products brand: only Neon Orange and Electric Green tones.
 const GAMER_PALETTES = [
   { key: "neon-green", from: "#39FF14", to: "#0F1A0F" },
   { key: "neon-orange", from: "#FF6B00", to: "#1A0F08" },
-  { key: "neon-purple", from: "#B57BFF", to: "#16091F" },
-  { key: "neon-cyan", from: "#00E0FF", to: "#06141B" },
-  { key: "neon-pink", from: "#FF4FB1", to: "#1F0A16" },
   { key: "split", from: "#FF6B00", to: "#39FF14" },
+  { key: "ember", from: "#FFA64D", to: "#1A0F08" },
+  { key: "mint", from: "#7FFF8E", to: "#0F1A0F" },
 ];
 
 export default function SocialProfile({ onNavigate }) {
