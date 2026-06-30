@@ -176,6 +176,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
   const [activeStemId, setActiveStemId] = useState(null); // stem currently playing as backing track
   const [stemPlaying, setStemPlaying] = useState(false);
   const stemAudioRef = useRef(null);
+  const stemsRef = useRef([]);
   const fileInputRef = useRef(null);
 
   // AI beat prompt (genre keys map to backend ALLOWED_GENRES catalogue)
@@ -339,9 +340,13 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
   useEffect(() => () => {
     if (stemAudioRef.current) stemAudioRef.current.pause();
     if (recRef.current.stream) recRef.current.stream.getTracks().forEach((t) => t.stop());
-    stems.forEach((s) => { try { URL.revokeObjectURL(s.url); } catch { /* noop */ } });
+    // Use latest stems via ref so hydrated entries also get their blob URLs revoked
+    (stemsRef.current || []).forEach((s) => { try { URL.revokeObjectURL(s.url); } catch { /* noop */ } });
     if (lastTakeUrl) try { URL.revokeObjectURL(lastTakeUrl); } catch { /* noop */ }
   }, []);
+
+  // Keep ref in sync so the on-unmount cleanup can revoke all blob URLs.
+  useEffect(() => { stemsRef.current = stems; }, [stems]);
 
   // Hydrate persisted stems from IndexedDB on first mount
   useEffect(() => {

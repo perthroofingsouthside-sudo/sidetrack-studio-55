@@ -1,0 +1,88 @@
+{
+  "summary": "Comprehensive AI Builder Contest polish pass. Visited every primary screen in both Creator and Gamer lanes (1280x900 + 390x844). Lane toggle, nav re-labelling, Gamer Tracks → Battle Stage, 16-pad sampler, FX/BPM/Search, Connect → Battle Hub, Personal Studio (correct present/absent test-ids), Profile dashboards, Pricing, Backstage Cinema, console hygiene — all exercised. App is in great shape: 0 page errors, 0 new console errors vs iteration_32 baseline, theme is consistently Neon Orange / Electric Green on dark across all visited screens. Three issues to flag for the main agent — see action_items.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Backstage (BackstagePage)",
+        "issue": "No 'backstage-watch-{id}' buttons exist because the seed DB has 0 recordings in the Kept/Discarded tabs. The 9-phase BackstageCinema sequence therefore could not be exercised end-to-end. The Pending tab renders the empty state correctly. Code-review of BackstagePage.js + BackstageCinema.js shows the wiring is present; this is a data-only gap.",
+        "selector": "[data-testid^='backstage-watch-']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "BottomNav (creator lane)",
+        "issue": "There is no entry point to /backstage from the CREATOR lane BottomNav (creator nav = Discover/Connect/Studio/Record/Profile, no Backstage). Backstage is only reachable in the GAMER lane via nav-backstage. The contest brief asks reviewers to 'switch to creator lane, navigate to backstage page' — currently impossible without a deep link. Either add a Backstage shortcut on Profile/Record for creators, or update copy in the brief.",
+        "selector": "[data-testid='nav-backstage']",
+        "priority": "MEDIUM"
+      },
+      {
+        "component": "PricingPage / Stadium VIP tile",
+        "issue": "The 'Stadium VIP & Pro Plans · From $2.98' tile on the Profile screen is NOT clickable and does not navigate anywhere. /pricing, /#/pricing, /plans, /buy all return the default home shell (no pricing-page mount). The $79.98 AUD 'Ownership' hero card the brief mentions is not reachable from any CTA. Stripe gate cannot be smoke-tested.",
+        "selector": "tile around 'Stadium VIP & Pro Plans' on social-profile",
+        "priority": "HIGH"
+      },
+      {
+        "component": "StadiumStudio (mobile 390x844)",
+        "issue": "After clicking nav-record at 390x844, the [data-testid='stadium-studio'] root is not rendered (test selector returns null). Either the page uses a different root testid on mobile, or the layout fails to mount the main panel at narrow widths. Needs visual confirmation — the most layout-sensitive screen per the brief.",
+        "selector": "[data-testid='stadium-studio']",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "GamerStage (battle stage performance view)",
+        "issues": [
+          "The 'notes' radar visualization on the right uses cyan rgb(0,225,255) accent dots — this is the only non-theme color encountered in the entire pass. All other accents are correctly #FF6B00 / #39FF14. Consider re-tinting the cyan note markers to electric green for theme consistency."
+        ]
+      },
+      {
+        "screen": "BattleHub (Connect)",
+        "issues": [
+          "Hub renders Register, Tournament (Q2·2026), Leaderboard and Archive — all clear and unambiguous (no placeholder text). NOTE: there is no separate 'Queue' card; the brief asked for a Queue card (data-testid='battle-queue-card') but the current design fuses Register + auto-match into one card. Update brief expectations OR add a visible queue/wait-state card."
+        ]
+      }
+    ]
+  },
+  "test_results_detail": {
+    "T1.theme_consistency": "PASS — Across Discover, Connect, BattleHub, Studio (KoalaStudio), Record (StadiumStudio), Profile (creator + gamer), Battle Arena, Gamer Tracks, Gamer Stage, Backstage — all accent colors are rgb(255,107,0) / rgb(57,255,20) on dark surfaces. Single exception: cyan rgb(0,225,255) note dots on GamerStage notes panel.",
+    "T2.lane_toggle": "PASS — lane-toggle-creator/gamer both flip instantly. Creator BottomNav = Discover/Connect/Studio/Record/Profile. Gamer BottomNav = Battle Stage/Tracks/Backstage/Profile. Labels swap correctly.",
+    "T3.gamer_tracks_to_battle_stage": "PASS — gamer-tracks-page renders 5 catalog-battle-{i} buttons. Clicking catalog-battle-0 → gamer-stage opens with title 'Pink Pony Club / Bring the fire inside', toast 'Battle created!' fires, 0 new console errors during transition. Screenshot 09_gamer_stage.png.",
+    "T4.cinematic_backstage": "BLOCKED-BY-EMPTY-SEED — backstage-page renders, tabs pending_review/kept/discarded all work, but 0 recordings exist in any tab. backstage-watch-{id} buttons therefore not present. Cinema sequence not exercisable end-to-end without seed data. Code path looks correct.",
+    "T5a.16_pad_sampler": "PASS — Correct testid is studio-pad-{0..15} (not pad-{i} as the brief stated). All 16 pads found in studio-pad-grid. studio-pad-0 click registers (orange active glow visible).",
+    "T5b.studio_search": "PASS — search overlay opens, query 'drum' returns results.",
+    "T5c.studio_fx": "PASS — studio-fx-stutter / crush / reverb / delay / pitch toggles present; studio-fx-amount slider present; studio-holdfx-bar present.",
+    "T5d.sequencer": "PARTIAL — BPM input accepts 140. No data-testid='sequencer-play' or 'studio-play' found; could not directly verify the live step indicator via testid. Recommend adding data-testid='sequencer-play' and 'sequencer-step-indicator' for testability.",
+    "T6.battle_hub": "PASS w/ NOTE — battle-hub root + battle-register-card + battle-tournament-card + battle-leaderboard-card (with leader-row-0..8) + battle-archive (with archive-row-{uuid} and archive-vote-a/b-{uuid}) all present. Wording is clear. No 'battle-queue-card' (see design_issues).",
+    "T7.personal_studio_clean": "PASS — All 3 required-PRESENT testids exist (studio-tools-panel, stem-file-input, ai-beat-generate, stem-mixer). All 7 required-ABSENT testids confirmed removed (stadium-chat-feed, fan-level-tracker, stadium-video-call-btn, stadium-voice-call-btn, fire-count, heart-count, say-something-input). Personal Studio is free of social distractions as required.",
+    "T8.stripe_ownership_gate": "FAIL — Pricing page not reachable via any tried route (/pricing, /#/pricing, /plans, /buy). No pricing-page testid mounted. Profile 'Stadium VIP & Pro Plans' tile is non-interactive. $79.98 AUD Ownership card not visible anywhere. Stripe gate cannot be smoke-tested. See ui_bugs.",
+    "T9.console_hygiene": "PASS — 0 page errors. 1 pre-existing console error: '<span> cannot be a child of <option>' hydration warning (same as iteration_31/32 baseline — NOT a regression). 1 benign Canvas2D willReadFrequently warning from the notes visualization. No duplicate-key warnings, no new prop-type warnings.",
+    "T10.profile_stats": "PASS — social-profile + profile-card + profile-stats + stat-wins/stat-losses/stat-likes/stat-views + profile-battle-status + profile-register-cta + profile-playlists + profile-my-raps all render with 0 values. No crash on empty state. Brief said 'battle-stats / playlists-row / my-raps' — actual testids are 'profile-stats / profile-playlists / profile-my-raps'.",
+    "T11.mobile_stadium_studio_390x844": "FAIL — On 390x844 mobile viewport, after clicking nav-record, [data-testid='stadium-studio'] is NOT present. Other creator nav tabs render fine on mobile. Needs root-cause investigation (mobile-only conditional render?)."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Make the Pricing page reachable — add a route + a clickable CTA on the 'Stadium VIP & Pro Plans' tile on Profile. Render $79.98 AUD Ownership hero card with data-testid='pricing-ownership-card' and a 'Buy Once' CTA (data-testid='pricing-buy-once'). Required for the Stripe smoke test.",
+    "Fix mobile (390x844) rendering of StadiumStudio — [data-testid='stadium-studio'] not mounted at narrow width. Likely a conditional/min-width gate.",
+    "Backstage cinema can only be tested with seeded recordings. Either (a) seed at least 1 Kept recording in dev DB, or (b) add a 'demo cinematic' button on Backstage that runs BackstageCinema with a fixture for QA.",
+    "Add a Backstage shortcut for the CREATOR lane (Profile or Record screen) so creators can access their archive without switching to gamer.",
+    "Re-tint cyan note dots on GamerStage notes panel from rgb(0,225,255) to electric green (#39FF14) for strict theme consistency.",
+    "Add data-testid='sequencer-play' and 'sequencer-step-indicator' on KoalaStudio for testability.",
+    "Pre-existing hydration warning '<span> in <option>' is still emitted (carried from iteration_31). Worth fixing for clean console at contest demo time."
+  ],
+  "critical_code_review_comments": [
+    "Brief vs reality mismatch: brief asks for testids 'pad-{i}', 'battle-queue-card', 'battle-stats', 'playlists-row', 'my-raps', 'backstage-watch-{id}'. Actual testids: 'studio-pad-{i}', 'battle-tournament-card', 'profile-stats', 'profile-playlists', 'profile-my-raps', no watch buttons (empty seed). Recommend brief is updated to match implementation OR testids renamed to match the brief (cheaper to update brief).",
+    "PricingPage.js exists in /app/frontend/src/pages/ but appears not registered in the router (no route serves it). Either add the route in ViewRouter.js or drop the file.",
+    "GamerStage notes visualization uses cyan accents that violate the strict 2-color theme policy. Easy fix in the visualization component.",
+    "Backstage discoverability: Creator lane has no nav-backstage entry. If Backstage is meant to be cross-lane, add it; if gamer-only, that should be documented.",
+    "Mobile StadiumStudio not mounting at 390x844 is a real regression — needs the main agent to investigate the responsive guard."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "9/11 fully PASS, 1 BLOCKED (Backstage cinema — empty seed), 1 FAIL (Pricing route + mobile StadiumStudio)"},
+  "test_credentials": "None required. localStorage.pp_lane controls lane (creator|gamer).",
+  "seed_data_creation": "None. Used existing DB: 13 active battles, 5 gamer-catalog battles, 9-entry leaderboard, 3 archived bouts. Backstage tabs (Kept/Discarded) are empty — needs seed for full cinema test.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Iteration_33 is a contest-readiness polish pass. App is otherwise stable. KEY TESTID MAP DISCOVERED THIS RUN: pads are 'studio-pad-{0..15}' (NOT 'pad-{i}'); profile stats are 'profile-stats' + 'stat-wins/losses/likes/views' (NOT 'battle-stats'); battle hub uses 'battle-register-card', 'battle-tournament-card', 'battle-leaderboard-card' (NO 'battle-queue-card'); backstage is only in gamer nav. PricingPage.js is orphaned (no route). Mobile StadiumStudio doesn't mount at 390px. Next pass should validate fixes for: pricing route, mobile stadium, cyan→green re-tint on GamerStage notes, and creator-lane Backstage shortcut.",
+  "rca of the issue": "Pricing not reachable: PricingPage.js exists at /app/frontend/src/pages/PricingPage.js but ViewRouter.js does not register a 'pricing' view, and no UI element has an onClick that sets view to 'pricing'. Mobile StadiumStudio: needs source inspection — likely a min-width gate or a guard that early-returns null on mobile."
+}
