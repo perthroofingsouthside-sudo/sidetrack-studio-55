@@ -67,10 +67,12 @@ export class SamplerEngine {
 
   decodeArrayBuffer(arrayBuffer) {
     // Wrap the legacy callback API so failures never propagate as unhandled
-    // rejections — caller checks for null.
+    // rejections — caller checks for null. Modern browsers ALSO return a
+    // rejected Promise from decodeAudioData; we swallow that too.
     return new Promise((resolve) => {
       try {
-        this.ctx.decodeAudioData(arrayBuffer.slice(0), resolve, () => resolve(null));
+        const p = this.ctx.decodeAudioData(arrayBuffer.slice(0), resolve, () => resolve(null));
+        if (p && typeof p.catch === "function") p.catch(() => resolve(null));
       } catch {
         resolve(null);
       }

@@ -204,7 +204,24 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - `pages/ConnectPage.js` — added `[data-testid='open-battle-hub']` CTA + `view='battle-hub'` branch.
 - Tested 15/15 backend + full frontend flow (iteration_24).
 
-## Feb 28, 2026 — Profile page (Creator lane)
+## Feb 28, 2026 — Koala Studio (16-pad sampler)
+- NEW `frontend/src/services/SamplerEngine.js` — Web Audio engine:
+  - 16 pads, each with buffer + per-pad volume / pitch / ADSR / hi-or-lo-pass filter / stem routing.
+  - 4 stem buses (drums / bass / keys / vocals) → master → MediaStreamDestination (for resample) → Hold-FX bus → destination.
+  - Hold-FX nodes: stutter (square LFO gate), crush (waveshaper), reverb (synthetic convolution), delay (feedback delay), pitch (modulated delay shimmer).
+  - `autoChop(buffer, n)` — RMS-window transient detection slices a buffer into up to N pad-sized chunks.
+  - `decodeArrayBuffer` is fail-safe: catches both the legacy error callback AND the modern Promise rejection so corrupt/CORS-blocked audio NEVER triggers the dev runtime overlay.
+- NEW `pages/KoalaStudio.js` — UI:
+  - Header + Sample Track CTA, 4×4 pad grid with neon-orange active glow and electric-green select ring.
+  - Toolbar: mic-sample (start/stop into selected pad), auto-chop, resample master.
+  - Hold-FX bar: 5 FX buttons + amount slider.
+  - 16-step sequencer with BPM input (40–220), per-pad rows, live step indicator.
+  - Side panel: vertical stem mixer (Drums/Bass/Keys/Vocals/Master + per-stem mute) + selected-pad config (stem routing, ADSR, filter, pitch).
+  - Search overlay sources from `/api/gamer/catalog/tracks?q=...&enrich=true` (the 3,800-track library); loads previews into the selected pad.
+- `App.js` — `case "studio"` now renders `<KoalaStudio>`. Previous `PlayerStudio` parked behind `case "player-studio"`.
+- Tested 18/18 frontend flows PASS (iteration_26). Decode-fail toast surfaces cleanly, no runtime overlay.
+
+
 - `pages/SocialProfile.js` extended with 4 new sections (Identity already existed):
   - Stats Dashboard — Battle Wins/Losses (from `/api/rap-battles/me`), Likes/Views (aggregated from kept recordings).
   - Battle Status — current registration (register CTA / queue / active match) with deep-link to Connect → Battle Hub. Recent battle history rows with W/L/T badge.
