@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
@@ -75,12 +75,27 @@ export function useBattleRecorder() {
         audio.play();
         audioRef.current = audio;
         setPlayingCoverId(cover.id);
-        audio.onended = () => setPlayingCoverId(null);
+        audio.onended = () => {
+          URL.revokeObjectURL(url);
+          setPlayingCoverId(null);
+        };
       }
     } catch {
       toast.error("Playback failed");
     }
   }, [playingCoverId]);
+
+  // Cleanup on unmount: stop recording, clear timer, stop playback
+  useEffect(() => () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (mediaRecorderRef.current?.state === "recording") {
+      try { mediaRecorderRef.current.stop(); } catch { /* noop */ }
+    }
+    if (audioRef.current) {
+      try { audioRef.current.pause(); } catch { /* noop */ }
+      audioRef.current = null;
+    }
+  }, []);
 
   return {
     isRecording, duration, recordedBlob, playingCoverId,
