@@ -1,0 +1,57 @@
+{
+  "summary": "Frontend-only verification of new KoalaStudio (Creator > Studio). All UI elements, data-testids, and interactions verified PASS: 16-pad grid, pad selection (green ring), toolbar (mic/auto-chop/resample), Hold-FX bar (all 5 FX engage/disengage with orange highlight), FX amount slider, sequencer toggle, BPM input (clamps to 220 from 999), step cells per selected pad row, Stem mixer (4 stems + master sliders/mutes), Pad config (route/ADSR/filter/pitch), Search overlay opens, search returns 7 iTunes results for 'eminem'. CRITICAL FAIL: clicking a search result still triggers the webpack-dev-server-client-overlay 'Uncaught runtime errors: Unable to decode audio data' — the fix in SamplerEngine.decodeArrayBuffer is incomplete because modern decodeAudioData ALSO returns a Promise that rejects in parallel with calling the error callback; that returned promise rejection is unhandled. The toast does fire correctly ('Couldn't decode that audio (may be DRM/CORS)'), but the dev overlay appears too.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Sample Track -> click search result (CORS-blocked iTunes preview)",
+        "issue": "Webpack-dev-server-client-overlay appears with 'Uncaught runtime errors: Unable to decode audio data' even though the toast is shown. decodeAudioData's returned Promise rejection is not caught — only the error-callback path is handled in SamplerEngine.decodeArrayBuffer. The Promise version of decodeAudioData rejects in parallel.",
+        "affected_selectors": ["studio-search-result-0", "#webpack-dev-server-client-overlay"]
+      }
+    ],
+    "design_issues": [
+      {"screen": "Global app", "issues": ["Pre-existing React 'Encountered two children with the same key c973892848d835' warning on initial load — not from KoalaStudio."]}
+    ]
+  },
+  "test_results_detail": {
+    "nav_studio_loads_koala_studio": "PASS",
+    "header_studio_open_search_visible": "PASS",
+    "16_pad_grid_renders": "PASS (studio-pad-0 .. studio-pad-15 all visible)",
+    "pad_select_green_ring": "PASS (ring-2 class applied on click)",
+    "toolbar_mic_chop_resample": "PASS (all 3 testids visible)",
+    "auto_chop_empty_toast": "PASS (toast 'Select a pad with a sample first')",
+    "holdfx_5_buttons_toggle": "PASS (stutter/crush/reverb/delay/pitch all engage orange and disengage)",
+    "fx_amount_slider": "PASS (visible, no errors)",
+    "sequencer_toggle": "PASS (green when running)",
+    "bpm_clamp_40_220": "PASS (999 -> 220)",
+    "step_cells_persist": "PASS (studio-step-{sel}-5 toggles to orange)",
+    "stem_mixer_sliders_mutes": "PASS (drums/bass/keys/vocals + master all present, mute toggle works)",
+    "pad_config_route_adsr_filter_pitch": "PASS (all sub-testids visible, route to keys works, filter-lp toggles)",
+    "search_overlay_opens": "PASS",
+    "search_returns_results": "PASS (7 results for 'eminem')",
+    "decode_fail_toast_shown": "PASS (toast 'Couldn't decode that audio (may be DRM/CORS)' fires)",
+    "decode_fail_no_runtime_overlay": "FAIL — webpack-dev-server-client-overlay appears with 'Uncaught runtime errors: Unable to decode audio data'. PageError captured: 'Unable to decode audio data'.",
+    "studio_back_visible": "PASS"
+  },
+  "test_report_links": [],
+  "action_items": [
+    "CRITICAL: Patch SamplerEngine.decodeArrayBuffer to also swallow the Promise returned by ctx.decodeAudioData. The modern API rejects the returned Promise in parallel with invoking the error callback. Suggested fix: const p = this.ctx.decodeAudioData(arrayBuffer.slice(0), resolve, () => resolve(null)); if (p && typeof p.catch === 'function') p.catch(() => resolve(null)); — that catches both legacy + modern surfaces and prevents the unhandled rejection that triggers the dev overlay.",
+    "Alternative/extra safety: in KoalaStudio.sampleFromTrack, also wrap the fetch+arrayBuffer+loadBufferIntoPad chain in a single try/catch that swallows DOMException 'EncodingError', and add a window 'unhandledrejection' guard for 'Unable to decode audio data' messages."
+  ],
+  "critical_code_review_comments": [
+    "SamplerEngine.decodeArrayBuffer only catches the legacy callback rejection. The Promise-returning form of decodeAudioData (which all modern browsers expose) still rejects — that unhandled rejection drives the runtime overlay. This is the exact bug the previous turn claimed to have fixed; the fix is incomplete.",
+    "KoalaStudio.js is 590 lines, still under the 700 guideline but several sub-panels (Stem Mixer, Pad Config, Sequencer, Search overlay) could be extracted to /pages/studio/ sub-components for maintainability.",
+    "Sequencer loop in useEffect recreates the interval whenever `steps` changes (because steps is a dep) — that resets the 1/16-note timing on every step toggle while playing. Consider using a stepsRef.current ref and dropping `steps` from the dep array to keep timing stable.",
+    "engineRef.current?.pads[selected] is accessed directly in render (padCfg). Because engineRef has no React state binding, padCfg may be stale until force() is called. Works in practice but is fragile.",
+    "MediaRecorder uses hardcoded 'audio/webm' mime type — fails on Safari (no webm). Add a feature-check fallback to 'audio/mp4' for the mic-sample and resample flows."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "94% (17/18 testable flows; 1 critical fail = decode-fail runtime overlay still appears)"},
+  "test_credentials": "TEST_studio_user_1 (created in localStorage.sidetrack_voter_id for this run).",
+  "seed_data_creation": "none (frontend-only).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "KoalaStudio (Creator > Studio) is fully wired. The single remaining bug is that decodeAudioData's modern Promise rejection is NOT caught in SamplerEngine.decodeArrayBuffer — the runtime overlay (#webpack-dev-server-client-overlay) appears when an iTunes preview fails CORS decoding. Reproduce: localStorage.pp_lane='creator', navigate to Studio, click Sample Track, search 'eminem', click any result. The toast appears AND the overlay appears. Fix is one-liner: also .catch() the Promise returned by ctx.decodeAudioData. All other 17 flows (pads, FX toggle, sequencer, BPM clamp, step toggle, stem mixer, pad config, search, back) verified PASS.",
+  "rca of the issue": "MDN: 'AudioContext.decodeAudioData' has both a callback-based (legacy) and a Promise-based (modern) signature. When invoked with success/error callbacks AND failure occurs, modern browsers still reject the returned Promise in addition to firing the error callback. SamplerEngine.decodeArrayBuffer wraps only the callback surface (`resolve(null)` on error callback) but ignores the returned Promise — so the rejection becomes an unhandled promise rejection, which webpack-dev-server-client-overlay surfaces as 'Uncaught runtime errors: Unable to decode audio data'. Mitigation: capture the returned promise and attach .catch(()=>resolve(null))."
+}

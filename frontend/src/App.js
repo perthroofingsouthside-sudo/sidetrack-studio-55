@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import HomePage from "@/pages/HomePage";
 import PlayerStudio from "@/pages/PlayerStudio";
+import KoalaStudio from "@/pages/KoalaStudio";
 import RecordingStudio from "@/pages/RecordingStudio";
 import StadiumStudio from "@/pages/StadiumStudio";
 import EditSharePage from "@/pages/EditSharePage";
@@ -278,6 +279,12 @@ function App() {
           />
         );
       case "studio":
+        return (
+          <KoalaStudio
+            onBack={() => setCurrentView("home")}
+          />
+        );
+      case "player-studio":
         return (
           <PlayerStudio
             song={currentSong}
