@@ -226,7 +226,13 @@ export class SamplerEngine {
     }
     this.fxDry.gain.value = 1.0;
     this.fxWet.gain.value = 0.0;
-    if (kind === "off") return;
+    if (kind === "off") {
+      // Drop the lingering `fxInput → previous-inputNode` edge so toggling
+      // FX on/off many times doesn't accumulate orphan node references.
+      try { this.fxInput.disconnect(); } catch { /* noop */ }
+      this.fxInput.connect(this.fxDry);
+      return;
+    }
 
     const ctx = this.ctx;
     let inputNode, outputNode, dispose;
@@ -288,7 +294,11 @@ export class SamplerEngine {
       return;
     }
 
-    try { this.fxInput.disconnect(this.fxDry); } catch { /* noop */ }
+    // Drop ALL outgoing edges from fxInput (both the previous dry edge AND
+    // any prior FX input edge — without this, switching FX accumulates
+    // orphaned `fxInput → old-inputNode` references, leaking nodes across
+    // the whole performance.) Then re-establish the dry edge cleanly.
+    try { this.fxInput.disconnect(); } catch { /* noop */ }
     this.fxInput.connect(this.fxDry);
     this.fxInput.connect(inputNode);
     outputNode.connect(this.fxWet);

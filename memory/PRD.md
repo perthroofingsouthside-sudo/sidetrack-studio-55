@@ -241,6 +241,11 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - Sub-components `BattleStatusSection`, `PlaylistsSection`, `MyRapsSection` live in-file (588 lines total).
 - Tested frontend 8/8 testable flows passed (iteration_25); active-battle card verified via code review.
 
+## Mar 1, 2026 — POST-PITCH POLISH
+- **Hold-FX node leak in `SamplerEngine.setMasterFx`** (code-review LOW) — fixed. The setter previously only disconnected the `fxInput → fxDry` edge before re-wiring; the `fxInput → previous-inputNode` edge from the prior FX was never disconnected, so cycling Stutter→Reverb→Delay→Crush accumulated dangling node references. Now `setMasterFx` calls `fxInput.disconnect()` (no args, drops ALL outgoing edges) and re-establishes the dry edge cleanly. Also covers the `kind === "off"` path. Verified live: cycled 4 FX buttons in a row, no console errors, page intact.
+- **PricingPage route**: already wired in `ViewRouter.js` (line 161-162, `case "pricing"`). Test agent's iter-33 "not reachable" finding was inaccurate — route exists; only the trigger CTA from Profile is missing, which the user has explicitly deferred ("don't worry about prices what so ever").
+- **BecomeAStar.js refactor**: deferred to post-launch backlog per user direction ("these additive's are for if the app bangs"). The page is also not reachable from the current nav after the lane restructure (LOW priority per PRD).
+
 ## Mar 1, 2026 — CODE REVIEW BLOCKERS RESOLVED + PITCH DECK
 - **3 atomic concurrency fixes in `routes/battles.py`** (code-review HIGH/MED blockers for contest data integrity):
   - **`/finish` race** (HIGH): every spectator's `audio.onended` fired `POST /finish`, multiplying winner's `lifetime_wins`. Now uses an atomic claim — `update_one({status:{$in:["live","agreed"]}}, …)` and credits leaderboard ONLY when `modified_count == 1`. Top-200 leaderboard is now race-safe.
