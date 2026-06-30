@@ -1,33 +1,18 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback } from "react";
 import "@/App.css";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import HomePage from "@/pages/HomePage";
-import PlayerStudio from "@/pages/PlayerStudio";
-import KoalaStudio from "@/pages/KoalaStudio";
-import RecordingStudio from "@/pages/RecordingStudio";
-import StadiumStudio from "@/pages/StadiumStudio";
-import EditSharePage from "@/pages/EditSharePage";
-import StreamPage from "@/pages/StreamPage";
-import BattleArena from "@/pages/BattleArena";
-import PlaylistsPage from "@/pages/PlaylistsPage";
-import GamerTracksPage from "@/pages/GamerTracksPage";
-import DuetStudio from "@/pages/DuetStudio";
-import BecomeAStar from "@/pages/BecomeAStar";
-import SocialProfile from "@/pages/SocialProfile";
-import PricingPage from "@/pages/PricingPage";
-import ConnectPage from "@/pages/ConnectPage";
-import GamerPage from "@/pages/GamerPage";
-import BackstageScreen from "@/components/BackstageScreen";
-import BackstagePage from "@/pages/BackstagePage";
+import axios from "axios";
 import BottomNav from "@/components/BottomNav";
 import GlobalPlayer from "@/components/GlobalPlayer";
-import axios from "axios";
+import ViewRouter from "@/router/ViewRouter";
+import { useGlobalAudioPlayer } from "@/hooks/useGlobalAudioPlayer";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 export const API = `${BACKEND_URL}/api`;
 
 function App() {
+  // ── View / song / lane / record-mode shell state ──────────────────────
   const [currentSong, setCurrentSong] = useState(null);
   const [currentView, setCurrentView] = useState(() => {
     const params = new URLSearchParams(window.location.search);
@@ -37,116 +22,36 @@ function App() {
   });
   const [editingRecording, setEditingRecording] = useState(null);
   const [duetData, setDuetData] = useState(null);
-  // ── Two-Lane Ecosystem ─────────────────────────
   const [lane, setLaneState] = useState(() => localStorage.getItem("pp_lane") || "creator");
   const [backstageTrack, setBackstageTrack] = useState(null);
-  // Track that was sent from Tracks → Battle Stage; consumed once on mount of BattleArena
   const [pendingBattleSong, setPendingBattleSong] = useState(null);
-  // Record-page layout — "stadium" is the new default, "classic" falls back to RecordingStudio (Live Stage)
   const [recordMode, setRecordMode] = useState(() => localStorage.getItem("pp_record_mode") || "stadium");
-  const switchRecordMode = (m) => {
+
+  const switchRecordMode = useCallback((m) => {
     setRecordMode(m);
     localStorage.setItem("pp_record_mode", m);
-  };
+  }, []);
 
   const setLane = useCallback((newLane) => {
     setLaneState(newLane);
     localStorage.setItem("pp_lane", newLane);
-    // Persist server-side
     const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
     axios.post(`${API}/lanes/set`, { user_id: uid, lane: newLane }).catch(() => {});
-    // Snap to a sensible default tab on lane switch.
-    // Gamer → Battle (the video-game entry point). Creator → Discover home.
-    if (newLane === "gamer") setCurrentView("battle");
-    else setCurrentView("home");
+    setCurrentView(newLane === "gamer" ? "battle" : "home");
   }, []);
 
-  // ── Global Audio Player State ──────────────────
-  const [nowPlaying, setNowPlaying] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const audioRef = useRef(null);
+  // ── Global audio player ───────────────────────────────────────────────
+  const {
+    nowPlaying, isPlaying, progress,
+    playTrack, togglePlayPause, handleSeek,
+  } = useGlobalAudioPlayer();
 
-  // Use audio element's native timeupdate event — no rAF loops, no accumulation
-  const attachProgressListener = useCallback((audio) => {
-    const onTimeUpdate = () => {
-      if (audio.duration) {
-        setProgress((audio.currentTime / audio.duration) * 100);
-      }
-    };
-    audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("ended", () => {
-      setIsPlaying(false);
-      setProgress(0);
-    });
-    // Store cleanup ref
-    audio._cleanupProgress = () => {
-      audio.removeEventListener("timeupdate", onTimeUpdate);
-    };
-  }, []);
-
-  const playTrack = useCallback((track) => {
-    if (!track.preview_url) { toast.info("No preview available"); return; }
-    // Clean up previous audio completely
-    if (audioRef.current) {
-      audioRef.current.pause();
-      if (audioRef.current._cleanupProgress) audioRef.current._cleanupProgress();
-      audioRef.current = null;
-    }
-    const audio = new Audio(track.preview_url);
-    audio.volume = 0.8;
-    audioRef.current = audio;
-    setNowPlaying(track);
-    setIsPlaying(true);
-    setProgress(0);
-    attachProgressListener(audio);
-    audio.play().catch(() => toast.error("Playback failed"));
-  }, [attachProgressListener]);
-
-  const togglePlayPause = useCallback(() => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    } else {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-    }
-  }, [isPlaying]);
-
-  const handleSeek = useCallback((pct) => {
-    if (!audioRef.current || !audioRef.current.duration) return;
-    audioRef.current.currentTime = pct * audioRef.current.duration;
-    setProgress(pct * 100);
-  }, []);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        if (audioRef.current._cleanupProgress) audioRef.current._cleanupProgress();
-        audioRef.current = null;
-      }
-    };
-  }, []);
-
-  const handleSongRecognized = useCallback((song) => {
-    setCurrentSong(song);
-    setCurrentView("studio");
-  }, []);
-
+  // ── Navigation / song handlers ────────────────────────────────────────
   const handleTrackSelect = useCallback((song) => {
-    // Set the song and start playback in the global mini-player.
-    // Do NOT auto-navigate to Studio — that's now an explicit user choice
-    // (Discover users can keep browsing while music plays).
     setCurrentSong(song);
-    if (song?.preview_url && playTrack) {
-      playTrack(song);
-    }
+    if (song?.preview_url) playTrack(song);
   }, [playTrack]);
 
-  // Used by views that explicitly want to land on the Studio (e.g. Studio's own search).
   const handleTrackSelectInStudio = useCallback((song) => {
     setCurrentSong(song);
     setCurrentView("studio");
@@ -159,7 +64,6 @@ function App() {
 
   const handleRecordingComplete = useCallback((recording) => {
     setEditingRecording(recording);
-    // Gamer lane: store privately + switch to Viewer playback automatically
     if (lane === "gamer") {
       const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
       axios.post(`${API}/gamer/recordings`, {
@@ -177,9 +81,7 @@ function App() {
     setCurrentView("edit");
   }, [lane, currentSong]);
 
-  const handleNavigate = useCallback((view) => {
-    setCurrentView(view);
-  }, []);
+  const handleNavigate = useCallback((view) => setCurrentView(view), []);
 
   const handleStartDuet = useCallback((battle, cover) => {
     setDuetData({ battle, cover });
@@ -188,171 +90,51 @@ function App() {
 
   const openInStudio = useCallback((track) => {
     setCurrentSong({
-      id: track.id || crypto.randomUUID(), title: track.title, artist: track.artist,
-      album: track.album || "", cover_url: track.cover_url || "", genre: track.genre || "",
+      id: track.id || crypto.randomUUID(),
+      title: track.title,
+      artist: track.artist,
+      album: track.album || "",
+      cover_url: track.cover_url || "",
+      genre: track.genre || "",
       preview_url: track.preview_url || "",
     });
     setCurrentView("studio");
   }, []);
 
-  const renderView = () => {
-    switch (currentView) {
-      case "home":
-        return (
-          <HomePage
-            onTrackSelect={handleTrackSelect}
-            onOpenPlaylists={() => setCurrentView("playlists")}
-            nowPlaying={nowPlaying}
-            isPlaying={isPlaying}
-            progress={progress}
-            togglePlayPause={togglePlayPause}
-            handleSeek={handleSeek}
-            openInStudio={openInStudio}
-          />
-        );
-      case "stream":
-        return (
-          <StreamPage
-            onTrackSelect={handleTrackSelect}
-            nowPlaying={nowPlaying}
-            isPlaying={isPlaying}
-            playTrack={playTrack}
-            togglePlayPause={togglePlayPause}
-            progress={progress}
-            openInStudio={openInStudio}
-          />
-        );
-      case "battle":
-        return <BattleArena currentSong={currentSong} pendingBattleSong={pendingBattleSong} onPendingBattleConsumed={() => setPendingBattleSong(null)} onStartDuet={handleStartDuet} />;
-      case "playlists":
-        return lane === "gamer"
-          ? <GamerTracksPage
-              onTrackSelect={handleTrackSelect}
-              onBattleTrack={(song) => { setCurrentSong(song); setPendingBattleSong(song); setCurrentView("battle"); }}
-            />
-          : <PlaylistsPage onTrackSelect={handleTrackSelect} />;
-      case "catalog":
-        return <GamerTracksPage
-          onTrackSelect={handleTrackSelect}
-          onBattleTrack={(song) => { setCurrentSong(song); setPendingBattleSong(song); setCurrentView("battle"); }}
-        />;
-      case "star":
-        return <BecomeAStar />;
-      case "connect":
-        return <ConnectPage />;
-      case "gamer":
-        return (
-          <GamerPage
-            onPickedTrack={(t) => setCurrentSong({
-              id: t.id || crypto.randomUUID(), title: t.title, artist: t.artist,
-              album: t.album || "", cover_url: t.cover_url || "", genre: t.genre || "",
-              preview_url: t.preview_url || "",
-            })}
-            onOpenBackstage={(t) => { setBackstageTrack(t); setCurrentView("backstage-intro"); }}
-          />
-        );
-      case "backstage":
-        return <BackstagePage />;
-      case "backstage-intro":
-        return (
-          <BackstageScreen
-            song={backstageTrack || currentSong}
-            userId={localStorage.getItem("sidetrack_voter_id") || "anon"}
-            onProceed={() => setCurrentView("record")}
-            onBack={() => setCurrentView("battle")}
-          />
-        );
-      case "pricing":
-        return <PricingPage onBack={() => setCurrentView("profile")} />;
-      case "profile":
-        return <SocialProfile onNavigate={handleNavigate} />;
-      case "duet":
-        return (
-          <DuetStudio
-            battle={duetData?.battle}
-            cover={duetData?.cover}
-            onRecordingComplete={(rec) => {
-              setEditingRecording(rec);
-              setCurrentView("edit");
-            }}
-            onBack={() => setCurrentView("battle")}
-          />
-        );
-      case "studio":
-        return (
-          <KoalaStudio
-            onBack={() => setCurrentView("home")}
-          />
-        );
-      case "player-studio":
-        return (
-          <PlayerStudio
-            song={currentSong}
-            onRecord={() => setCurrentView("record")}
-            onSongSelect={handleTrackSelectInStudio}
-          />
-        );
-      case "record":
-        return recordMode === "stadium" ? (
-          <StadiumStudio
-            song={currentSong}
-            onSwitchClassic={() => switchRecordMode("classic")}
-          />
-        ) : (
-          <RecordingStudio
-            song={currentSong}
-            onSongSelect={handleTrackSelectForRecord}
-            onRecordingComplete={handleRecordingComplete}
-            onBack={() => setCurrentView("studio")}
-            onSwitchStadium={() => switchRecordMode("stadium")}
-          />
-        );
-      case "edit":
-        return (
-          <EditSharePage
-            recording={editingRecording}
-            song={currentSong}
-            onBack={() => setCurrentView("studio")}
-            onOpenInStudio={(rec) => {
-              // Convert a recording into a "song" object the Studio can play with.
-              const recSong = {
-                id: rec.id || `rec-${Date.now()}`,
-                title: (currentSong?.title ? `${currentSong.title} — Your Take` : "Your Recording"),
-                artist: localStorage.getItem("sidetrack_username") || "You",
-                album: "Personal Recording",
-                cover_url: currentSong?.cover_url || "",
-                genre: currentSong?.genre || "original",
-                preview_url: rec.url || "",
-                is_recording: true,
-              };
-              setCurrentSong(recSong);
-              if (rec.url && playTrack) playTrack(recSong);
-              setCurrentView("studio");
-              toast.success("Recording opened in Studio");
-            }}
-          />
-        );
-      default:
-        return (
-          <StreamPage
-            onTrackSelect={handleTrackSelect}
-            nowPlaying={nowPlaying}
-            isPlaying={isPlaying}
-            playTrack={playTrack}
-            togglePlayPause={togglePlayPause}
-            progress={progress}
-            openInStudio={openInStudio}
-          />
-        );
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#05050A] text-white">
       <div className={nowPlaying ? "pb-44" : "pb-28"}>
-        {renderView()}
+        <ViewRouter
+          currentView={currentView}
+          lane={lane}
+          currentSong={currentSong}
+          setCurrentSong={setCurrentSong}
+          setCurrentView={setCurrentView}
+          nowPlaying={nowPlaying}
+          isPlaying={isPlaying}
+          progress={progress}
+          playTrack={playTrack}
+          togglePlayPause={togglePlayPause}
+          handleSeek={handleSeek}
+          handleTrackSelect={handleTrackSelect}
+          handleTrackSelectInStudio={handleTrackSelectInStudio}
+          handleTrackSelectForRecord={handleTrackSelectForRecord}
+          handleRecordingComplete={handleRecordingComplete}
+          handleNavigate={handleNavigate}
+          handleStartDuet={handleStartDuet}
+          openInStudio={openInStudio}
+          pendingBattleSong={pendingBattleSong}
+          setPendingBattleSong={setPendingBattleSong}
+          backstageTrack={backstageTrack}
+          setBackstageTrack={setBackstageTrack}
+          duetData={duetData}
+          editingRecording={editingRecording}
+          setEditingRecording={setEditingRecording}
+          recordMode={recordMode}
+          switchRecordMode={switchRecordMode}
+        />
       </div>
-      {/* Global Now Playing Bar — persists across all tabs */}
+
       {nowPlaying && (
         <GlobalPlayer
           nowPlaying={nowPlaying}
@@ -363,6 +145,7 @@ function App() {
           onSeek={handleSeek}
         />
       )}
+
       <BottomNav
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -370,6 +153,7 @@ function App() {
         lane={lane}
         onLaneChange={setLane}
       />
+
       <Toaster position="top-center" theme="dark" />
     </div>
   );
