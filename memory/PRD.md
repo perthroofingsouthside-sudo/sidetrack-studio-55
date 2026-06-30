@@ -204,7 +204,18 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - `pages/ConnectPage.js` — added `[data-testid='open-battle-hub']` CTA + `view='battle-hub'` branch.
 - Tested 15/15 backend + full frontend flow (iteration_24).
 
-## Feb 28, 2026 — Koala Studio (16-pad sampler)
+## Feb 28, 2026 — Record page personalisation + Backstage Cinema wire-up
+- `pages/StadiumStudio.js` refactored into **PersonalStudio** behaviour:
+  - Stripped Stadium Chat aside, mobile chat tab, fire/heart counters, Fan Level XP tracker, video/voice-call buttons.
+  - Replaced right pane with `studio-tools-panel` containing 3 sub-sections:
+    - **Stem Upload Queue** — `<input type="file" multiple accept="audio/*">` with playable rows + remove.
+    - **AI Beat Maker** — POST `/api/studio/beat/generate` with the correct backend contract `{genre, bpm, bars, key, user_id}`. Genres mapped to backend keys: `hip_hop_top200 / mtv_classic / ministry_of_sound / alt_rock`. Bars selector 4/8/16/32. Returns `beat.preview_url` (WAV data URL) and adds it to the stems list.
+    - **Sing to Stems** — `MediaRecorder` with feature-checked webm→mp4 fallback (Safari). Auto-plays the selected stem when recording starts.
+  - Kept left vertical stem mixer (Drums/Bass/Keys/Master) + center neon halo/waveform + bottom progress/BPM/Key footer.
+- `pages/BackstagePage.js` — injected `backstage-watch-{id}` button on each Kept-tab recording row that opens `<BackstageCinema>` overlay (9-phase intro → playback). Cinema close handler reloads to refresh views/likes counts.
+- **Tested**: iteration_27 structural pass 24/24 + 0 page errors. Beat contract validated via curl returning ~700KB WAV data URL.
+
+
 - NEW `frontend/src/services/SamplerEngine.js` — Web Audio engine:
   - 16 pads, each with buffer + per-pad volume / pitch / ADSR / hi-or-lo-pass filter / stem routing.
   - 4 stem buses (drums / bass / keys / vocals) → master → MediaStreamDestination (for resample) → Hold-FX bus → destination.

@@ -177,10 +177,11 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
   const stemAudioRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // AI beat prompt
+  // AI beat prompt (genre keys map to backend ALLOWED_GENRES catalogue)
   const [beatPrompt, setBeatPrompt] = useState("");
   const [beatBpm, setBeatBpm] = useState(96);
-  const [beatGenre, setBeatGenre] = useState("Hip-Hop");
+  const [beatGenre, setBeatGenre] = useState("hip_hop_top200");
+  const [beatBars, setBeatBars] = useState(8);
   const [beatGenerating, setBeatGenerating] = useState(false);
 
   // Mic recording (sing-to-stems)
@@ -264,22 +265,27 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
 
   // ── AI Beat ──
   const generateBeat = async () => {
-    if (!beatPrompt.trim()) { toast.message("Describe the vibe first"); return; }
     setBeatGenerating(true);
     try {
       const res = await axios.post(`${API}/studio/beat/generate`, {
-        prompt: beatPrompt.trim(), bpm: beatBpm, genre: beatGenre, duration_sec: 30,
+        genre: beatGenre,
+        bpm: beatBpm,
+        bars: beatBars,
+        key: "C",
+        user_id: userId.current,
       });
-      const url = res.data?.audio_url || res.data?.beat_url;
+      const url = res.data?.beat?.preview_url || res.data?.beat?.audio_url || res.data?.audio_url;
+      const labelBase = beatPrompt.trim() || `AI Beat · ${beatGenre.replace(/_/g, " ")}`;
       if (url) {
-        const entry = { id: `beat-${Date.now()}`, name: `AI Beat — ${beatGenre}`, url, blob: null, duration: 0 };
+        const entry = { id: `beat-${Date.now()}`, name: labelBase, url, blob: null, duration: 0 };
         setStems((prev) => [entry, ...prev]);
         toast.success("AI beat ready · added to stems");
       } else {
         toast.message("Beat generated (preview unavailable)");
       }
     } catch (err) {
-      toast.error("Beat generator unavailable");
+      const msg = err?.response?.data?.detail || "Beat generator unavailable";
+      toast.error(typeof msg === "string" ? msg : "Beat generator unavailable");
     } finally { setBeatGenerating(false); }
   };
 
@@ -563,22 +569,30 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
                   <Sparkles className="w-3 h-3" /> AI Beat Maker
                 </p>
                 <Input value={beatPrompt} onChange={(e) => setBeatPrompt(e.target.value)}
-                  placeholder="e.g. dark trap, 808s, eerie keys"
+                  placeholder="(Optional) name this beat"
                   data-testid="ai-beat-prompt"
                   className="h-9 bg-[#0F0F16] border-white/10 text-white text-xs rounded-lg" />
-                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                <div className="grid grid-cols-3 gap-1.5 mt-1.5">
                   <Input type="number" value={beatBpm}
-                    onChange={(e) => setBeatBpm(Math.max(40, Math.min(220, +e.target.value || 96)))}
+                    onChange={(e) => setBeatBpm(Math.max(60, Math.min(200, +e.target.value || 96)))}
                     placeholder="BPM"
                     data-testid="ai-beat-bpm"
                     className="h-8 bg-[#0F0F16] border-white/10 text-white text-xs rounded-lg" />
+                  <select value={beatBars} onChange={(e) => setBeatBars(+e.target.value)}
+                    data-testid="ai-beat-bars"
+                    className="h-8 bg-[#0F0F16] border border-white/10 text-white text-xs rounded-lg px-2">
+                    {[4, 8, 16, 32].map((b) => <option key={b} value={b}>{b} bars</option>)}
+                  </select>
                   <select value={beatGenre} onChange={(e) => setBeatGenre(e.target.value)}
                     data-testid="ai-beat-genre"
                     className="h-8 bg-[#0F0F16] border border-white/10 text-white text-xs rounded-lg px-2">
-                    {["Hip-Hop", "Trap", "Lo-Fi", "Boom Bap", "Drill", "R&B"].map((g) => <option key={g}>{g}</option>)}
+                    <option value="hip_hop_top200">Hip-Hop</option>
+                    <option value="mtv_classic">MTV Classic</option>
+                    <option value="ministry_of_sound">House</option>
+                    <option value="alt_rock">Alt-Rock</option>
                   </select>
                 </div>
-                <Button onClick={generateBeat} disabled={beatGenerating || !beatPrompt.trim()}
+                <Button onClick={generateBeat} disabled={beatGenerating}
                   data-testid="ai-beat-generate"
                   className="w-full mt-1.5 h-9 rounded-lg bg-[#FF6B00] hover:bg-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider gap-1.5">
                   {beatGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
