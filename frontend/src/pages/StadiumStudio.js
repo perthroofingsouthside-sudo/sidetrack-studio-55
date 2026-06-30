@@ -362,7 +362,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
           <button
             onClick={onSwitchClassic}
             data-testid="switch-classic-btn"
-            className="hidden sm:inline-flex px-2.5 h-7 rounded-full items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] border border-white/15 bg-white/5 text-white/70 hover:text-white"
+            className="inline-flex px-2.5 h-7 rounded-full items-center gap-1 text-[9px] font-black uppercase tracking-[0.25em] border border-white/15 bg-white/5 text-white/70 hover:text-white"
           >
             <ChevronLeft className="w-2.5 h-2.5" /> Classic
           </button>

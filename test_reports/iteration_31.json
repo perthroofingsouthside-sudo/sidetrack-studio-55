@@ -1,0 +1,42 @@
+{
+  "summary": "Regression-tested two changes: (1) StadiumStudio switch-classic-btn mobile-reachability fix and (2) BattleArena.js decomposition into useBattleRecorder hook + 3 view sub-components. All 10 in-scope scenarios PASS. 0 page errors, 0 same-key warnings across creator+gamer lane flows. Refactor is behavior-preserving.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_results_detail": {
+    "mobile_switch_classic_btn (375x800)": "PASS — element in DOM, visible (display:flex, box 91x28). Click switches to classic Record (switch-stadium-btn appears). pp_record_mode flow works on mobile.",
+    "desktop_switch_classic_btn (1920x900)": "PASS — element visible, click works.",
+    "battle_arena_renders (1920x900, gamer)": "PASS — battle-arena, battle-stage-header, create-battle-btn, artist-marquee, stage-skin-toggle, leaderboard-section, active-battles all present.",
+    "create_battle_no_song": "PASS — Toast 'Select a song from Stream or Discover first!' displayed; no crash.",
+    "battle_card_click_opens_stage": "PASS — Clicking battle-card-{id} transitions away from battle-arena and renders data-testid='gamer-stage' (BattleArena view='stage' → GamerStage).",
+    "stage_skin_toggle": "PASS — Opens stage-skin-picker. 4 skins (theater/arena/space/ocean). Each click stores correct value in localStorage.pp_stage_skin (verified for 'theater'). Toast 'Stage skin: <Label>' fires.",
+    "leaderboard_active_battles": "PASS — both sections render (13 active battles in seeded data).",
+    "battle_detail_submit_views": "NOT EXERCISED via UI — per request note, openBattle routes directly to 'stage' (GamerStage). BattleDetailView (detail-back-btn / enter-battle-btn) and BattleSubmitView (battle-submit / rec-toggle-btn / username-input / rec-duration) are only reachable after a submitCover flow which itself requires reaching detail first. Code reviewed: testids preserved, props wiring is correct.",
+    "full_app_regression_creator_nav": "PASS — nav-home→home-page, nav-connect→connect-heading, nav-studio→koala-studio, nav-record→stadium-studio, nav-profile→social-profile (all 5).",
+    "full_app_regression_gamer_nav": "PASS — lane-toggle-gamer → battle-arena; nav-battle / nav-playlists / nav-backstage / nav-profile all clickable.",
+    "lane_toggle_both_ways": "PASS — creator→gamer (battle-arena), gamer→creator (home-page).",
+    "page_errors_total": "0",
+    "same_key_warnings_total": "0",
+    "pre_existing_warnings": "1 React hydration warning '<span> cannot be a child of option' — same as iteration_30 baseline, unrelated to this refactor."
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "BattleArena.js decomposition is clean: 188 lines, single-responsibility orchestrator (state + data loading + view dispatch). Delegates rendering to BattleStageListView/BattleDetailView/BattleSubmitView and mic logic to useBattleRecorder. All testids preserved.",
+    "useBattleRecorder.js is well-encapsulated (92 lines). Proper cleanup of stream tracks in onstop, timer cleared in stopRecording. Returns a stable API and a fmtDur helper. ONE MINOR: timerRef is not cleared on unmount of the consumer — if the consumer unmounts mid-recording, the interval will leak. Consider adding a useEffect cleanup that calls clearInterval(timerRef.current) and stops the MediaRecorder on unmount.",
+    "useBattleRecorder.playCoverAudio creates Audio objects via URL.createObjectURL but never revokes the blob URL when playback ends — minor memory leak per playback. Add URL.revokeObjectURL(url) in audio.onended.",
+    "StadiumStudio.js:365 fix is correct: class changed to 'inline-flex' (no sm: prefix). Verified visible at 375px viewport with display:flex computed style.",
+    "BattleArena.js: createBattle uses toast.info (not error) for the missing-song case — friendly UX choice, preserved from original. Spec wording 'should show toast' matches.",
+    "BattleArena.js: detail/submit views unreachable from a fresh list click because openBattle goes to 'stage' (GamerStage). This is the existing behavior (not a regression). The 'detail' view is only entered after submitCover() success. If the product intent is for users to vote on covers from the list, consider adding a 'View covers' affordance on each battle card that routes to the detail view — currently the BattleDetailView component renders only after the user has just submitted their own cover."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (frontend-only)", "frontend": "100% (10/10 testable scenarios PASS; 1 acknowledged unreachable via clean-UI)"},
+  "test_credentials": "localStorage: pp_lane (creator|gamer), pp_record_mode='stadium', sidetrack_voter_id='rec_test'. No auth required.",
+  "seed_data_creation": "None — 13 active battles already seeded in DB.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "iteration_31: BattleArena refactor + mobile classic-record fix. Lane toggle testids are 'lane-toggle-creator' and 'lane-toggle-gamer' (not a single 'lane-toggle'). Gamer nav tabs are: nav-battle, nav-playlists, nav-backstage, nav-profile (no nav-home/connect/studio/record in gamer lane). To reach BattleDetailView/BattleSubmitView from UI requires submitting a cover first — not easily exercised in headless (mic-gated). Pre-existing hydration warning about '<span> in <option>' exists in baseline; ignore unless E1 fixes it explicitly. Stage skin keys: theater, arena, space, ocean."
+}
