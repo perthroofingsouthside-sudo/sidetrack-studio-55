@@ -312,7 +312,7 @@ export default function HomePage({
                 )}
                 {results.map((t, idx) => (
                   <ResultRow
-                    key={t.track_id || t.id || idx}
+                    key={`${t.track_id || t.id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
                     track={t}
                     idx={idx}
                     nowPlayingId={nowPlaying?.id}
@@ -479,7 +479,7 @@ function CoverMosaic({ tracks, onPick }) {
       <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
         {tracks.map((t, idx) => (
           <button
-            key={t.track_id || t.id || idx}
+            key={`${t.track_id || t.id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
             onClick={() => onPick(t)}
             data-testid={`discover-mosaic-${idx}`}
             className="group relative aspect-square rounded-2xl overflow-hidden border border-white/5 hover:border-[#FF6B00]/50 transition-all"

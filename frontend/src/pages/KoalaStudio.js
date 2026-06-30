@@ -573,7 +573,7 @@ export default function KoalaStudio({ onBack }) {
             <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
               {results.map((t, idx) => (
                 <button
-                  key={t.track_id || idx}
+                  key={`${t.track_id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
                   onClick={() => sampleFromTrack(t, selected)}
                   data-testid={`studio-search-result-${idx}`}
                   className="w-full flex items-center gap-2 p-2 rounded-xl border border-white/5 hover:border-[#FF6B00]/40 hover:bg-[#FF6B00]/5 text-left">
