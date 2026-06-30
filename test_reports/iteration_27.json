@@ -1,0 +1,78 @@
+{
+  "summary": "Verified Record (PersonalStudio/StadiumStudio) refactor and Backstage Watch button. STRUCTURAL/UI: 100% PASS — all 24 required testids present, ALL forbidden chat/social testids absent (stadium-chat, stadium-chat-feed, say-something, fan-level-tracker, fire/heart-count, mobile-tab-chat, stadium-video/voice-call-btn, chat-msg-*), mobile tabs are mixer|tools, stem mixer + studio-tools-panel + 3 sub-sections (stem-upload-section, ai-beat-section, record-section) render correctly. AI Beat Maker controls work: BPM clamps to 40-220 (999→220, 10→40), ai-beat-generate is disabled with empty prompt and enabled when filled. Backstage: Kept tab renders backstage-watch-{id} alongside play; click opens backstage-cinema (data-phase='backstage_pov' = phase 1 of 9), both cinema-skip-btn and cinema-close-btn present, cinema-close-btn closes overlay back to Kept list. Pending tab and Discarded tab both have 0 watch buttons (correct). BACKEND: 3/5 tests pass — /api/gamer/recordings GET kept + pending + create→keep→verify all PASS. CRITICAL: /api/studio/beat/generate returns HTTP 422 for the exact payload the frontend sends — frontend wiring is incompatible with the current backend BeatRequest schema.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "POST /api/studio/beat/generate",
+        "issue": "Frontend↔backend payload mismatch. Frontend (StadiumStudio.js line 270-272) sends {prompt, bpm, genre:'Hip-Hop'|'Trap'|'Lo-Fi'|'Boom Bap'|'Drill'|'R&B', duration_sec:30}. Backend BeatRequest (routes/studio_ai.py line 38-43) REQUIRES {genre, bpm, bars (default 8), key (default 'C'), user_id (REQUIRED)} where genre MUST be in ALLOWED_GENRES = ['mtv_classic','ministry_of_sound','hip_hop_top200','alt_rock']. Result: backend returns 422 with detail 'Field required: user_id'. Even if user_id were added, the genres from the dropdown ('Hip-Hop', 'Trap', 'Lo-Fi', etc.) would all be rejected with 400 'Genre must be one of mtv_classic|ministry_of_sound|hip_hop_top200|alt_rock'. AI Beat Maker will NEVER produce a beat in current state.",
+        "priority": "CRITICAL"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Record > AI Beat Maker > Generate Beat",
+        "issue": "POST /api/studio/beat/generate fails with 422 due to missing user_id and incompatible genre value. Toast 'Beat generator unavailable' surfaces, no beat ever returned.",
+        "affected_selectors": ["ai-beat-generate", "ai-beat-genre", "ai-beat-prompt"]
+      }
+    ],
+    "design_issues": [
+      {"screen": "Global app", "issues": ["Pre-existing React 'Encountered two children with the same key f6bf37ecb304a4' warning on initial load — same warning seen in iteration 26, NOT from PersonalStudio/Backstage refactor."]}
+    ]
+  },
+  "test_results_detail": {
+    "nav_record_loads_stadium_studio": "PASS",
+    "all_required_testids_present": "PASS (24/24)",
+    "no_chat_or_social_testids_in_dom": "PASS (0/10 forbidden testids found, 0 chat-msg-*)",
+    "mobile_tabs_mixer_and_tools": "PASS",
+    "studio_tools_panel_three_sections": "PASS (stem-upload-section, ai-beat-section, record-section)",
+    "stem_upload_btn_and_empty_state": "PASS",
+    "ai_beat_bpm_clamp_40_220": "PASS (999→220, 10→40)",
+    "ai_beat_generate_disabled_when_empty": "PASS",
+    "ai_beat_generate_enabled_when_filled": "PASS",
+    "ai_beat_generate_api_call_succeeds": "FAIL (422 — payload shape mismatch with backend)",
+    "personal_record_btn_toggles_rec_pill": "INCONCLUSIVE (headless Playwright getUserMedia does not return a real stream; pill code path requires successful MediaRecorder start. Code is correct on inspection.)",
+    "stem_mixer_drums_bass_keys_master_present": "PASS (all sliders, solo, mute, db testids)",
+    "master_db_visible": "PASS",
+    "backstage_page_renders": "PASS",
+    "backstage_tab_kept_renders_watch_btn": "PASS (backstage-watch-{id} alongside backstage-play-{id})",
+    "backstage_watch_opens_cinema": "PASS (data-testid=backstage-cinema with data-phase=backstage_pov, 9-phase intro)",
+    "cinema_skip_btn_visible": "PASS",
+    "cinema_close_btn_visible_and_closes": "PASS",
+    "pending_tab_has_no_watch_btn": "PASS (0 watch buttons)",
+    "discarded_tab_has_no_watch_btn": "PASS (0 watch buttons)",
+    "backend_studio_beat_generate": "FAIL (2/2 cases — 422 missing user_id)",
+    "backend_gamer_recordings_kept_get": "PASS",
+    "backend_gamer_recordings_pending_get": "PASS",
+    "backend_gamer_recordings_create_keep_verify": "PASS"
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration27_record_backstage.py",
+    "/app/test_reports/pytest/iteration27_results.xml"
+  ],
+  "action_items": [
+    "CRITICAL: Fix StadiumStudio.js generateBeat() (line 266-284) to send the correct payload shape to /api/studio/beat/generate. Required changes: (1) add user_id: userId.current to the POST body; (2) replace duration_sec with bars (default 8); (3) map dropdown genre labels to backend ALLOWED_GENRES keys — e.g. {'Hip-Hop':'hip_hop_top200','Trap':'hip_hop_top200','Lo-Fi':'hip_hop_top200','Boom Bap':'hip_hop_top200','Drill':'hip_hop_top200','R&B':'hip_hop_top200'} OR expand backend ALLOWED_GENRES to include these labels. Without this fix the AI Beat Maker is non-functional. Backend response key is 'beat.preview_url' (nested), not 'audio_url' or 'beat_url' — also adjust the response parsing on line 273.",
+    "Optional: When MediaRecorder isn't supported or mic is denied, surface a clearer message and ensure the rec pill only flashes briefly; the current behaviour is silent except for the toast. Consider adding a visual disabled state on personal-record-btn if MediaRecorder unsupported."
+  ],
+  "critical_code_review_comments": [
+    "StadiumStudio.js line 270-272: hardcoded duration_sec instead of bars; missing user_id; genre values mismatch backend enum. This is the only integration bug blocking the feature.",
+    "StadiumStudio.js line 273: const url = res.data?.audio_url || res.data?.beat_url — backend returns {success:true, beat:{preview_url,...}} (data URL with synthesized WAV). Should read res.data?.beat?.preview_url.",
+    "BackstagePage.js line 152: when toggling tabs rapidly, the previous tab's recordings briefly remain in state until load() resolves. The watch button is correctly gated on tab==='kept' so it doesn't leak across tabs in practice.",
+    "StadiumStudio.js line 317-322: unmount cleanup hook has stems/lastTakeUrl in closure-captured stale snapshot (deps array is []). For correct cleanup of late-added stems, store them in a ref or include in deps with a current-mount guard.",
+    "BackstagePage.js line 30: userId fallback 'anon' will silently load no recordings if localStorage was never set — display a friendlier 'Sign in to see recordings' empty state."
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "60% (3/5 pytest cases — gamer recordings 100%, studio beat generate 0%)",
+    "frontend": "95% (20/21 structural/interaction checks pass; personal-rec-pill toggle is INCONCLUSIVE in headless env)"
+  },
+  "test_credentials": "rec_demo (set in localStorage.sidetrack_voter_id). No auth required — app is open-access per /app/memory/test_credentials.md.",
+  "seed_data_creation": "Created 1 kept recording for rec_demo via POST /api/gamer/recordings (TEST_BackstageWatch) followed by POST /api/gamer/recordings/{id}/review action=keep. The recording id (0f23fb1b-8541-411d-bba2-f1539e8d9708) was used to validate backstage-watch-{id} rendering and cinema overlay open/close.",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Record refactor (StadiumStudio.js) and Backstage Watch button refactor (BackstagePage.js + BackstageCinema.js) are STRUCTURALLY COMPLETE. The ONLY blocker is the /api/studio/beat/generate payload mismatch — fix in StadiumStudio.js generateBeat() then retest. Seeded kept recording exists for rec_demo (id starts with 0f23fb1b). To re-seed: POST /api/gamer/recordings {user_id:'rec_demo', song_id:'TEST_x', song_title:'TEST_x', duration_sec:12, blob_url:'https://example.com/take.webm', performance_type:'karaoke'} then POST /api/gamer/recordings/{id}/review {user_id:'rec_demo', action:'keep'}. Cinema overlay close uses data-testid=cinema-close-btn (not cinema-skip-btn — skip just advances to next of 9 phases).",
+  "rca of the issue": "RCA: /api/studio/beat/generate has been schema-upgraded server-side to a Catalog Pivot model (genres = mtv_classic|ministry_of_sound|hip_hop_top200|alt_rock + per-user beat library requires user_id + bars-based sequencer rather than duration_sec). Frontend StadiumStudio.js generateBeat() was authored against the older shape {prompt, bpm, genre, duration_sec} and was never adapted. Reproduction: localStorage.pp_lane='creator', sidetrack_voter_id='rec_demo'; nav-record; type any prompt; click ai-beat-generate → 422 in Network tab + console error + toast 'Beat generator unavailable'. Mitigation: update payload as detailed in action_items[0]."
+}

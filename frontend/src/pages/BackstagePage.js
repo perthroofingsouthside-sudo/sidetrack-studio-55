@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Sparkles, Play, Pause, Check, Trash2, Loader2, Music2, Clock, Archive } from "lucide-react";
+import { Sparkles, Play, Pause, Check, Trash2, Loader2, Music2, Clock, Archive, Film } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
+import BackstageCinema from "@/components/BackstageCinema";
 
 const TABS = [
   { key: "pending_review", label: "Pending", accent: "#FF6B00" },
@@ -25,6 +26,7 @@ export default function BackstagePage() {
   const [loading, setLoading] = useState(false);
   const [acting, setActing] = useState(null);
   const [playingId, setPlayingId] = useState(null);
+  const [cinemaRec, setCinemaRec] = useState(null);
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
   const audioRef = useRef(null);
 
@@ -91,7 +93,7 @@ export default function BackstagePage() {
               <span className="text-[#39FF14] glow-text-green">Backstage</span>
             </h1>
             <p className="text-[11px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold">
-              Every set recorded · Keep what's worth keeping
+              Every set recorded · Keep what&rsquo;s worth keeping
             </p>
           </div>
         </div>
@@ -190,6 +192,16 @@ export default function BackstagePage() {
                         </Button>
                       </div>
                     )}
+                    {tab === "kept" && (
+                      <Button
+                        onClick={() => setCinemaRec(r)}
+                        data-testid={`backstage-watch-${r.id}`}
+                        className="h-8 px-3 rounded-lg text-[10px] font-black bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1 uppercase tracking-wider flex-shrink-0"
+                        style={{ boxShadow: "0 0 12px rgba(255,107,0,0.45)" }}
+                      >
+                        <Film className="w-3 h-3" /> Watch
+                      </Button>
+                    )}
                     {tab === "discarded" && (
                       <Button onClick={() => review(r, "keep")} disabled={acting === r.id}
                         data-testid={`backstage-restore-${r.id}`}
@@ -212,6 +224,14 @@ export default function BackstagePage() {
           Recordings are private to you. Backstage is your performance archive.
         </p>
       </div>
+      {/* Cinematic playback overlay */}
+      {cinemaRec && (
+        <BackstageCinema
+          recording={cinemaRec}
+          currentUserId={userId.current}
+          onClose={() => { setCinemaRec(null); load(); }}
+        />
+      )}
     </div>
   );
 }

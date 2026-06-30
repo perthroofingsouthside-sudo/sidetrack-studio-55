@@ -1,14 +1,13 @@
-/* StadiumStudio — new default Record page layout.
-   3-pane stadium-style performance UI:
+/* PersonalStudio — Creator-lane personal recording space.
+   3-pane layout:
      LEFT  : vertical stem mixer (Drums / Bass / Keys / Master) with dB meters + Solo/Mute
-     CENTER: performance frame (live camera or cover art), big neon-orange waveform, fire/heart counters
-     RIGHT : stadium chat with avatars + Fan Level XP tracker + Say-something bar with Video/Voice call icons
-   BOTTOM : synced progress bar, BPM, Key
-   On mobile (<lg) the panes stack vertically with mixer + chat as tabs. */
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+     CENTER: cover/halo + neon waveform + record button
+     RIGHT : Studio Tools — Stem Upload Queue + AI Beat Maker + Sing-to-Stems
+   BOTTOM: synced progress bar, BPM, Key. Strictly local; no chat/social. */
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
-  Flame, Heart, Mic, Square, Play, Pause, Video, Phone, Send, Sliders, MessageSquare,
-  ChevronLeft, Volume2, VolumeX, Layers, Clock,
+  Mic, Square, Sliders, ChevronLeft, Layers, Clock, Upload, Sparkles, Music2,
+  Loader2, Play, Pause, Trash2, Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -161,7 +160,6 @@ function NeonWaveform({ active, height = 96 }) {
 
 export default function StadiumStudio({ song, onSwitchClassic }) {
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
-  const userName = useRef(localStorage.getItem("sidetrack_username") || "Performer");
 
   // ── State ──
   const [volumes, setVolumes] = useState({ drums: 80, bass: 78, keys: 65, master: 88 });
@@ -170,23 +168,25 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
   const [levels, setLevels] = useState({ drums: 40, bass: 32, keys: 28, master: 60 });
   const [isPerforming, setIsPerforming] = useState(false);
   const [progress, setProgress] = useState(0);  // 0..100
-  const [fireCount, setFireCount] = useState(2847);
-  const [heartCount, setHeartCount] = useState(1296);
-  const [chatMsg, setChatMsg] = useState("");
-  const [messages, setMessages] = useState([
-    { id: "m1", user: "Maya", color: "#FF4FB1", text: "Bring the fire! 🔥",  ts: "now" },
-    { id: "m2", user: "Jay",  color: "#39FF14", text: "Bass is HEAVY tonight", ts: "now" },
-    { id: "m3", user: "Drew", color: "#00E0FF", text: "love this drop", ts: "1m" },
-    { id: "m4", user: "Sky",  color: "#FF6B00", text: "play it again ✨", ts: "2m" },
-  ]);
-  const [mobileTab, setMobileTab] = useState("mixer"); // mixer | chat
-  const [xp, setXp] = useState(620);
-  const fanLevel = useMemo(() => {
-    if (xp >= 800) return { tier: "Legend", pct: 100, next: 1000 };
-    if (xp >= 500) return { tier: "Legend", pct: Math.min(100, ((xp - 500) / 500) * 100), next: 1000 };
-    if (xp >= 250) return { tier: "Star",   pct: ((xp - 250) / 250) * 100, next: 500 };
-    return { tier: "Rookie", pct: (xp / 250) * 100, next: 250 };
-  }, [xp]);
+  const [mobileTab, setMobileTab] = useState("mixer"); // mixer | tools
+
+  // Stem upload queue (WAV/MP3 audio files the user drops in)
+  const [stems, setStems] = useState([]);                 // {id, name, url, duration, blob}
+  const [activeStemId, setActiveStemId] = useState(null); // stem currently playing as backing track
+  const [stemPlaying, setStemPlaying] = useState(false);
+  const stemAudioRef = useRef(null);
+  const fileInputRef = useRef(null);
+
+  // AI beat prompt
+  const [beatPrompt, setBeatPrompt] = useState("");
+  const [beatBpm, setBeatBpm] = useState(96);
+  const [beatGenre, setBeatGenre] = useState("Hip-Hop");
+  const [beatGenerating, setBeatGenerating] = useState(false);
+
+  // Mic recording (sing-to-stems)
+  const [recording, setRecording] = useState(false);
+  const [lastTakeUrl, setLastTakeUrl] = useState(null);
+  const recRef = useRef({ stream: null, rec: null, chunks: [] });
 
   // Song defaults
   const songTitle = (song?.title || "Fire Inside").toUpperCase();
@@ -223,25 +223,103 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
   const toggleMute = (key) => setMuted((prev) => ({ ...prev, [key]: !prev[key] }));
   const toggleSolo = (key) => setSoloed((prev) => ({ ...prev, [key]: !prev[key] }));
 
-  const sendChat = () => {
-    const t = chatMsg.trim();
-    if (!t) return;
-    setMessages((prev) => [
-      ...prev,
-      { id: `m-${Date.now()}`, user: userName.current, color: "#FF6B00", text: t, ts: "now" },
-    ]);
-    setChatMsg("");
-    setXp((x) => x + 5);
+  // ── Stem Upload ──
+  const onPickFile = () => fileInputRef.current?.click();
+  const onFileChange = async (e) => {
+    const files = Array.from(e.target.files || []);
+    for (const file of files) {
+      if (!file.type.startsWith("audio/")) { toast.error(`${file.name}: not an audio file`); continue; }
+      const url = URL.createObjectURL(file);
+      const entry = { id: `stem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: file.name, url, blob: file, duration: 0 };
+      // Best-effort duration probe
+      try {
+        const a = new Audio(url);
+        await new Promise((res) => {
+          a.onloadedmetadata = () => { entry.duration = a.duration || 0; res(); };
+          a.onerror = res;
+        });
+      } catch { /* noop */ }
+      setStems((prev) => [...prev, entry]);
+    }
+    if (e.target) e.target.value = "";
+    toast.success(`${files.length} stem${files.length === 1 ? "" : "s"} added`);
   };
 
-  const startCall = async (video) => {
+  const removeStem = (id) => {
+    setStems((prev) => prev.filter((s) => s.id !== id));
+    if (activeStemId === id) { stemAudioRef.current?.pause(); setStemPlaying(false); setActiveStemId(null); }
+  };
+
+  const playStem = (stem) => {
+    if (stemAudioRef.current) { stemAudioRef.current.pause(); stemAudioRef.current = null; }
+    if (activeStemId === stem.id && stemPlaying) {
+      setStemPlaying(false); setActiveStemId(null); return;
+    }
+    const a = new Audio(stem.url);
+    a.onended = () => { setStemPlaying(false); setActiveStemId(null); };
+    a.onerror = () => { toast.error("Couldn't play stem"); setStemPlaying(false); };
+    a.play().then(() => { stemAudioRef.current = a; setActiveStemId(stem.id); setStemPlaying(true); })
+      .catch(() => toast.error("Playback blocked"));
+  };
+
+  // ── AI Beat ──
+  const generateBeat = async () => {
+    if (!beatPrompt.trim()) { toast.message("Describe the vibe first"); return; }
+    setBeatGenerating(true);
     try {
-      await navigator.mediaDevices.getUserMedia({ video, audio: true });
-      toast.success(video ? "Video call started" : "Voice call started");
+      const res = await axios.post(`${API}/studio/beat/generate`, {
+        prompt: beatPrompt.trim(), bpm: beatBpm, genre: beatGenre, duration_sec: 30,
+      });
+      const url = res.data?.audio_url || res.data?.beat_url;
+      if (url) {
+        const entry = { id: `beat-${Date.now()}`, name: `AI Beat — ${beatGenre}`, url, blob: null, duration: 0 };
+        setStems((prev) => [entry, ...prev]);
+        toast.success("AI beat ready · added to stems");
+      } else {
+        toast.message("Beat generated (preview unavailable)");
+      }
+    } catch (err) {
+      toast.error("Beat generator unavailable");
+    } finally { setBeatGenerating(false); }
+  };
+
+  // ── Mic record (sing over the active stem) ──
+  const toggleRecord = async () => {
+    if (recording) {
+      recRef.current.rec?.stop();
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm") ? "audio/webm"
+        : MediaRecorder.isTypeSupported("audio/mp4") ? "audio/mp4" : "";
+      const rec = new MediaRecorder(stream, mimeType ? { mimeType } : undefined);
+      recRef.current = { stream, rec, chunks: [] };
+      rec.ondataavailable = (e) => { if (e.data.size > 0) recRef.current.chunks.push(e.data); };
+      rec.onstop = () => {
+        const blob = new Blob(recRef.current.chunks, { type: mimeType || "audio/webm" });
+        const url = URL.createObjectURL(blob);
+        setLastTakeUrl(url);
+        stream.getTracks().forEach((t) => t.stop());
+        setRecording(false);
+        toast.success("Take saved · listen back");
+      };
+      rec.start();
+      setRecording(true);
+      // Optionally start the active stem when recording starts
+      const stem = stems.find((s) => s.id === activeStemId);
+      if (stem && !stemPlaying) playStem(stem);
     } catch {
-      toast.error("Camera/mic permission denied");
+      toast.error("Mic permission denied");
     }
   };
+
+  useEffect(() => () => {
+    if (stemAudioRef.current) stemAudioRef.current.pause();
+    if (recRef.current.stream) recRef.current.stream.getTracks().forEach((t) => t.stop());
+    stems.forEach((s) => { try { URL.revokeObjectURL(s.url); } catch { /* noop */ } });
+    if (lastTakeUrl) try { URL.revokeObjectURL(lastTakeUrl); } catch { /* noop */ }
+  }, []);
 
   const bpm = 128;
   const keyName = "E MIN";
@@ -290,20 +368,15 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
           <p className="text-[10px] sm:text-xs text-[#A0A0B0] font-bold mt-0.5 truncate" data-testid="stadium-song-artist">{songArtist}</p>
         </div>
         <div className="flex items-center gap-2 sm:gap-3">
-          <button data-testid="fire-count" onClick={() => { setFireCount((c) => c + 1); setXp((x) => x + 1); }}
-            className="flex items-center gap-1 px-2 h-7 rounded-full border border-[#FF6B00]/30 bg-[#FF6B00]/8 hover:bg-[#FF6B00]/15">
-            <Flame className="w-3 h-3 text-[#FF6B00]" />
-            <span className="text-[10px] font-black text-white">{fireCount.toLocaleString()}</span>
-          </button>
-          <button data-testid="heart-count" onClick={() => { setHeartCount((c) => c + 1); setXp((x) => x + 1); }}
-            className="flex items-center gap-1 px-2 h-7 rounded-full border border-[#39FF14]/30 bg-[#39FF14]/8 hover:bg-[#39FF14]/15">
-            <Heart className="w-3 h-3 text-[#39FF14]" />
-            <span className="text-[10px] font-black text-white">{heartCount.toLocaleString()}</span>
-          </button>
+          {recording && (
+            <span className="flex items-center gap-1.5 px-2 h-7 rounded-full border border-red-500/40 bg-red-500/10 text-red-400 text-[10px] font-black uppercase tracking-wider" data-testid="personal-rec-pill">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" /> Rec
+            </span>
+          )}
         </div>
       </header>
 
-      {/* Mobile-only tab switcher between mixer / chat */}
+      {/* Mobile-only tab switcher between mixer / tools */}
       <div className="lg:hidden px-3 pb-2 flex gap-1.5" data-testid="mobile-tabs">
         <button onClick={() => setMobileTab("mixer")} data-testid="mobile-tab-mixer"
           className={`flex-1 h-8 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 ${
@@ -311,11 +384,11 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
           }`}>
           <Sliders className="w-3 h-3" /> Mixer
         </button>
-        <button onClick={() => setMobileTab("chat")} data-testid="mobile-tab-chat"
+        <button onClick={() => setMobileTab("tools")} data-testid="mobile-tab-tools"
           className={`flex-1 h-8 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 ${
-            mobileTab === "chat" ? "bg-[#FF6B00] text-white" : "border border-white/10 text-[#A0A0B0]"
+            mobileTab === "tools" ? "bg-[#FF6B00] text-white" : "border border-white/10 text-[#A0A0B0]"
           }`}>
-          <MessageSquare className="w-3 h-3" /> Chat
+          <Wand2 className="w-3 h-3" /> Tools
         </button>
       </div>
 
@@ -434,73 +507,109 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
               </div>
             </section>
 
-            {/* ── RIGHT: Stadium Chat + Fan Level ── */}
-            <aside data-testid="stadium-chat"
-              className={`relative rounded-2xl border border-white/8 backdrop-blur-md p-3 flex flex-col ${mobileTab === "chat" ? "flex" : "hidden"} lg:flex`}
+            {/* ── RIGHT: Studio Tools — Stem Upload + AI Beat + Sing-to-Stems ── */}
+            <aside data-testid="studio-tools-panel"
+              className={`relative rounded-2xl border border-white/8 backdrop-blur-md p-3 flex flex-col gap-3 ${mobileTab === "tools" ? "flex" : "hidden"} lg:flex`}
               style={{ background: "linear-gradient(180deg, rgba(15,15,22,0.85), rgba(5,5,10,0.85))" }}>
-              <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#FF6B00] mb-2 flex items-center gap-1">
-                <MessageSquare className="w-3 h-3" /> Stadium Chat
-              </p>
 
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 max-h-[260px] lg:max-h-none" data-testid="stadium-chat-feed">
-                {messages.map((m) => (
-                  <div key={m.id} className="flex items-start gap-2" data-testid={`chat-msg-${m.id}`}>
-                    <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 text-[10px] font-black"
-                      style={{ background: `${m.color}26`, color: m.color, border: `1px solid ${m.color}44` }}>
-                      {m.user[0].toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[10px]">
-                        <span className="font-black" style={{ color: m.color }}>{m.user}</span>
-                        <span className="text-[#5C5C6B] ml-1">· {m.ts}</span>
-                      </p>
-                      <p className="text-xs text-white truncate">{m.text}</p>
-                    </div>
+              {/* Section 1 — Stem upload queue */}
+              <div data-testid="stem-upload-section">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#39FF14] flex items-center gap-1">
+                    <Upload className="w-3 h-3" /> Stems
+                  </p>
+                  <button onClick={onPickFile} data-testid="stem-upload-btn"
+                    className="h-7 px-2.5 rounded-full text-[9px] font-black uppercase tracking-wider border border-[#39FF14]/40 text-[#39FF14] hover:bg-[#39FF14]/10">
+                    Upload
+                  </button>
+                </div>
+                <input ref={fileInputRef} type="file" accept="audio/*" multiple onChange={onFileChange}
+                  data-testid="stem-file-input" className="hidden" />
+                {stems.length === 0 ? (
+                  <button onClick={onPickFile} data-testid="stem-empty"
+                    className="w-full rounded-xl border border-dashed border-white/10 p-3 flex items-center gap-2 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left">
+                    <Music2 className="w-6 h-6 text-[#39FF14]/40 flex-shrink-0" />
+                    <p className="text-[10px] text-[#A0A0B0]">Drop a WAV / MP3 backing track here</p>
+                  </button>
+                ) : (
+                  <div className="space-y-1.5 max-h-40 overflow-y-auto" data-testid="stem-list">
+                    {stems.map((s) => {
+                      const isActive = activeStemId === s.id && stemPlaying;
+                      return (
+                        <div key={s.id} data-testid={`stem-${s.id}`}
+                          className={`flex items-center gap-2 p-2 rounded-xl border ${isActive ? "border-[#39FF14]/50 bg-[#39FF14]/8" : "border-white/5"}`}>
+                          <button onClick={() => playStem(s)} data-testid={`stem-play-${s.id}`}
+                            className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isActive ? "bg-[#39FF14] text-[#05050A]" : "bg-[#39FF14]/15 text-[#39FF14]"}`}>
+                            {isActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 ml-0.5" />}
+                          </button>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-[11px] font-bold text-white truncate">{s.name}</p>
+                            {s.duration > 0 && <p className="text-[9px] text-[#5C5C6B]">{Math.round(s.duration)}s</p>}
+                          </div>
+                          <button onClick={() => removeStem(s.id)} data-testid={`stem-remove-${s.id}`}
+                            className="w-6 h-6 rounded-md flex items-center justify-center text-[#5C5C6B] hover:text-red-400 hover:bg-red-500/10">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                )}
               </div>
 
-              {/* Fan Level XP tracker */}
-              <div className="mt-3 pt-3 border-t border-white/5" data-testid="fan-level-tracker">
-                <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#39FF14]">Fan Level</p>
-                  <p className="text-[10px] font-black text-white">{fanLevel.tier}</p>
-                </div>
-                <div className="relative h-1.5 rounded-full overflow-hidden bg-white/8">
-                  <div className="absolute top-0 left-0 h-full transition-[width]"
-                    style={{
-                      width: `${fanLevel.pct}%`,
-                      background: "linear-gradient(90deg, #FF6B00, #39FF14)",
-                      boxShadow: "0 0 12px rgba(57,255,20,0.55)",
-                    }} />
-                </div>
-                <div className="flex items-center justify-between mt-1">
-                  <p className="text-[9px] text-[#5C5C6B] font-bold">{xp} XP</p>
-                  <p className="text-[9px] text-[#5C5C6B] font-bold">→ {fanLevel.next} XP</p>
-                </div>
-              </div>
-
-              {/* Say something — with video/voice call icons */}
-              <div className="mt-3 flex items-center gap-1.5" data-testid="say-something">
-                <Button onClick={() => startCall(true)} data-testid="stadium-video-call-btn"
-                  className="h-9 w-9 rounded-lg bg-[#39FF14]/15 border border-[#39FF14]/30 text-[#39FF14] hover:bg-[#39FF14]/25 p-0 shrink-0"
-                  title="Start video call">
-                  <Video className="w-4 h-4" />
-                </Button>
-                <Button onClick={() => startCall(false)} data-testid="stadium-voice-call-btn"
-                  className="h-9 w-9 rounded-lg bg-[#FF6B00]/15 border border-[#FF6B00]/30 text-[#FF6B00] hover:bg-[#FF6B00]/25 p-0 shrink-0"
-                  title="Start voice call">
-                  <Phone className="w-4 h-4" />
-                </Button>
-                <Input value={chatMsg} onChange={(e) => setChatMsg(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendChat()}
-                  data-testid="say-something-input"
-                  placeholder="Say something…"
+              {/* Section 2 — AI Beat Maker prompt */}
+              <div data-testid="ai-beat-section" className="pt-3 border-t border-white/5">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#FF6B00] mb-2 flex items-center gap-1">
+                  <Sparkles className="w-3 h-3" /> AI Beat Maker
+                </p>
+                <Input value={beatPrompt} onChange={(e) => setBeatPrompt(e.target.value)}
+                  placeholder="e.g. dark trap, 808s, eerie keys"
+                  data-testid="ai-beat-prompt"
                   className="h-9 bg-[#0F0F16] border-white/10 text-white text-xs rounded-lg" />
-                <Button onClick={sendChat} data-testid="say-something-send"
-                  className="h-9 w-9 rounded-lg bg-[#FF6B00] hover:bg-[#FF8533] text-white p-0 shrink-0">
-                  <Send className="w-4 h-4" />
+                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                  <Input type="number" value={beatBpm}
+                    onChange={(e) => setBeatBpm(Math.max(40, Math.min(220, +e.target.value || 96)))}
+                    placeholder="BPM"
+                    data-testid="ai-beat-bpm"
+                    className="h-8 bg-[#0F0F16] border-white/10 text-white text-xs rounded-lg" />
+                  <select value={beatGenre} onChange={(e) => setBeatGenre(e.target.value)}
+                    data-testid="ai-beat-genre"
+                    className="h-8 bg-[#0F0F16] border border-white/10 text-white text-xs rounded-lg px-2">
+                    {["Hip-Hop", "Trap", "Lo-Fi", "Boom Bap", "Drill", "R&B"].map((g) => <option key={g}>{g}</option>)}
+                  </select>
+                </div>
+                <Button onClick={generateBeat} disabled={beatGenerating || !beatPrompt.trim()}
+                  data-testid="ai-beat-generate"
+                  className="w-full mt-1.5 h-9 rounded-lg bg-[#FF6B00] hover:bg-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider gap-1.5">
+                  {beatGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                  {beatGenerating ? "Generating…" : "Generate Beat"}
                 </Button>
+              </div>
+
+              {/* Section 3 — Sing-to-Stems controls (Record) */}
+              <div data-testid="record-section" className="pt-3 border-t border-white/5 mt-auto">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#39FF14] mb-2 flex items-center gap-1">
+                  <Mic className="w-3 h-3" /> Sing to Stems
+                </p>
+                <Button onClick={toggleRecord} data-testid="personal-record-btn"
+                  className={`w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-wider gap-1.5 ${
+                    recording
+                      ? "bg-red-500 hover:bg-red-600 text-white"
+                      : "bg-[#39FF14] hover:bg-[#39FF14]/85 text-[#05050A]"
+                  }`}
+                  style={!recording ? { boxShadow: "0 0 18px rgba(57,255,20,0.4)" } : undefined}>
+                  {recording ? <><Square className="w-3 h-3" /> Stop Take</> : <><Mic className="w-3 h-3" /> Record Take</>}
+                </Button>
+                <p className="text-[9px] text-[#5C5C6B] mt-1 text-center">
+                  {activeStemId
+                    ? "Hits record · plays the selected stem"
+                    : "Pick a stem above first (or just record dry)"}
+                </p>
+                {lastTakeUrl && (
+                  <audio src={lastTakeUrl} controls className="mt-2 w-full"
+                    data-testid="last-take-player"
+                    style={{ filter: "invert(0.85) hue-rotate(180deg)" }} />
+                )}
               </div>
             </aside>
           </div>
