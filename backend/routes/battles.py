@@ -96,13 +96,42 @@ async def _public_profile(user_id: str) -> dict:
 
 
 async def _try_match() -> Optional[dict]:
-    """Pair the two longest-waiting users in the queue, if at least two exist."""
+    """Pair the two longest-waiting users in the queue, if at least two exist.
+
+    Concurrency-safe: atomically claim each candidate out of the queue via a
+    conditional update. If another worker has already claimed a candidate
+    (modified_count == 0) we abort, requeue the partial claim, and bail. This
+    prevents two simultaneous matchmakers from producing duplicate battles for
+    the same pair.
+    """
     waiting = await db.battle_users.find(
         {"in_queue": True}, {"_id": 0}
     ).sort("queued_at", 1).limit(2).to_list(2)
     if len(waiting) < 2:
         return None
     a, b = waiting[0], waiting[1]
+    matched_at = _iso(_now())
+
+    # Atomic claim — side A
+    claim_a = await db.battle_users.update_one(
+        {"user_id": a["user_id"], "in_queue": True},
+        {"$set": {"in_queue": False, "matched_at": matched_at}, "$unset": {"queued_at": ""}},
+    )
+    if claim_a.modified_count != 1:
+        return None  # someone else claimed A first
+
+    # Atomic claim — side B
+    claim_b = await db.battle_users.update_one(
+        {"user_id": b["user_id"], "in_queue": True},
+        {"$set": {"in_queue": False, "matched_at": matched_at}, "$unset": {"queued_at": ""}},
+    )
+    if claim_b.modified_count != 1:
+        # Roll back A so they stay in the queue and can be paired with someone else
+        await db.battle_users.update_one(
+            {"user_id": a["user_id"]},
+            {"$set": {"in_queue": True, "queued_at": matched_at}, "$unset": {"matched_at": ""}},
+        )
+        return None
 
     battle = {
         "id": str(uuid.uuid4()),
@@ -126,11 +155,6 @@ async def _try_match() -> Optional[dict]:
         "created_at": _iso(_now()),
     }
     await db.battles.insert_one(battle)
-    # Remove both from queue
-    await db.battle_users.update_many(
-        {"user_id": {"$in": [a["user_id"], b["user_id"]]}},
-        {"$set": {"in_queue": False, "matched_at": _iso(_now())}, "$unset": {"queued_at": ""}},
-    )
     logger.info(f"[battles] matched {a['user_id']} vs {b['user_id']} → {battle['id']}")
     battle.pop("_id", None)
     return battle
@@ -355,22 +379,31 @@ async def vote(battle_id: str, req: VoteReq):
         expires = b.get("archive_expires_at")
         if expires and _now() > datetime.fromisoformat(expires):
             raise HTTPException(410, "Archive window closed")
-    if req.voter_id in (b.get("voters") or []):
-        raise HTTPException(409, "Already voted")
     if req.voter_id in (b["user_a"], b["user_b"]):
         raise HTTPException(403, "Participants cannot vote")
+    # Atomic guarded update — `voters: {$ne: voter_id}` ensures only ONE vote
+    # is counted even under racing double-tap / parallel requests.
     inc = {"votes_a": 1} if req.choice == "a" else {"votes_b": 1}
-    await db.battles.update_one(
-        {"id": battle_id},
+    res = await db.battles.update_one(
+        {"id": battle_id, "voters": {"$ne": req.voter_id}},
         {"$inc": inc, "$push": {"voters": req.voter_id}},
     )
+    if res.modified_count == 0:
+        raise HTTPException(409, "Already voted")
     b = await db.battles.find_one({"id": battle_id}, {"_id": 0, "beat_data_url": 0, "voters": 0})
     return {"success": True, "battle": b}
 
 
 @router.post("/rap-battles/{battle_id}/finish")
 async def finish(battle_id: str):
-    """Mark battle done, archive for 7 days, increment winner/loser counters."""
+    """Mark battle done, archive for 7 days, increment winner/loser counters.
+
+    Concurrency-safe: every open viewer's stage fires `/finish` when the 60s
+    beat ends, so we atomically claim the live→archived transition. Only the
+    request that wins the claim (modified_count == 1) increments leaderboard
+    counters. All other racing calls return the already-archived state without
+    inflating wins/losses. This guarantees Top-200 leaderboard integrity.
+    """
     b = await db.battles.find_one({"id": battle_id}, {"_id": 0})
     if not b:
         raise HTTPException(404, "Battle not found")
@@ -388,8 +421,9 @@ async def finish(battle_id: str):
     loser_id = b["user_b"] if winner_side == "a" else (b["user_a"] if winner_side == "b" else None)
 
     expires = _now() + timedelta(days=ARCHIVE_TTL_DAYS)
-    await db.battles.update_one(
-        {"id": battle_id},
+    # Atomic claim of the archive transition — race-safe.
+    res = await db.battles.update_one(
+        {"id": battle_id, "status": {"$in": ["live", "agreed"]}},
         {"$set": {
             "status": "archived",
             "winner": winner_id,
@@ -397,9 +431,11 @@ async def finish(battle_id: str):
             "archive_expires_at": _iso(expires),
         }},
     )
-    if winner_id:
-        await db.battle_users.update_one({"user_id": winner_id}, {"$inc": {"lifetime_wins": 1}})
-    if loser_id:
-        await db.battle_users.update_one({"user_id": loser_id}, {"$inc": {"lifetime_losses": 1}})
+    if res.modified_count == 1:
+        # We are the SINGLE winner of the race — credit the leaderboard exactly once.
+        if winner_id:
+            await db.battle_users.update_one({"user_id": winner_id}, {"$inc": {"lifetime_wins": 1}})
+        if loser_id:
+            await db.battle_users.update_one({"user_id": loser_id}, {"$inc": {"lifetime_losses": 1}})
     b = await db.battles.find_one({"id": battle_id}, {"_id": 0, "beat_data_url": 0, "voters": 0})
     return {"success": True, "battle": b}

@@ -99,7 +99,16 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
 
   const skipIntro = () => setPhase("playback");
 
+  // Demo fixture (Preview Cinematic Intro) has no backend row — skip the API
+  // calls and just toggle local state so the preview stays clean.
+  const isDemo = recording?.id === "demo-cinematic";
+
   const toggleLike = async () => {
+    if (isDemo) {
+      setLiked((v) => !v);
+      setLikes((n) => Math.max(0, n + (liked ? -1 : 1)));
+      return;
+    }
     try {
       const r = await axios.post(`${API}/gamer/recordings/${recording.id}/like`, { user_id: currentUserId });
       if (r.data?.success) { setLikes(r.data.likes); setLiked(r.data.liked); }
@@ -107,6 +116,11 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
   };
 
   const toggleShowBoth = async () => {
+    if (isDemo) {
+      setShowBoth((v) => !v);
+      toast.message("Preview mode — change won't be saved");
+      return;
+    }
     try {
       const next = !showBoth;
       await axios.post(`${API}/gamer/recordings/${recording.id}/share-scope`, { user_id: currentUserId, show_on_both: next });

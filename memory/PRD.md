@@ -241,6 +241,15 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - Sub-components `BattleStatusSection`, `PlaylistsSection`, `MyRapsSection` live in-file (588 lines total).
 - Tested frontend 8/8 testable flows passed (iteration_25); active-battle card verified via code review.
 
+## Mar 1, 2026 — CODE REVIEW BLOCKERS RESOLVED + PITCH DECK
+- **3 atomic concurrency fixes in `routes/battles.py`** (code-review HIGH/MED blockers for contest data integrity):
+  - **`/finish` race** (HIGH): every spectator's `audio.onended` fired `POST /finish`, multiplying winner's `lifetime_wins`. Now uses an atomic claim — `update_one({status:{$in:["live","agreed"]}}, …)` and credits leaderboard ONLY when `modified_count == 1`. Top-200 leaderboard is now race-safe.
+  - **Matchmaker dedupe** (MED): two concurrent `/register` or `/matchmake/run` calls could pair the same two users into two battles. Now each candidate is atomically claimed via conditional `update_one({user_id, in_queue:true})`; if the second claim fails, the first is rolled back into the queue.
+  - **Double-vote** (MED): non-atomic check-then-write let a fast double-tap count twice. Now uses guarded `update_one({voters:{$ne:voter_id}}, {$inc, $push:voters})`; `modified_count == 0` returns 409.
+- **Regression tests added**: `/app/backend/tests/test_battle_concurrency.py` — 3 tests that fire 10 concurrent votes/finish/register against the same resource and assert exact invariants. All 3 PASS.
+- **BackstageCinema demo guard**: like/share buttons now detect `recording.id === "demo-cinematic"` and skip the API call (no more error toasts in the preview-cinematic flow).
+- **Pitch Deck**: created `/app/PITCH_DECK.md` — Rap Battle Matchmaker-centric mission brief for the AI Builder Contest, covering matchmaking-within-the-hour, user-ID stats, the Agreement Call, the 60-second live-streamed beat, the 1-week voting gallery, and the Quarterly Global Contest (Top 200).
+
 ## Mar 1, 2026 — CONTEST LAUNCH POLISH (iteration_33 follow-up)
 - **Strict brand palette enforcement**: removed every off-brand accent (cyan #00E0FF, magenta #FF4FB1, purple #B57BFF, yellow #FFEB3B) across:
   - `GamerStage.js` — Guitar Hero `LANE_COLORS` re-palette → Orange / Green / Light-Orange (#FFA64D) / Light-Green (#7FFF8E); LightTrails SVG gradient re-tints (trail2/3/4); "Notes" label color from cyan → electric green.
