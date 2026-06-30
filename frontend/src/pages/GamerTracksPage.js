@@ -203,7 +203,7 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
           {tracks.map((t, i) => {
             const isPlaying = playingId === t.track_id;
             return (
-            <div key={t.track_id || i}
+            <div key={`${t.track_id || "x"}-${t.year ?? "_"}-${t.rank ?? i}`}
               data-testid={`catalog-track-${i}`}
               className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl border transition-all ${
                 isPlaying ? "border-[#39FF14]/50 bg-[#39FF14]/8 shadow-[0_0_18px_rgba(57,255,20,0.18)]" : "border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5"

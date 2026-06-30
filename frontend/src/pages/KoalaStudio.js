@@ -58,6 +58,10 @@ export default function KoalaStudio({ onBack }) {
   const [steps, setSteps] = useState(() => Array.from({ length: NUM_PADS }, () => Array(16).fill(false)));
   const [stepIdx, setStepIdx] = useState(0);
   const seqTimerRef = useRef(null);
+  const stepsRef = useRef(steps);
+  // Keep ref in sync with state so the interval callback sees current cells
+  // without restarting the interval each toggle.
+  useEffect(() => { stepsRef.current = steps; }, [steps]);
 
   const mediaRef = useRef({ stream: null, rec: null, chunks: [] });
 
@@ -78,7 +82,7 @@ export default function KoalaStudio({ onBack }) {
     eng.setMasterVolume(stemVol.master / 100);
   }, [stemVol, stemMute]);
 
-  // Sequencer loop
+  // Sequencer loop — reads steps via ref so cell toggles don't restart timing
   useEffect(() => {
     if (!seqEnabled) {
       if (seqTimerRef.current) { clearInterval(seqTimerRef.current); seqTimerRef.current = null; }
@@ -90,12 +94,12 @@ export default function KoalaStudio({ onBack }) {
       setStepIdx((idx) => {
         const next = (idx + 1) % 16;
         const eng = engineRef.current;
-        steps.forEach((row, padId) => { if (row[next]) eng?.play(padId); });
+        stepsRef.current.forEach((row, padId) => { if (row[next]) eng?.play(padId); });
         return next;
       });
     }, stepMs);
     return () => { if (seqTimerRef.current) clearInterval(seqTimerRef.current); };
-  }, [seqEnabled, bpm, steps]);
+  }, [seqEnabled, bpm]);
 
   // ── Pad triggers ───────────────────────────────────────────────────────
   const triggerPad = useCallback(async (padId) => {
