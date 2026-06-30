@@ -10,6 +10,7 @@ import {
   Loader2, Play, Pause, Trash2, Wand2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { putStem, listStems, removeStem as dbRemoveStem, dataUrlToBlob } from "@/services/stemStore";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -231,8 +232,10 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
     for (const file of files) {
       if (!file.type.startsWith("audio/")) { toast.error(`${file.name}: not an audio file`); continue; }
       const url = URL.createObjectURL(file);
-      const entry = { id: `stem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, name: file.name, url, blob: file, duration: 0 };
-      // Best-effort duration probe
+      const entry = {
+        id: `stem-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        name: file.name, url, blob: file, duration: 0, kind: "upload",
+      };
       try {
         const a = new Audio(url);
         await new Promise((res) => {
@@ -241,14 +244,22 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
         });
       } catch { /* noop */ }
       setStems((prev) => [...prev, entry]);
+      // Persist (blob + metadata) — file is itself a Blob so no conversion needed
+      putStem({ id: entry.id, name: entry.name, blob: file, duration: entry.duration, kind: "upload" })
+        .catch((err) => console.warn("[stems] persist failed:", err));
     }
     if (e.target) e.target.value = "";
-    toast.success(`${files.length} stem${files.length === 1 ? "" : "s"} added`);
+    if (files.length) toast.success(`${files.length} stem${files.length === 1 ? "" : "s"} added`);
   };
 
   const removeStem = (id) => {
-    setStems((prev) => prev.filter((s) => s.id !== id));
+    setStems((prev) => {
+      const target = prev.find((s) => s.id === id);
+      if (target?.url) { try { URL.revokeObjectURL(target.url); } catch { /* noop */ } }
+      return prev.filter((s) => s.id !== id);
+    });
     if (activeStemId === id) { stemAudioRef.current?.pause(); setStemPlaying(false); setActiveStemId(null); }
+    dbRemoveStem(id).catch(() => { /* noop */ });
   };
 
   const playStem = (stem) => {
@@ -277,9 +288,14 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
       const url = res.data?.beat?.preview_url || res.data?.beat?.audio_url || res.data?.audio_url;
       const labelBase = beatPrompt.trim() || `AI Beat · ${beatGenre.replace(/_/g, " ")}`;
       if (url) {
-        const entry = { id: `beat-${Date.now()}`, name: labelBase, url, blob: null, duration: 0 };
+        const entry = { id: `beat-${Date.now()}`, name: labelBase, url, blob: null, duration: 0, kind: "beat" };
         setStems((prev) => [entry, ...prev]);
         toast.success("AI beat ready · added to stems");
+        // Convert data: URL to a Blob and persist
+        dataUrlToBlob(url).then((blob) => {
+          if (blob) putStem({ id: entry.id, name: entry.name, blob, duration: 0, kind: "beat" })
+            .catch((err) => console.warn("[stems] beat persist failed:", err));
+        });
       } else {
         toast.message("Beat generated (preview unavailable)");
       }
@@ -325,6 +341,32 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
     if (recRef.current.stream) recRef.current.stream.getTracks().forEach((t) => t.stop());
     stems.forEach((s) => { try { URL.revokeObjectURL(s.url); } catch { /* noop */ } });
     if (lastTakeUrl) try { URL.revokeObjectURL(lastTakeUrl); } catch { /* noop */ }
+  }, []);
+
+  // Hydrate persisted stems from IndexedDB on first mount
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const saved = await listStems();
+        if (cancelled || !saved.length) return;
+        const hydrated = saved
+          .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+          .map((s) => ({
+            id: s.id,
+            name: s.name,
+            blob: s.blob,
+            url: URL.createObjectURL(s.blob),
+            duration: s.duration || 0,
+            kind: s.kind || "upload",
+          }));
+        setStems((prev) => {
+          const seen = new Set(prev.map((p) => p.id));
+          return [...hydrated.filter((h) => !seen.has(h.id)), ...prev];
+        });
+      } catch (err) { console.warn("[stems] hydrate failed:", err); }
+    })();
+    return () => { cancelled = true; };
   }, []);
 
   const bpm = 128;

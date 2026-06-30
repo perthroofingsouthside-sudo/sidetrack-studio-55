@@ -10,7 +10,7 @@ import BattleStageBackdrop, { SKIN_KEYS, SKIN_LABELS } from "@/components/Battle
 export default function BattleStageListView({
   battles, leaderboard,
   stageSkin, skinPickerOpen, onTogglePicker, onChangeSkin,
-  onCreateBattle, onOpenBattle,
+  onCreateBattle, onOpenBattle, onOpenDetail,
 }) {
   const allSceneryCovers = [...battles, ...leaderboard];
   const marqueeArtists = (() => {
@@ -218,9 +218,19 @@ export default function BattleStageListView({
                         </span>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0">
-                      <span className="text-[8px] uppercase tracking-wider text-[#FF6B00] font-black">Enter</span>
-                      <Swords className="w-5 h-5 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                    <div className="flex flex-col items-center gap-1 flex-shrink-0">
+                      <button
+                        data-testid={`view-covers-${battle.id}`}
+                        onClick={(e) => { e.stopPropagation(); onOpenDetail && onOpenDetail(battle); }}
+                        className="px-2 h-6 rounded-full text-[8px] font-black uppercase tracking-wider border border-[#39FF14]/40 bg-[#39FF14]/10 text-[#39FF14] hover:bg-[#39FF14]/20 transition-colors"
+                        title="View covers + vote"
+                      >
+                        View Covers
+                      </button>
+                      <div className="flex items-center gap-0.5">
+                        <span className="text-[8px] uppercase tracking-wider text-[#FF6B00] font-black">Enter</span>
+                        <Swords className="w-4 h-4 text-[#FF6B00] group-hover:scale-110 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 ))}

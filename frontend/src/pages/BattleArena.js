@@ -70,6 +70,19 @@ export default function BattleArena({ currentSong, pendingBattleSong, onPendingB
     } catch { toast.error("Failed to load battle"); }
   }, []);
 
+  /** Open the covers/voting detail view without entering the stage. */
+  const openBattleDetail = useCallback(async (battle) => {
+    setSelectedBattle(battle);
+    setView("detail");
+    try {
+      const res = await axios.get(`${API}/battles/${battle.id}`);
+      if (res.data.success) {
+        setSelectedBattle(res.data.battle);
+        setCovers(res.data.covers);
+      }
+    } catch { toast.error("Failed to load battle"); }
+  }, []);
+
   const createBattle = useCallback(async (override) => {
     const songToUse = override || currentSong;
     if (!songToUse) {
@@ -182,6 +195,7 @@ export default function BattleArena({ currentSong, pendingBattleSong, onPendingB
       onChangeSkin={changeSkin}
       onCreateBattle={createBattle}
       onOpenBattle={openBattle}
+      onOpenDetail={openBattleDetail}
     />
   );
 }
