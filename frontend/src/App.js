@@ -135,7 +135,16 @@ function App() {
         />
       </div>
 
+      {/* Slim GlobalPlayer bar is scoped ONLY to the two playback-oriented
+          tabs — Discover (creator lane home) and Tracks (gamer lane
+          `playlists` view routes to GamerTracksPage). Audio playback
+          continues across tabs but the UI bar disappears everywhere else
+          so it never obscures Connect / Studio / Record / Backstage /
+          Profile chrome. */}
       {nowPlaying && (
+        currentView === "home" ||
+        (currentView === "playlists" && lane === "gamer")
+      ) && (
         <GlobalPlayer
           nowPlaying={nowPlaying}
           isPlaying={isPlaying}

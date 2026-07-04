@@ -5,22 +5,17 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
-import NowPlayingHero from "@/components/NowPlayingHero";
 
 /**
  * Discover — Creator Lane Utility Tab
  *
  * Strictly three things:
  *  1. SEARCH the ~3,800 track Hottest 100 + Top 200 Hip-Hop catalog.
- *  2. LISTEN via the global player (and the NowPlayingHero overlay).
+ *  2. LISTEN via the global player (slim bottom bar — never blocks Discover).
  *  3. PLAYLISTS — quick access + inline "Add to playlist" on each result.
- *
- * No mic recognition, no Battle buttons, no Studio CTAs. Other lanes/tabs
- * handle those flows.
  */
 export default function HomePage({
-  onTrackSelect, onOpenPlaylists, nowPlaying,
-  isPlaying, progress, togglePlayPause, handleSeek, openInStudio,
+  onTrackSelect, onOpenPlaylists, nowPlaying, isPlaying,
 }) {
   const [query, setQuery] = useState("");
   const [searching, setSearching] = useState(false);
@@ -28,16 +23,11 @@ export default function HomePage({
   const [hasSearched, setHasSearched] = useState(false);
   const [mosaic, setMosaic] = useState([]);
   const [playlists, setPlaylists] = useState([]);
-  // When something is playing, allow user to temporarily override the hero
-  // to find another track. Reset to hero on track change.
-  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   // Track id of result whose "add-to-playlist" picker is open
   const [pickerOpen, setPickerOpen] = useState(null);
   // Track ids that just got added (to flash a check)
   const [justAdded, setJustAdded] = useState({});
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
-
-  useEffect(() => { setShowSearchOverlay(false); }, [nowPlaying?.id]);
 
   // Load initial mosaic (random sample of catalog) + user playlists
   useEffect(() => {
@@ -151,20 +141,10 @@ export default function HomePage({
 
   return (
     <>
-      {/* IMMERSIVE NOW-PLAYING — shown while a track is streaming on Discover */}
-      {nowPlaying && !showSearchOverlay && (
-        <NowPlayingHero
-          nowPlaying={nowPlaying}
-          isPlaying={isPlaying}
-          progress={progress}
-          togglePlayPause={togglePlayPause}
-          handleSeek={handleSeek}
-          openInStudio={openInStudio}
-          onTapSearch={() => setShowSearchOverlay(true)}
-        />
-      )}
-      {(!nowPlaying || showSearchOverlay) && (
-        <div className="min-h-screen relative overflow-hidden px-4 pt-0 pb-[88px]" data-testid="home-page">
+      {/* Discover Hub is ALWAYS visible — the slim GlobalPlayer bar (below,
+          separately mounted) handles now-playing state without ever hiding
+          the mosaic, circle, or search. */}
+      <div className="min-h-screen relative overflow-hidden px-4 pt-0 pb-[88px]" data-testid="home-page">
           {/* Ambient background */}
           <div className="absolute inset-0 z-0 pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#FF6B00]/6 blur-[140px]" />
@@ -284,20 +264,7 @@ export default function HomePage({
               />
             )}
           </div>
-
-          {/* Back-to-now-playing pill when overlay is shown */}
-          {nowPlaying && showSearchOverlay && (
-            <button
-              onClick={() => setShowSearchOverlay(false)}
-              data-testid="back-to-now-playing"
-              className="fixed top-3 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-4 h-9 rounded-full border border-[#39FF14]/40 bg-[#0F0F16]/90 backdrop-blur-md text-[11px] font-bold uppercase tracking-wider text-[#39FF14]"
-              style={{ boxShadow: "0 0 18px rgba(57,255,20,0.25)" }}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" /> Back to Now Playing
-            </button>
-          )}
-        </div>
-      )}
+      </div>
     </>
   );
 }
@@ -484,59 +451,15 @@ function ClassicLanding({
   while (tiles.length < 8) tiles.push({ __placeholder: true, id: `ph-${tiles.length}` });
   const left = tiles.slice(0, 4);
   const right = tiles.slice(4, 8);
-  // Reserve 88px for the bottom nav, +72px more when the GlobalPlayer bar
-  // is mounted, so the composition always centers inside the truly-visible
-  // area — never behind the player or the nav.
   const reservedPx = hasPlayer ? 176 : 88;
 
   return (
     <div
-      className="w-full flex flex-col items-center justify-center gap-3 sm:gap-4"
+      className="w-full flex flex-col items-center gap-4 sm:gap-5 pt-2"
       style={{ minHeight: `calc(100vh - ${reservedPx}px)` }}
       data-testid="classic-landing"
     >
-      {/* ── PP MONOGRAM ─────────────────────────────────────────── */}
-      <div className="flex flex-col items-center select-none" data-testid="pp-monogram-hero">
-        <div
-          className="relative flex items-center justify-center leading-none"
-          style={{
-            fontFamily: '"Outfit", system-ui, sans-serif',
-            fontWeight: 900,
-            fontSize: "clamp(44px, 7.5vw, 88px)",
-            letterSpacing: "-0.06em",
-          }}
-          aria-label="Pocket Products"
-        >
-          <span
-            style={{
-              color: "#FF6B00",
-              textShadow:
-                "0 0 20px rgba(255,107,0,0.7), 0 0 44px rgba(255,107,0,0.42), 0 0 84px rgba(255,107,0,0.22)",
-            }}
-          >
-            P
-          </span>
-          <span
-            style={{
-              color: "#39FF14",
-              textShadow:
-                "0 0 20px rgba(57,255,20,0.7), 0 0 44px rgba(57,255,20,0.38), 0 0 84px rgba(57,255,20,0.2)",
-              marginLeft: "-0.04em",
-            }}
-          >
-            p
-          </span>
-        </div>
-        <p
-          className="mt-1 text-[8px] sm:text-[10px] font-black text-white/85"
-          style={{ letterSpacing: "0.55em", textIndent: "0.55em" }}
-          data-testid="pp-brand-text"
-        >
-          POCKET PRODUCTS
-        </p>
-      </div>
-
-      {/* ── MOSAIC BAND — 4 covers | Discover circle | 4 covers ── */}
+      {/* ── TOP ROW — [4 covers] [Compact PP emblem] [4 covers] ── */}
       <div
         className="w-full max-w-5xl grid gap-2 sm:gap-4 items-center px-1"
         style={{ gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)" }}
@@ -548,10 +471,7 @@ function ClassicLanding({
           ))}
         </div>
 
-        <DiscoverCircle onClick={() => {
-          const el = document.querySelector('[data-testid="discover-search-input"]');
-          if (el) el.focus();
-        }} />
+        <CompactEmblem />
 
         <div className="grid grid-cols-2 gap-1.5 sm:gap-2" data-testid="mosaic-right">
           {right.map((t, i) => (
@@ -560,7 +480,13 @@ function ClassicLanding({
         </div>
       </div>
 
-      {/* ── SEARCH BAR (directly beneath the circle+mosaic row) ─── */}
+      {/* ── DISCOVER CIRCLE (centred beneath the top row) ────── */}
+      <DiscoverCircle onClick={() => {
+        const el = document.querySelector('[data-testid="discover-search-input"]');
+        if (el) el.focus();
+      }} />
+
+      {/* ── SEARCH BAR ─────────────────────────────────────────── */}
       <div className="w-full max-w-2xl px-1" data-testid="discover-search">
         <div className="flex gap-2">
           <div className="flex-1 relative">
@@ -607,15 +533,85 @@ function ClassicLanding({
         </div>
       </div>
 
-      {/* Hidden playlists row — mounted only when the user has playlists,
-          so the classic landing composition stays lifted; the button above
-          links to the full manage view. This keeps the layout above-the-fold
-          on 600-700px viewports while preserving playlist accessibility. */}
       {playlists.length > 0 && (
-        <div className="w-full max-w-2xl px-1 -mt-1" data-testid="discover-playlists">
+        <div className="w-full max-w-2xl px-1" data-testid="discover-playlists">
           <PlaylistsRow playlists={playlists} onOpenPlaylists={onOpenPlaylists} compact />
         </div>
       )}
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+/**
+ * CompactEmblem — small square Pp badge with the tagline underneath.
+ * Sits in the CENTRE COLUMN of the mosaic band so the top row reads:
+ *   [4 covers on 2×2] · [Pp badge + POCKET PRODUCTS] · [4 covers on 2×2]
+ * The badge is intentionally compact (~clamp 76-108px square) so the
+ * mosaic is genuinely lifted to the top of the viewport.
+ */
+function CompactEmblem() {
+  return (
+    <div className="flex flex-col items-center gap-1.5 select-none" data-testid="pp-monogram-hero">
+      <div
+        className="relative flex items-center justify-center rounded-2xl"
+        style={{
+          width: "clamp(76px, 9vw, 108px)",
+          height: "clamp(76px, 9vw, 108px)",
+          background:
+            "linear-gradient(135deg, rgba(255,107,0,0.10) 0%, rgba(15,15,22,0.85) 45%, rgba(57,255,20,0.10) 100%)",
+          border: "1.5px solid rgba(255,107,0,0.45)",
+          boxShadow:
+            "0 0 18px rgba(255,107,0,0.35), inset 0 0 22px rgba(57,255,20,0.06)",
+        }}
+        aria-label="Pocket Products"
+        data-testid="pp-emblem-badge"
+      >
+        {/* Green edge accent */}
+        <span
+          aria-hidden
+          className="absolute inset-0 rounded-2xl pointer-events-none"
+          style={{ border: "1px solid rgba(57,255,20,0.28)", margin: "3px" }}
+        />
+        {/* Tight Pp monogram inside the square */}
+        <div
+          className="relative flex items-baseline leading-none"
+          style={{
+            fontFamily: '"Outfit", system-ui, sans-serif',
+            fontWeight: 900,
+            fontSize: "clamp(42px, 5.4vw, 62px)",
+            letterSpacing: "-0.06em",
+          }}
+        >
+          <span
+            style={{
+              color: "#FF6B00",
+              textShadow:
+                "0 0 8px rgba(255,107,0,0.85), 0 0 18px rgba(255,107,0,0.5)",
+            }}
+          >
+            P
+          </span>
+          <span
+            style={{
+              color: "#39FF14",
+              textShadow:
+                "0 0 8px rgba(57,255,20,0.85), 0 0 18px rgba(57,255,20,0.45)",
+              marginLeft: "-0.05em",
+            }}
+          >
+            p
+          </span>
+        </div>
+      </div>
+      <p
+        className="text-[8px] sm:text-[9px] font-black text-white/85"
+        style={{ letterSpacing: "0.4em", textIndent: "0.4em" }}
+        data-testid="pp-brand-text"
+      >
+        POCKET PRODUCTS
+      </p>
     </div>
   );
 }
