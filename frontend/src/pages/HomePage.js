@@ -164,7 +164,7 @@ export default function HomePage({
         />
       )}
       {(!nowPlaying || showSearchOverlay) && (
-        <div className="min-h-screen relative overflow-hidden px-4 pt-8 pb-16" data-testid="home-page">
+        <div className="min-h-screen relative overflow-hidden px-4 pt-0 pb-[88px]" data-testid="home-page">
           {/* Ambient background */}
           <div className="absolute inset-0 z-0 pointer-events-none">
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#FF6B00]/6 blur-[140px]" />
@@ -485,15 +485,24 @@ function ClassicLanding({
   const right = tiles.slice(4, 8);
 
   return (
-    <div className="w-full flex flex-col items-center" data-testid="classic-landing">
+    // Vertically centre the whole composition inside the viewport-minus-nav.
+    // 88px reserved for the bottom nav; 12px top pad so the monogram never
+    // kisses the top edge. `justify-center` keeps everything visually
+    // anchored to the middle on tall screens, and compresses gracefully
+    // on shorter viewports.
+    <div
+      className="w-full flex flex-col items-center justify-center gap-3 sm:gap-4"
+      style={{ minHeight: "calc(100vh - 88px)" }}
+      data-testid="classic-landing"
+    >
       {/* ── PP MONOGRAM ─────────────────────────────────────────── */}
-      <div className="flex flex-col items-center pt-6 pb-6 sm:pb-8 select-none" data-testid="pp-monogram-hero">
+      <div className="flex flex-col items-center select-none" data-testid="pp-monogram-hero">
         <div
           className="relative flex items-center justify-center leading-none"
           style={{
             fontFamily: '"Outfit", system-ui, sans-serif',
             fontWeight: 900,
-            fontSize: "clamp(80px, 14vw, 160px)",
+            fontSize: "clamp(44px, 7.5vw, 88px)",
             letterSpacing: "-0.06em",
           }}
           aria-label="Pocket Products"
@@ -502,7 +511,7 @@ function ClassicLanding({
             style={{
               color: "#FF6B00",
               textShadow:
-                "0 0 24px rgba(255,107,0,0.7), 0 0 52px rgba(255,107,0,0.45), 0 0 100px rgba(255,107,0,0.25)",
+                "0 0 20px rgba(255,107,0,0.7), 0 0 44px rgba(255,107,0,0.42), 0 0 84px rgba(255,107,0,0.22)",
             }}
           >
             P
@@ -511,7 +520,7 @@ function ClassicLanding({
             style={{
               color: "#39FF14",
               textShadow:
-                "0 0 24px rgba(57,255,20,0.7), 0 0 52px rgba(57,255,20,0.4), 0 0 100px rgba(57,255,20,0.22)",
+                "0 0 20px rgba(57,255,20,0.7), 0 0 44px rgba(57,255,20,0.38), 0 0 84px rgba(57,255,20,0.2)",
               marginLeft: "-0.04em",
             }}
           >
@@ -519,7 +528,7 @@ function ClassicLanding({
           </span>
         </div>
         <p
-          className="mt-3 text-[10px] sm:text-xs font-black text-white/85"
+          className="mt-1 text-[8px] sm:text-[10px] font-black text-white/85"
           style={{ letterSpacing: "0.55em", textIndent: "0.55em" }}
           data-testid="pp-brand-text"
         >
@@ -529,25 +538,22 @@ function ClassicLanding({
 
       {/* ── MOSAIC BAND — 4 covers | Discover circle | 4 covers ── */}
       <div
-        className="w-full max-w-5xl grid gap-4 sm:gap-6 items-center"
+        className="w-full max-w-5xl grid gap-2 sm:gap-4 items-center px-1"
         style={{ gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)" }}
         data-testid="mosaic-band"
       >
-        {/* LEFT 4 covers as 2×2 */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3" data-testid="mosaic-left">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2" data-testid="mosaic-left">
           {left.map((t, i) => (
             <MosaicTile key={t.id || `L-${i}`} track={t} idx={i} side="left" onPick={onPick} />
           ))}
         </div>
 
-        {/* CENTRAL DISCOVER CIRCLE */}
         <DiscoverCircle onClick={() => {
           const el = document.querySelector('[data-testid="discover-search-input"]');
           if (el) el.focus();
         }} />
 
-        {/* RIGHT 4 covers as 2×2 */}
-        <div className="grid grid-cols-2 gap-2 sm:gap-3" data-testid="mosaic-right">
+        <div className="grid grid-cols-2 gap-1.5 sm:gap-2" data-testid="mosaic-right">
           {right.map((t, i) => (
             <MosaicTile key={t.id || `R-${i}`} track={t} idx={i + 4} side="right" onPick={onPick} />
           ))}
@@ -555,7 +561,7 @@ function ClassicLanding({
       </div>
 
       {/* ── SEARCH BAR (directly beneath the circle+mosaic row) ─── */}
-      <div className="w-full max-w-2xl mt-8 sm:mt-10" data-testid="discover-search">
+      <div className="w-full max-w-2xl px-1" data-testid="discover-search">
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FF6B00]" />
@@ -565,7 +571,7 @@ function ClassicLanding({
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && doSearch()}
               placeholder="Search the catalog…  songs, artists"
-              className="pl-11 pr-9 h-14 bg-[#0F0F16]/90 border border-[#FF6B00]/25 focus-visible:ring-[#FF6B00]/60 text-sm rounded-full"
+              className="pl-11 pr-9 h-12 bg-[#0F0F16]/90 border border-[#FF6B00]/25 focus-visible:ring-[#FF6B00]/60 text-sm rounded-full"
               style={{ boxShadow: "0 0 22px rgba(255,107,0,0.15), inset 0 0 12px rgba(255,107,0,0.05)" }}
             />
             {query && (
@@ -583,21 +589,33 @@ function ClassicLanding({
             onClick={doSearch}
             disabled={searching || !query.trim()}
             data-testid="discover-search-btn"
-            className="h-14 px-6 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40 uppercase tracking-wider"
+            className="h-12 px-5 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-xs disabled:opacity-40 uppercase tracking-wider"
             style={{ boxShadow: "0 0 22px rgba(255,107,0,0.45)" }}
           >
             {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
           </Button>
         </div>
-        <p className="mt-2 text-[10px] text-[#5C5C6B] text-center uppercase tracking-[0.25em] font-bold">
-          Hottest 100 · Top 200 Hip-Hop · 3,800+ tracks
-        </p>
+        <div className="mt-1.5 flex items-center justify-center gap-3 text-[9px] uppercase tracking-[0.25em] font-bold">
+          <span className="text-[#5C5C6B]">Hottest 100 · Top 200 · 3,800+ tracks</span>
+          <button
+            onClick={() => onOpenPlaylists && onOpenPlaylists()}
+            data-testid="discover-playlists-manage"
+            className="text-[#39FF14] hover:text-white transition-colors"
+          >
+            Playlists →
+          </button>
+        </div>
       </div>
 
-      {/* ── PLAYLISTS UTILITY ROW (compact, below search) ────────── */}
-      <div className="w-full max-w-2xl mt-8 mb-4" data-testid="discover-playlists">
-        <PlaylistsRow playlists={playlists} onOpenPlaylists={onOpenPlaylists} />
-      </div>
+      {/* Hidden playlists row — mounted only when the user has playlists,
+          so the classic landing composition stays lifted; the button above
+          links to the full manage view. This keeps the layout above-the-fold
+          on 600-700px viewports while preserving playlist accessibility. */}
+      {playlists.length > 0 && (
+        <div className="w-full max-w-2xl px-1 -mt-1" data-testid="discover-playlists">
+          <PlaylistsRow playlists={playlists} onOpenPlaylists={onOpenPlaylists} compact />
+        </div>
+      )}
     </div>
   );
 }
@@ -612,8 +630,8 @@ function DiscoverCircle({ onClick }) {
       data-testid="discover-circle"
       className="relative group flex-shrink-0 mx-auto"
       style={{
-        width: "clamp(160px, 22vw, 240px)",
-        height: "clamp(160px, 22vw, 240px)",
+        width: "clamp(110px, 15vw, 180px)",
+        height: "clamp(110px, 15vw, 180px)",
       }}
       aria-label="Discover"
     >
@@ -732,7 +750,30 @@ function MosaicTile({ track, idx, side, onPick }) {
 
 /* ──────────────────────────────────────────────────────────────────────── */
 
-function PlaylistsRow({ playlists, onOpenPlaylists }) {
+function PlaylistsRow({ playlists, onOpenPlaylists, compact = false }) {
+  if (compact) {
+    // Compact mode — only a single-line horizontal chip row shown when the
+    // user already has playlists. Skips the header row entirely to save
+    // vertical space on the landing composition.
+    return (
+      <div className="flex gap-2 overflow-x-auto scrollbar-hide" data-testid="discover-playlists-row">
+        {playlists.slice(0, 8).map((pl, idx) => (
+          <button
+            key={pl.id || idx}
+            onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
+            data-testid={`discover-playlist-${idx}`}
+            className="flex-shrink-0 flex items-center gap-1.5 h-8 px-3 rounded-full border border-white/8 hover:border-[#39FF14]/50 hover:bg-[#39FF14]/5 text-[10px] font-bold text-white transition-colors"
+          >
+            <ListMusic className="w-3 h-3 text-[#39FF14]" />
+            <span className="max-w-[110px] truncate">{pl.name || "Untitled"}</span>
+            <span className="text-[#5C5C6B]">
+              {pl.track_count != null ? pl.track_count : (pl.tracks?.length || 0)}
+            </span>
+          </button>
+        ))}
+      </div>
+    );
+  }
   return (
     <>
       <div className="flex items-center justify-between mb-2">
