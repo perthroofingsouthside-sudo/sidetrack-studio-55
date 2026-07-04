@@ -171,164 +171,116 @@ export default function HomePage({
             <div className="absolute bottom-0 right-0 w-[420px] h-[420px] rounded-full bg-[#39FF14]/5 blur-[120px]" />
           </div>
 
-          <div className="relative z-10 max-w-2xl mx-auto">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-5" data-testid="discover-header">
-              <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                style={{ background: "rgba(255,107,0,0.12)", boxShadow: "0 0 22px rgba(255,107,0,0.25)" }}>
-                <Search className="w-5 h-5 text-[#FF6B00]" />
-              </div>
-              <div>
-                <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  <span className="text-[#FF6B00] glow-text-orange">Discover</span>
-                </h1>
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
-                  Search · Listen · Save
-                </p>
-              </div>
-            </div>
-
-            {/* SEARCH BAR */}
-            <div className="mb-4" data-testid="discover-search">
-              <div className="flex gap-2">
-                <div className="flex-1 relative">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C5C6B]" />
-                  <Input
-                    data-testid="discover-search-input"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && doSearch()}
-                    placeholder="Search the catalog…  songs, artists"
-                    className="pl-10 pr-9 h-12 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF6B00]/50 text-sm rounded-2xl"
-                  />
-                  {query && (
-                    <button
-                      onClick={clearSearch}
-                      data-testid="discover-search-clear"
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C6B] hover:text-white text-xs font-bold"
-                      aria-label="Clear search"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-                <Button
-                  onClick={doSearch}
-                  disabled={searching || !query.trim()}
-                  data-testid="discover-search-btn"
-                  className="h-12 px-5 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40"
-                  style={{ boxShadow: "0 0 18px rgba(255,107,0,0.35)" }}
-                >
-                  {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
-                </Button>
-              </div>
-              <p className="mt-1.5 text-[10px] text-[#5C5C6B]">
-                Searching the Hottest 100 + Top 200 Hip-Hop library · 3,800+ tracks
-              </p>
-            </div>
-
-            {/* YOUR PLAYLISTS — utility row */}
-            <div className="mb-5" data-testid="discover-playlists">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-1.5">
-                  <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />
-                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black">Your Playlists</p>
-                </div>
-                <button
-                  onClick={() => onOpenPlaylists && onOpenPlaylists()}
-                  data-testid="discover-playlists-manage"
-                  className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider transition-colors"
-                >
-                  Manage →
-                </button>
-              </div>
-
-              {playlists.length === 0 ? (
-                <button
-                  onClick={() => onOpenPlaylists && onOpenPlaylists()}
-                  data-testid="discover-playlists-empty"
-                  className="w-full flex items-center gap-3 p-3 rounded-2xl border border-dashed border-[#39FF14]/25 hover:border-[#39FF14]/60 hover:bg-[#39FF14]/5 transition-all text-left"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
-                    <Plus className="w-4 h-4 text-[#39FF14]" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-white">Create your first playlist</p>
-                    <p className="text-[10px] text-[#5C5C6B]">Save tracks you love for later</p>
-                  </div>
-                </button>
-              ) : (
-                <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="discover-playlists-row">
-                  {playlists.slice(0, 10).map((pl, idx) => (
-                    <button
-                      key={pl.id || idx}
-                      onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
-                      data-testid={`discover-playlist-${idx}`}
-                      className="flex-shrink-0 w-28 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
-                    >
-                      <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
-                        {pl.cover_url ? (
-                          <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <ListMusic className="w-7 h-7 text-[#39FF14]/40 group-hover:text-[#39FF14] transition-colors" />
-                        )}
-                      </div>
-                      <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
-                      <p className="text-[10px] text-[#5C5C6B] truncate">
-                        {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
-                      </p>
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => onOpenPlaylists && onOpenPlaylists()}
-                    data-testid="discover-playlists-add"
-                    className="flex-shrink-0 w-28 rounded-2xl border border-dashed border-white/10 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all flex flex-col items-center justify-center p-2 gap-1.5"
-                  >
-                    <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
-                      <Plus className="w-4 h-4 text-[#39FF14]" />
-                    </div>
-                    <p className="text-[10px] text-[#5C5C6B] font-bold uppercase tracking-wider">New</p>
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* SEARCH RESULTS or MOSAIC */}
+          <div className="relative z-10 max-w-6xl mx-auto">
             {hasSearched ? (
-              <div className="space-y-1.5" data-testid="discover-search-results">
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-2 flex items-center justify-between">
-                  <span>{results.length > 0 ? `${results.length} Result${results.length === 1 ? "" : "s"}` : "No matches"}</span>
-                  {results.length > 0 && (
-                    <button onClick={clearSearch} className="text-[#5C5C6B] hover:text-white text-[10px] font-bold normal-case tracking-normal">
-                      Clear
-                    </button>
-                  )}
-                </p>
-                {results.length === 0 && !searching && (
-                  <div className="py-10 rounded-2xl border border-dashed border-white/10 text-center">
-                    <p className="text-sm font-bold text-white">No tracks matched &ldquo;{query}&rdquo;</p>
-                    <p className="text-[11px] text-[#5C5C6B] mt-1">Try a different artist or song name.</p>
+              /* ── SEARCH RESULTS VIEW — compact header + result rows ─────── */
+              <>
+                {/* Header */}
+                <div className="flex items-center gap-3 mb-5" data-testid="discover-header">
+                  <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(255,107,0,0.12)", boxShadow: "0 0 22px rgba(255,107,0,0.25)" }}>
+                    <Search className="w-5 h-5 text-[#FF6B00]" />
                   </div>
-                )}
-                {results.map((t, idx) => (
-                  <ResultRow
-                    key={`${t.track_id || t.id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
-                    track={t}
-                    idx={idx}
-                    nowPlayingId={nowPlaying?.id}
-                    isPlaying={isPlaying}
-                    pickerOpen={pickerOpen === (t.track_id || t.id)}
-                    setPickerOpen={(open) => setPickerOpen(open ? (t.track_id || t.id) : null)}
-                    onPick={() => pickTrack(t)}
-                    onAdd={(pl) => addToPlaylist(t, pl)}
-                    onCreatePlaylist={() => createPlaylistAndAdd(t)}
-                    playlists={playlists}
-                    justAdded={!!justAdded[t.track_id || t.id]}
-                  />
-                ))}
-              </div>
+                  <div>
+                    <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white tracking-tight">
+                      <span className="text-[#FF6B00] glow-text-orange">Discover</span>
+                    </h1>
+                    <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
+                      Search · Listen · Save
+                    </p>
+                  </div>
+                </div>
+
+                {/* SEARCH BAR (results mode) */}
+                <div className="mb-4 max-w-2xl" data-testid="discover-search">
+                  <div className="flex gap-2">
+                    <div className="flex-1 relative">
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#5C5C6B]" />
+                      <Input
+                        data-testid="discover-search-input"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && doSearch()}
+                        placeholder="Search the catalog…  songs, artists"
+                        className="pl-10 pr-9 h-12 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF6B00]/50 text-sm rounded-2xl"
+                      />
+                      {query && (
+                        <button
+                          onClick={clearSearch}
+                          data-testid="discover-search-clear"
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#5C5C6B] hover:text-white text-xs font-bold"
+                          aria-label="Clear search"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                    <Button
+                      onClick={doSearch}
+                      disabled={searching || !query.trim()}
+                      data-testid="discover-search-btn"
+                      className="h-12 px-5 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40"
+                      style={{ boxShadow: "0 0 18px rgba(255,107,0,0.35)" }}
+                    >
+                      {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* RESULTS */}
+                <div className="space-y-1.5 max-w-2xl" data-testid="discover-search-results">
+                  <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold mb-2 flex items-center justify-between">
+                    <span>{results.length > 0 ? `${results.length} Result${results.length === 1 ? "" : "s"}` : "No matches"}</span>
+                    {results.length > 0 && (
+                      <button onClick={clearSearch} className="text-[#5C5C6B] hover:text-white text-[10px] font-bold normal-case tracking-normal">
+                        Clear
+                      </button>
+                    )}
+                  </p>
+                  {results.length === 0 && !searching && (
+                    <div className="py-10 rounded-2xl border border-dashed border-white/10 text-center">
+                      <p className="text-sm font-bold text-white">No tracks matched &ldquo;{query}&rdquo;</p>
+                      <p className="text-[11px] text-[#5C5C6B] mt-1">Try a different artist or song name.</p>
+                    </div>
+                  )}
+                  {results.map((t, idx) => (
+                    <ResultRow
+                      key={`${t.track_id || t.id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
+                      track={t}
+                      idx={idx}
+                      nowPlayingId={nowPlaying?.id}
+                      isPlaying={isPlaying}
+                      pickerOpen={pickerOpen === (t.track_id || t.id)}
+                      setPickerOpen={(open) => setPickerOpen(open ? (t.track_id || t.id) : null)}
+                      onPick={() => pickTrack(t)}
+                      onAdd={(pl) => addToPlaylist(t, pl)}
+                      onCreatePlaylist={() => createPlaylistAndAdd(t)}
+                      playlists={playlists}
+                      justAdded={!!justAdded[t.track_id || t.id]}
+                    />
+                  ))}
+                </div>
+
+                {/* PLAYLISTS — utility row (kept beneath results) */}
+                <div className="mt-6 max-w-2xl" data-testid="discover-playlists">
+                  <PlaylistsRow playlists={playlists} onOpenPlaylists={onOpenPlaylists} />
+                </div>
+              </>
             ) : (
-              <CoverMosaic tracks={mosaic} onPick={pickTrack} />
+              /* ── CLASSIC LANDING LAYOUT ─────────────────────────────────
+                 PP monogram (top) · 4 covers | Discover circle | 4 covers
+                 · search bar directly beneath the circle · playlists row. */
+              <ClassicLanding
+                mosaic={mosaic.slice(0, 8)}
+                query={query}
+                setQuery={setQuery}
+                doSearch={doSearch}
+                clearSearch={clearSearch}
+                searching={searching}
+                onPick={pickTrack}
+                playlists={playlists}
+                onOpenPlaylists={onOpenPlaylists}
+              />
             )}
           </div>
 
@@ -505,5 +457,345 @@ function CoverMosaic({ tracks, onPick }) {
         ))}
       </div>
     </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+/**
+ * ClassicLanding — the exact landing layout Pocket Products opens with.
+ *   ┌─────────────────────────────────────────────┐
+ *   │             Pp   POCKET PRODUCTS            │
+ *   │                                             │
+ *   │  [Alb1] [Alb2] │ Discover │ [Alb5] [Alb6]   │
+ *   │  [Alb3] [Alb4] │ (circle) │ [Alb7] [Alb8]   │
+ *   │                                             │
+ *   │            [   Search bar   ]               │
+ *   │              Your Playlists →               │
+ *   └─────────────────────────────────────────────┘
+ */
+function ClassicLanding({
+  mosaic, query, setQuery, doSearch, clearSearch, searching,
+  onPick, playlists, onOpenPlaylists,
+}) {
+  // Pad to exactly 8 tiles so the mosaic always renders symmetrically
+  const tiles = [...mosaic];
+  while (tiles.length < 8) tiles.push({ __placeholder: true, id: `ph-${tiles.length}` });
+  const left = tiles.slice(0, 4);
+  const right = tiles.slice(4, 8);
+
+  return (
+    <div className="w-full flex flex-col items-center" data-testid="classic-landing">
+      {/* ── PP MONOGRAM ─────────────────────────────────────────── */}
+      <div className="flex flex-col items-center pt-6 pb-6 sm:pb-8 select-none" data-testid="pp-monogram-hero">
+        <div
+          className="relative flex items-center justify-center leading-none"
+          style={{
+            fontFamily: '"Outfit", system-ui, sans-serif',
+            fontWeight: 900,
+            fontSize: "clamp(80px, 14vw, 160px)",
+            letterSpacing: "-0.06em",
+          }}
+          aria-label="Pocket Products"
+        >
+          <span
+            style={{
+              color: "#FF6B00",
+              textShadow:
+                "0 0 24px rgba(255,107,0,0.7), 0 0 52px rgba(255,107,0,0.45), 0 0 100px rgba(255,107,0,0.25)",
+            }}
+          >
+            P
+          </span>
+          <span
+            style={{
+              color: "#39FF14",
+              textShadow:
+                "0 0 24px rgba(57,255,20,0.7), 0 0 52px rgba(57,255,20,0.4), 0 0 100px rgba(57,255,20,0.22)",
+              marginLeft: "-0.04em",
+            }}
+          >
+            p
+          </span>
+        </div>
+        <p
+          className="mt-3 text-[10px] sm:text-xs font-black text-white/85"
+          style={{ letterSpacing: "0.55em", textIndent: "0.55em" }}
+          data-testid="pp-brand-text"
+        >
+          POCKET PRODUCTS
+        </p>
+      </div>
+
+      {/* ── MOSAIC BAND — 4 covers | Discover circle | 4 covers ── */}
+      <div
+        className="w-full max-w-5xl grid gap-4 sm:gap-6 items-center"
+        style={{ gridTemplateColumns: "minmax(0,1fr) auto minmax(0,1fr)" }}
+        data-testid="mosaic-band"
+      >
+        {/* LEFT 4 covers as 2×2 */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3" data-testid="mosaic-left">
+          {left.map((t, i) => (
+            <MosaicTile key={t.id || `L-${i}`} track={t} idx={i} side="left" onPick={onPick} />
+          ))}
+        </div>
+
+        {/* CENTRAL DISCOVER CIRCLE */}
+        <DiscoverCircle onClick={() => {
+          const el = document.querySelector('[data-testid="discover-search-input"]');
+          if (el) el.focus();
+        }} />
+
+        {/* RIGHT 4 covers as 2×2 */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3" data-testid="mosaic-right">
+          {right.map((t, i) => (
+            <MosaicTile key={t.id || `R-${i}`} track={t} idx={i + 4} side="right" onPick={onPick} />
+          ))}
+        </div>
+      </div>
+
+      {/* ── SEARCH BAR (directly beneath the circle+mosaic row) ─── */}
+      <div className="w-full max-w-2xl mt-8 sm:mt-10" data-testid="discover-search">
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FF6B00]" />
+            <Input
+              data-testid="discover-search-input"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && doSearch()}
+              placeholder="Search the catalog…  songs, artists"
+              className="pl-11 pr-9 h-14 bg-[#0F0F16]/90 border border-[#FF6B00]/25 focus-visible:ring-[#FF6B00]/60 text-sm rounded-full"
+              style={{ boxShadow: "0 0 22px rgba(255,107,0,0.15), inset 0 0 12px rgba(255,107,0,0.05)" }}
+            />
+            {query && (
+              <button
+                onClick={clearSearch}
+                data-testid="discover-search-clear"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#5C5C6B] hover:text-white text-xs font-bold"
+                aria-label="Clear search"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+          <Button
+            onClick={doSearch}
+            disabled={searching || !query.trim()}
+            data-testid="discover-search-btn"
+            className="h-14 px-6 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40 uppercase tracking-wider"
+            style={{ boxShadow: "0 0 22px rgba(255,107,0,0.45)" }}
+          >
+            {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
+          </Button>
+        </div>
+        <p className="mt-2 text-[10px] text-[#5C5C6B] text-center uppercase tracking-[0.25em] font-bold">
+          Hottest 100 · Top 200 Hip-Hop · 3,800+ tracks
+        </p>
+      </div>
+
+      {/* ── PLAYLISTS UTILITY ROW (compact, below search) ────────── */}
+      <div className="w-full max-w-2xl mt-8 mb-4" data-testid="discover-playlists">
+        <PlaylistsRow playlists={playlists} onOpenPlaylists={onOpenPlaylists} />
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function DiscoverCircle({ onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      data-testid="discover-circle"
+      className="relative group flex-shrink-0 mx-auto"
+      style={{
+        width: "clamp(160px, 22vw, 240px)",
+        height: "clamp(160px, 22vw, 240px)",
+      }}
+      aria-label="Discover"
+    >
+      {/* Outer glow ring */}
+      <span
+        aria-hidden
+        className="absolute inset-0 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(255,107,0,0.35) 0%, rgba(255,107,0,0) 60%)",
+          filter: "blur(4px)",
+        }}
+      />
+      {/* Circle body */}
+      <span
+        aria-hidden
+        className="absolute inset-2 rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle at 30% 30%, rgba(255,107,0,0.18) 0%, rgba(15,15,22,0.9) 60%, rgba(5,5,10,0.95) 100%)",
+          border: "2px solid #FF6B00",
+          boxShadow:
+            "0 0 30px rgba(255,107,0,0.55), inset 0 0 25px rgba(255,107,0,0.25), 0 0 90px rgba(57,255,20,0.12)",
+        }}
+      />
+      {/* Rotating green accent ring */}
+      <span
+        aria-hidden
+        className="absolute inset-4 rounded-full pointer-events-none"
+        style={{
+          borderTop: "1px solid rgba(57,255,20,0.65)",
+          borderRight: "1px solid transparent",
+          borderBottom: "1px solid transparent",
+          borderLeft: "1px solid rgba(57,255,20,0.35)",
+          animation: "spin 12s linear infinite",
+        }}
+      />
+      {/* Label */}
+      <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
+        <Search className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6B00]"
+                style={{ filter: "drop-shadow(0 0 8px rgba(255,107,0,0.7))" }} />
+        <span
+          className="text-white font-black uppercase"
+          style={{
+            fontFamily: '"Outfit", system-ui, sans-serif',
+            fontSize: "clamp(16px, 2.4vw, 24px)",
+            letterSpacing: "0.15em",
+            textShadow: "0 0 12px rgba(255,107,0,0.55)",
+          }}
+          data-testid="discover-circle-label"
+        >
+          Discover
+        </span>
+        <span className="text-[8px] sm:text-[9px] tracking-[0.35em] font-bold text-[#39FF14]">
+          TAP TO SEARCH
+        </span>
+      </span>
+    </button>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function MosaicTile({ track, idx, side, onPick }) {
+  const isPlaceholder = track?.__placeholder;
+  const glow = side === "left"
+    ? "hover:border-[#FF6B00]/60 hover:shadow-[0_0_22px_rgba(255,107,0,0.35)]"
+    : "hover:border-[#39FF14]/55 hover:shadow-[0_0_22px_rgba(57,255,20,0.28)]";
+  return (
+    <button
+      type="button"
+      onClick={() => !isPlaceholder && onPick(track)}
+      disabled={isPlaceholder}
+      data-testid={`landing-mosaic-${idx}`}
+      className={`group relative aspect-square rounded-2xl overflow-hidden border border-white/8 transition-all ${glow}`}
+      style={{ boxShadow: "0 6px 22px rgba(0,0,0,0.5)" }}
+    >
+      {track?.cover_url ? (
+        <img
+          src={track.cover_url}
+          alt={track.title || ""}
+          loading="lazy"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-[#141420] to-[#0A0A12]">
+          <span className="text-[10px] font-black tracking-[0.2em] uppercase text-white/25">
+            {isPlaceholder ? "PP" : (track?.title || "").slice(0, 2)}
+          </span>
+        </div>
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-[#05050A]/50 to-transparent opacity-95" />
+      {!isPlaceholder && (
+        <>
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
+              side === "left" ? "bg-[#FF6B00]" : "bg-[#39FF14]"
+            }`}
+                 style={{
+                   boxShadow: side === "left"
+                     ? "0 0 22px rgba(255,107,0,0.55)"
+                     : "0 0 22px rgba(57,255,20,0.55)",
+                 }}>
+              <Play className={`w-3.5 h-3.5 ml-0.5 ${side === "left" ? "text-white" : "text-[#05050A]"}`} />
+            </div>
+          </div>
+          <div className="absolute bottom-0 left-0 right-0 p-1.5 text-left">
+            <p className="text-[10px] font-black text-white truncate leading-tight">{track?.title}</p>
+            <p className="text-[8px] text-white/50 truncate">{track?.artist}</p>
+          </div>
+        </>
+      )}
+    </button>
+  );
+}
+
+/* ──────────────────────────────────────────────────────────────────────── */
+
+function PlaylistsRow({ playlists, onOpenPlaylists }) {
+  return (
+    <>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-1.5">
+          <ListMusic className="w-3.5 h-3.5 text-[#39FF14]" />
+          <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black">Your Playlists</p>
+        </div>
+        <button
+          onClick={() => onOpenPlaylists && onOpenPlaylists()}
+          data-testid="discover-playlists-manage"
+          className="text-[10px] text-[#5C5C6B] hover:text-white font-bold uppercase tracking-wider transition-colors"
+        >
+          Manage →
+        </button>
+      </div>
+      {playlists.length === 0 ? (
+        <button
+          onClick={() => onOpenPlaylists && onOpenPlaylists()}
+          data-testid="discover-playlists-empty"
+          className="w-full flex items-center gap-3 p-3 rounded-2xl border border-dashed border-[#39FF14]/25 hover:border-[#39FF14]/60 hover:bg-[#39FF14]/5 transition-all text-left"
+        >
+          <div className="w-10 h-10 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
+            <Plus className="w-4 h-4 text-[#39FF14]" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-white">Create your first playlist</p>
+            <p className="text-[10px] text-[#5C5C6B]">Save tracks you love for later</p>
+          </div>
+        </button>
+      ) : (
+        <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1" data-testid="discover-playlists-row">
+          {playlists.slice(0, 10).map((pl, idx) => (
+            <button
+              key={pl.id || idx}
+              onClick={() => onOpenPlaylists && onOpenPlaylists(pl)}
+              data-testid={`discover-playlist-${idx}`}
+              className="flex-shrink-0 w-24 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
+            >
+              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+                {pl.cover_url ? (
+                  <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
+                ) : (
+                  <ListMusic className="w-6 h-6 text-[#39FF14]/40 group-hover:text-[#39FF14] transition-colors" />
+                )}
+              </div>
+              <p className="text-xs font-bold text-white truncate">{pl.name || "Untitled"}</p>
+              <p className="text-[10px] text-[#5C5C6B] truncate">
+                {pl.track_count != null ? `${pl.track_count} tracks` : (pl.tracks?.length || 0) + " tracks"}
+              </p>
+            </button>
+          ))}
+          <button
+            onClick={() => onOpenPlaylists && onOpenPlaylists()}
+            data-testid="discover-playlists-add"
+            className="flex-shrink-0 w-24 rounded-2xl border border-dashed border-white/10 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all flex flex-col items-center justify-center p-2 gap-1.5"
+          >
+            <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 flex items-center justify-center">
+              <Plus className="w-4 h-4 text-[#39FF14]" />
+            </div>
+            <p className="text-[10px] text-[#5C5C6B] font-bold uppercase tracking-wider">New</p>
+          </button>
+        </div>
+      )}
+    </>
   );
 }
