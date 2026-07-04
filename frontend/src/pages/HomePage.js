@@ -280,6 +280,7 @@ export default function HomePage({
                 onPick={pickTrack}
                 playlists={playlists}
                 onOpenPlaylists={onOpenPlaylists}
+                hasPlayer={!!nowPlaying}
               />
             )}
           </div>
@@ -476,23 +477,22 @@ function CoverMosaic({ tracks, onPick }) {
  */
 function ClassicLanding({
   mosaic, query, setQuery, doSearch, clearSearch, searching,
-  onPick, playlists, onOpenPlaylists,
+  onPick, playlists, onOpenPlaylists, hasPlayer,
 }) {
   // Pad to exactly 8 tiles so the mosaic always renders symmetrically
   const tiles = [...mosaic];
   while (tiles.length < 8) tiles.push({ __placeholder: true, id: `ph-${tiles.length}` });
   const left = tiles.slice(0, 4);
   const right = tiles.slice(4, 8);
+  // Reserve 88px for the bottom nav, +72px more when the GlobalPlayer bar
+  // is mounted, so the composition always centers inside the truly-visible
+  // area — never behind the player or the nav.
+  const reservedPx = hasPlayer ? 176 : 88;
 
   return (
-    // Vertically centre the whole composition inside the viewport-minus-nav.
-    // 88px reserved for the bottom nav; 12px top pad so the monogram never
-    // kisses the top edge. `justify-center` keeps everything visually
-    // anchored to the middle on tall screens, and compresses gracefully
-    // on shorter viewports.
     <div
       className="w-full flex flex-col items-center justify-center gap-3 sm:gap-4"
-      style={{ minHeight: "calc(100vh - 88px)" }}
+      style={{ minHeight: `calc(100vh - ${reservedPx}px)` }}
       data-testid="classic-landing"
     >
       {/* ── PP MONOGRAM ─────────────────────────────────────────── */}

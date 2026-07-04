@@ -245,6 +245,7 @@ const DEMO_LYRICS = [
 
 export default function GamerStage({ battle, onExit }) {
   const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
+  const audioRef = useRef(null);
 
   // Avatar from Creation Lab
   const avatar = useMemo(() => {
@@ -258,6 +259,33 @@ export default function GamerStage({ battle, onExit }) {
   const [modeKey, setModeKey] = useState("sing");
   const mode = PERFORMANCE_MODES.find((m) => m.key === modeKey) || PERFORMANCE_MODES[0];
   const [vocalDropped, setVocalDropped] = useState(false);
+
+  // Backing-track audio: play the battle's song preview (or the seeded beat)
+  // through a hidden <audio> element. "Drop Vocals" mutes this element so the
+  // toggle is an actual observable audio change — not just visual state.
+  const previewUrl = battle?.song_preview_url || battle?.preview_url || battle?.beat_data_url;
+  useEffect(() => {
+    if (!previewUrl) return;
+    const a = new Audio(previewUrl);
+    a.loop = true;
+    a.crossOrigin = "anonymous";
+    a.volume = 0.65;
+    audioRef.current = a;
+    // Attempt autoplay — most browsers allow it after the user tapped a
+    // battle-card to open this stage (user gesture already happened).
+    const tryPlay = () => a.play().catch(() => { /* silent — audio not critical */ });
+    tryPlay();
+    return () => { a.pause(); a.src = ""; audioRef.current = null; };
+  }, [previewUrl]);
+
+  // Bind the vocalDropped state to the actual audio element volume so
+  // clicking "Drop Vocals" audibly mutes the backing track (acapella mode).
+  useEffect(() => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.volume = vocalDropped ? 0 : 0.65;
+  }, [vocalDropped]);
+
   const [isLive, setIsLive] = useState(true);
   const [progress, setProgress] = useState(0);
   const [currentLyric, setCurrentLyric] = useState(0);

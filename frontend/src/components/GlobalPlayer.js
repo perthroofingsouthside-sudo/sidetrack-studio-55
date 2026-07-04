@@ -15,7 +15,7 @@ export default function GlobalPlayer({ nowPlaying, isPlaying, progress, onToggle
   };
 
   return (
-    <div className="fixed bottom-16 left-0 right-0 crystal-glass z-40" data-testid="global-now-playing">
+    <div className="fixed left-0 right-0 crystal-glass z-[45]" style={{ bottom: "104px" }} data-testid="global-now-playing">
       {/* Interactive seek bar */}
       <div
         ref={barRef}
