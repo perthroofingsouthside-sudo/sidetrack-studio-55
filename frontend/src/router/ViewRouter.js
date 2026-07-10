@@ -14,6 +14,7 @@ import SocialProfile from "@/pages/SocialProfile";
 import PricingPage from "@/pages/PricingPage";
 import ConnectPage from "@/pages/ConnectPage";
 import GamerPage from "@/pages/GamerPage";
+import LearnPage from "@/pages/LearnPage";
 import BackstageScreen from "@/components/BackstageScreen";
 import BackstagePage from "@/pages/BackstagePage";
 
@@ -144,6 +145,9 @@ export default function ViewRouter({
           }}
         />
       );
+
+    case "learn":
+      return <LearnPage />;
 
     case "backstage":
       return <BackstagePage />;

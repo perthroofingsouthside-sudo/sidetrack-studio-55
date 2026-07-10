@@ -1,4 +1,4 @@
-import { Home, Music2, Mic2, Swords, ListMusic, User, MessageSquare, Sparkles, Gamepad2 } from "lucide-react";
+import { Home, Music2, Mic2, Swords, ListMusic, User, MessageSquare, Sparkles, Gamepad2, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Creator-lane items — Original music creation. NO Battle / NO Star (those are Gamer-only)
@@ -15,6 +15,7 @@ const CREATOR_ITEMS = [
 const GAMER_ITEMS = [
   { key: "battle", icon: Swords, label: "Battle Stage" },
   { key: "playlists", icon: ListMusic, label: "Tracks" },
+  { key: "learn", icon: GraduationCap, label: "Learn" },
   { key: "backstage", icon: Sparkles, label: "Backstage" },
   { key: "profile", icon: User, label: "Profile" },
 ];
