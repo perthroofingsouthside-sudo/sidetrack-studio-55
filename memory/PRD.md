@@ -264,3 +264,18 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - **iteration_33 mobile-StadiumStudio FAIL invalidated**: self-tested at 390x844, `[data-testid='stadium-studio']` count = 1, mounts correctly. Test agent had a flaky run.
 - **Pricing flow**: deferred per user direction ("don't worry about prices what so ever"). PricingPage.js remains orphaned-but-present; can be wired into the router post-launch.
 - Build/lint clean for all modified files. Pre-existing `<span> in <option>` hydration warning still present (not source-located in app code — likely a transient Sonner / Radix internal; non-blocking).
+
+## Jun 10, 2026 — GAMER LEARN TAB SHIPPED (iteration_34: 100% pass)
+- New "Learn" tab in the Gamer-lane bottom nav (GraduationCap icon, between Tracks and Backstage; Gamer lane only).
+- `pages/LearnPage.js` — instrument picker (Guitar / Piano) → 3 lessons each:
+  - Guitar: Open Strings, E Minor Pentatonic, First Power Riff.
+  - Piano: C Major Scale, Happy Birthday, Ode to Joy.
+- `PracticeSession` full-screen view: neon perspective note highway (`components/learn/NoteHighway.js`, reuses GamerStage visual language), big target note, progress dots, score + streak badges, completion overlay with Replay / More Lessons, best score persisted to localStorage (`pp_learn_best_{id}`, ★ shown on lesson card).
+- Real-time mic pitch detection: `services/PitchDetector.js` — Web Audio AnalyserNode + autocorrelation (ACF), octave-tolerant matching (±50 cents, 3-frame hold). `TunerGauge` shows detected note, Hz, cents needle.
+- No-instrument fallback: interactive visual aids (`GuitarAid` clickable fretboard with target dot + position hint; `PianoAid` clickable keyboard) — tapping the correct position counts as a hit; wrong tap resets streak + toast. "Hear Note" plays a reference triangle-wave tone.
+- Router: `case "learn"` in ViewRouter.js. Fully client-side, no backend endpoints.
+- Tested: iteration_34 — all 11 acceptance criteria pass (both full lesson sequences, wrong-note handling, mic grant/deny grace, exit, best-score star, creator-lane regression, 0 console errors).
+
+### Remaining backlog (unchanged)
+- P1: Decompose `BecomeAStar.js` (717 lines); "Show on Both" licensing constraints in Backstage.
+- P2: SEO fixes (robots.txt, sitemap.xml, llms.txt); refactor `_run_band_activity_check()`, `get_lyrics()`, `separate_stems()`; YouTube/TikTok OAuth (BLOCKED on user credentials).
