@@ -109,8 +109,11 @@ async def battle_leaderboard(limit: int = 20):
         {"$limit": limit},
     ]
     top_covers = await db.covers.aggregate(pipeline).to_list(limit)
+    battle_ids = list({c.get("battle_id") for c in top_covers if c.get("battle_id")})
+    battles = await db.battles.find({"id": {"$in": battle_ids}}, {"_id": 0}).to_list(len(battle_ids))
+    battle_map = {b["id"]: b for b in battles}
     for cover in top_covers:
-        battle = await db.battles.find_one({"id": cover.get("battle_id")}, {"_id": 0})
+        battle = battle_map.get(cover.get("battle_id"))
         if battle:
             cover["song_title"] = battle.get("song_title", "")
             cover["song_artist"] = battle.get("song_artist", "")
