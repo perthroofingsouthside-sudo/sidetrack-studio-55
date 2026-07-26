@@ -164,7 +164,7 @@ def _track_in_curated_catalog(track_id: str) -> bool:
     if not track_id:
         return False
     h = int(hashlib.sha256(track_id.encode()).hexdigest(), 16)
-    # 80% are curated free, 20% require $79.98 ownership purchase
+    # 80% hash-curated — informational only now, NO access gate (free model)
     return (h % 100) < 80
 
 
@@ -176,8 +176,8 @@ async def catalog_status():
         "success": True,
         "curated_size_target": CATALOG_TARGET_SIZE,
         "seeded_records": total,
-        "gate_strategy": "deterministic_hash_80pct",
-        "non_curated_requires_ownership": True,
+        "gate_strategy": "none_all_free",
+        "non_curated_requires_ownership": False,
     }
 
 
@@ -188,11 +188,12 @@ async def catalog_track_in(track_id: str):
     override = await db.curated_catalog.find_one({"track_id": track_id}, {"_id": 0})
     if override:
         in_cat = bool(override.get("in_catalog", in_cat))
+    # FREE MODEL: every track is playable by everyone — no ownership gate.
     return {
         "success": True,
         "track_id": track_id,
         "in_catalog": in_cat,
-        "requires_ownership": not in_cat,
+        "requires_ownership": False,
     }
 
 

@@ -1,4 +1,4 @@
-"""Subscriptions, band activity, rewards, trim, social, discovery, sync, chat."""
+"""Free-access platform: rewards, trim, social, discovery, sync, chat."""
 
 from fastapi import APIRouter, HTTPException, Form, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
@@ -15,170 +15,11 @@ from typing import Dict, Set
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-# ── Subscription Tiers ──────────────────────────
-# `requires_ownership: True` = tier is locked until user owns the Creator Ecosystem
-SUBSCRIPTION_TIERS = [
-    # ── Listener Tier ──
-    {
-        "key": "listener",
-        "name": "Listener",
-        "tagline": "Just the Music",
-        "price": 4.98,
-        "period": "month",
-        "features": [
-            "Unlimited streaming",
-            "Curated MTV / MOS / Hip-Hop playlists",
-            "50 skips/day",
-            "Synced lyrics",
-        ],
-        "category": "listener",
-        "highlight": True,
-        "includes_covers": False,
-        "requires_ownership": False,
-    },
-    # ── Creator Tiers ──
-    {
-        "key": "individual",
-        "name": "Individual Creator",
-        "tagline": "Solo Artist",
-        "price": 11.98,
-        "period": "month",
-        "features": [
-            "Everything in Listener",
-            "Full stem separation",
-            "HD audio export",
-            "Karaoke & recording",
-            "Battle entry",
-        ],
-        "category": "creator",
-        "highlight": False,
-        "includes_covers": False,
-        "requires_ownership": False,
-    },
-    {
-        "key": "individual_covers",
-        "name": "Creator + Covers",
-        "tagline": "Full License",
-        "price": 15.98,
-        "period": "month",
-        "features": [
-            "Everything in Individual",
-            "Unlimited cover recordings",
-            "Cover distribution rights",
-            "Priority in Battles",
-        ],
-        "category": "creator",
-        "highlight": True,
-        "includes_covers": True,
-        "requires_ownership": False,
-    },
-    {
-        "key": "student",
-        "name": "Student Creator",
-        "tagline": "Study & Play",
-        "price": 9.98,
-        "period": "month",
-        "features": [
-            "All Individual features",
-            "Valid student email required",
-            "Discounted creator tools",
-        ],
-        "category": "creator",
-        "highlight": False,
-        "includes_covers": False,
-        "requires_ownership": True,
-    },
-    {
-        "key": "couple_duo",
-        "name": "Couple / Duo",
-        "tagline": "Two Voices",
-        "price": 14.98,
-        "period": "month",
-        "features": [
-            "2 accounts",
-            "Shared duet workspace",
-            "Unlimited skips for both",
-            "Priority duet matching",
-        ],
-        "category": "creator",
-        "highlight": False,
-        "includes_covers": False,
-        "requires_ownership": True,
-    },
-    {
-        "key": "family",
-        "name": "Family",
-        "tagline": "Up to 5 members",
-        "price": 20.98,
-        "period": "month",
-        "features": [
-            "5 individual accounts",
-            "Family mix playlists",
-            "Parental controls",
-            "All creator features",
-        ],
-        "category": "creator",
-        "highlight": False,
-        "includes_covers": False,
-        "requires_ownership": True,
-    },
-    # ── Band Tiers ──
-    {
-        "key": "adult_band",
-        "name": "Adult Band",
-        "tagline": "Active Band",
-        "price": 17.98,
-        "period": "month",
-        "features": [
-            "Up to 8 members",
-            "Band collaboration room",
-            "Shared stem library",
-            "Covers included",
-            "1 upload/week to stay active",
-        ],
-        "category": "band",
-        "highlight": False,
-        "includes_covers": True,
-        "requires_ownership": True,
-    },
-    {
-        "key": "under18_band",
-        "name": "Under-18 Band",
-        "tagline": "Young Stars",
-        "price": 2.98,
-        "period": "month",
-        "features": [
-            "Up to 8 members",
-            "Band collaboration room",
-            "Shared stem library",
-            "Safe community features",
-        ],
-        "category": "band",
-        "highlight": False,
-        "includes_covers": False,
-        "requires_ownership": True,
-    },
-    # ── Covers Add-on ──
-    {
-        "key": "covers_addon",
-        "name": "Covers Add-on",
-        "tagline": "For any plan",
-        "price": 5.98,
-        "period": "month",
-        "features": [
-            "Unlimited cover recordings",
-            "Cover distribution rights",
-            "Stack with any subscription",
-        ],
-        "category": "addon",
-        "highlight": False,
-        "includes_covers": True,
-        "requires_ownership": False,
-    },
-]
-
-# Tiers locked behind Creator Ecosystem ownership
-LOCKED_TIERS = {t["key"] for t in SUBSCRIPTION_TIERS if t.get("requires_ownership")}
+# ── FREE ACCESS MODEL ───────────────────────────
+# Pocket Products is 100% free — no subscriptions, no ownership gates.
+# The creator economy keeps a 70/30 artist-favoured revenue split on
+# content sales (see /store endpoints below).
+FREE_MODEL_MESSAGE = "Pocket Products is completely free — every feature, every lane, for everyone."
 
 # Revenue split: 70% artist / 30% platform
 PLATFORM_CUT = 0.30
@@ -190,114 +31,30 @@ PAY_PER_SONG_PRICE = 0.79  # Cheaper than iTunes $0.99
 
 @router.get("/subscriptions/tiers")
 async def list_tiers(user_id: str = None):
-    """Return all subscription tiers. If user_id provided, includes per-tier `locked` flag."""
-    is_owned = False
-    if user_id:
-        own = await db.ownership.find_one({"user_id": user_id}, {"_id": 0})
-        is_owned = bool(own and own.get("status") == "owned")
-    tiers = []
-    for t in SUBSCRIPTION_TIERS:
-        tier = dict(t)
-        tier["locked"] = bool(t.get("requires_ownership") and not is_owned)
-        tiers.append(tier)
-    return {"success": True, "tiers": tiers, "is_owned": is_owned}
+    """FREE MODEL: no subscription tiers exist — everything is free."""
+    return {"success": True, "tiers": [], "all_free": True, "is_owned": True, "message": FREE_MODEL_MESSAGE}
 
 
 @router.post("/subscriptions/select")
 async def select_subscription(payload: SubscriptionSelect):
-    tier = next((t for t in SUBSCRIPTION_TIERS if t["key"] == payload.tier_key), None)
-    if not tier:
-        raise HTTPException(status_code=400, detail="Invalid tier key")
-    # ── Ownership gate ──
-    if tier.get("requires_ownership"):
-        own = await db.ownership.find_one({"user_id": payload.user_id}, {"_id": 0})
-        if not own or own.get("status") != "owned":
-            raise HTTPException(
-                status_code=403,
-                detail="Creator Ecosystem ownership required to unlock this discounted tier.",
-            )
-    now = datetime.now(timezone.utc)
-    sub_doc = {
-        "user_id": payload.user_id,
-        "tier_key": tier["key"],
-        "tier_name": tier["name"],
-        "price": tier["price"],
-        "status": "trial",
-        "trial_end": (now + timedelta(days=30)).isoformat(),
-        "started_at": now.isoformat(),
-        "last_upload": None,
-        "active_band": tier["category"] == "band",
-        "reward_months": 0,
-    }
-    await db.subscriptions.update_one(
-        {"user_id": payload.user_id}, {"$set": sub_doc}, upsert=True
-    )
-    stored = await db.subscriptions.find_one({"user_id": payload.user_id}, {"_id": 0})
-    return {"success": True, "subscription": stored}
+    """FREE MODEL: nothing to select — access is universal."""
+    return {"success": True, "subscription": None, "all_free": True, "message": FREE_MODEL_MESSAGE}
 
 
 @router.get("/subscriptions/{user_id}/status")
 async def get_subscription_status(user_id: str):
-    sub = await db.subscriptions.find_one({"user_id": user_id}, {"_id": 0})
-    if not sub:
-        return {
-            "success": True,
-            "subscription": None,
-            "is_pro": False,
-            "is_vip": False,
-            "is_band": False,
-            "tier_key": "free",
-            "upload_status": None,
-        }
-    tier_key = sub.get("tier_key", "free")
-    is_band = tier_key in ("adult_band", "under18_band")
-    upload_status = None
-    if is_band:
-        now = datetime.now(timezone.utc)
-        week_start = (now - timedelta(days=now.weekday())).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        week_end = week_start + timedelta(days=7)
-        uploads = await db.band_uploads.count_documents(
-            {
-                "user_id": user_id,
-                "uploaded_at": {
-                    "$gte": week_start.isoformat(),
-                    "$lt": week_end.isoformat(),
-                },
-            }
-        )
-        upload_status = {
-            "uploads_this_week": uploads,
-            "required": 1,
-            "met": uploads >= 1,
-            "week_start": week_start.isoformat(),
-            "week_end": week_end.isoformat(),
-        }
+    """FREE MODEL: every user has full access to every feature."""
     return {
         "success": True,
-        "subscription": sub,
-        "is_pro": tier_key != "free",
-        "is_vip": tier_key == "stadium_vip",
-        "is_band": is_band,
-        "tier_key": tier_key,
-        "upload_status": upload_status,
+        "subscription": None,
+        "is_pro": True,
+        "is_vip": True,
+        "is_band": False,
+        "tier_key": "free",
+        "all_free": True,
+        "upload_status": None,
+        "message": FREE_MODEL_MESSAGE,
     }
-
-
-@router.post("/subscriptions/{user_id}/upload")
-async def record_band_upload(user_id: str):
-    sub = await db.subscriptions.find_one({"user_id": user_id}, {"_id": 0})
-    if not sub or sub.get("tier_key") not in ("adult_band", "under18_band"):
-        raise HTTPException(status_code=400, detail="Not a band subscription")
-    now = datetime.now(timezone.utc)
-    await db.band_uploads.insert_one(
-        {"user_id": user_id, "uploaded_at": now.isoformat()}
-    )
-    await db.subscriptions.update_one(
-        {"user_id": user_id}, {"$set": {"last_upload": now.isoformat()}}
-    )
-    return {"success": True, "message": "Upload recorded"}
 
 
 # ── Pay-Per-Song: Purchase tracks outside curated catalog ──
@@ -386,147 +143,18 @@ async def get_store_pricing():
             "Ministry of Sound Collection",
             "Top 200 Hip-Hop Albums",
         ],
-        "note": "Songs in curated playlists are included with any subscription. Songs outside require purchase.",
+        "note": "Platform access is 100% free. Optional song purchases directly support artists with a 70/30 artist-favoured split.",
     }
 
 
-# ── Active Band Auto-Downgrade ──────────────────
-
-INDIVIDUAL_RATE = 11.98  # Downgrade target rate
+# ── Band Activity Check (retired) ───────────────
 
 
 async def _run_band_activity_check(trigger: str = "manual"):
-    """Core logic: scan all band accounts, audit each, downgrade inactive ones.
-
-    Business rules:
-    - Scans all subscriptions with tier_key in (adult_band, under18_band) that are NOT already downgraded
-    - Checks if the user uploaded at least 1 track/stem in the preceding 7 days
-    - If requirement NOT met → flag account as downgraded, adjust price to Individual rate ($11.98)
-    - Every check is logged to the `band_audit_log` collection for admin review
-    """
-    now = datetime.now(timezone.utc)
-    cutoff = (now - timedelta(days=7)).isoformat()
-    run_id = str(uuid.uuid4())[:12]
-
-    band_subs = await db.subscriptions.find(
-        {
-            "tier_key": {"$in": ["adult_band", "under18_band"]},
-            "status": {"$ne": "downgraded"},
-        },
-        {"_id": 0},
-    ).to_list(1000)
-
-    checked = 0
-    compliant = []
-    downgraded = []
-    audit_entries = []
-
-    for sub in band_subs:
-        checked += 1
-        user_id = sub["user_id"]
-        tier_key = sub.get("tier_key", "")
-        original_price = sub.get("price", 0)
-        last_upload = sub.get("last_upload")
-
-        # Count uploads in the 7-day window
-        uploads_count = await db.band_uploads.count_documents(
-            {"user_id": user_id, "uploaded_at": {"$gte": cutoff}}
-        )
-
-        met_requirement = uploads_count >= 1
-        action = "none"
-
-        if not met_requirement:
-            # Downgrade: flag account + adjust price to Individual rate
-            await db.subscriptions.update_one(
-                {"user_id": user_id},
-                {
-                    "$set": {
-                        "status": "downgraded",
-                        "downgraded_at": now.isoformat(),
-                        "downgrade_reason": "No upload in 7 days",
-                        "previous_tier": tier_key,
-                        "previous_price": original_price,
-                        "price": INDIVIDUAL_RATE,
-                    }
-                },
-            )
-            downgraded.append(user_id)
-            action = "downgraded_to_individual"
-        else:
-            compliant.append(user_id)
-            action = "compliant"
-
-        # Audit log entry for this user
-        audit_entries.append(
-            {
-                "run_id": run_id,
-                "trigger": trigger,
-                "user_id": user_id,
-                "tier_key": tier_key,
-                "original_price": original_price,
-                "last_upload": last_upload,
-                "uploads_in_window": uploads_count,
-                "cutoff": cutoff,
-                "met_requirement": met_requirement,
-                "action": action,
-                "new_price": INDIVIDUAL_RATE if not met_requirement else original_price,
-                "checked_at": now.isoformat(),
-            }
-        )
-
-    # Write all audit entries in bulk
-    if audit_entries:
-        await db.band_audit_log.insert_many(audit_entries)
-
-    # Write a summary record
-    summary = {
-        "run_id": run_id,
-        "trigger": trigger,
-        "checked_at": now.isoformat(),
-        "total_checked": checked,
-        "compliant_count": len(compliant),
-        "downgraded_count": len(downgraded),
-        "downgraded_users": downgraded,
-        "compliant_users": compliant,
-    }
-    await db.band_audit_log.insert_one({**summary, "type": "run_summary"})
-
-    logger.info(
-        f"[BandCron] run_id={run_id} trigger={trigger} "
-        f"checked={checked} compliant={len(compliant)} downgraded={len(downgraded)}"
-    )
-
-    return summary
-
-
-@router.post("/subscriptions/check-band-activity")
-async def check_band_activity():
-    """Manual trigger: scan all band accounts and downgrade inactive ones."""
-    result = await _run_band_activity_check(trigger="manual_api")
-    return {"success": True, **result}
-
-
-@router.get("/subscriptions/band-audit")
-async def get_band_audit_log(limit: int = 50):
-    """Admin endpoint: retrieve the band activity audit trail."""
-    entries = (
-        await db.band_audit_log.find({}, {"_id": 0})
-        .sort("checked_at", -1)
-        .to_list(limit)
-    )
-    return {"success": True, "entries": entries, "count": len(entries)}
-
-
-@router.get("/subscriptions/band-audit/summary")
-async def get_band_audit_summaries(limit: int = 20):
-    """Admin endpoint: retrieve run summaries only."""
-    summaries = (
-        await db.band_audit_log.find({"type": "run_summary"}, {"_id": 0})
-        .sort("checked_at", -1)
-        .to_list(limit)
-    )
-    return {"success": True, "summaries": summaries, "count": len(summaries)}
+    """FREE MODEL: band subscriptions no longer exist. Retained as a no-op
+    because the scheduler in server.py still invokes it."""
+    logger.info(f"[BandCron] skipped (free model) trigger={trigger}")
+    return {"trigger": trigger, "skipped": True, "reason": "free_model"}
 
 
 # ── Real Audio Trimming ─────────────────────────
@@ -705,6 +333,7 @@ async def like_performance(perf_id: str, user_id: str = Form(...)):
 # ── Competition Winner Auto-Credit ──────────────
 @router.post("/rewards/credit-winner")
 async def credit_winner(battle_id: str = Form(...)):
+    """FREE MODEL: winners earn a Champion badge (no subscription months)."""
     covers = (
         await db.covers.find({"battle_id": battle_id}, {"_id": 0, "audio_data": 0})
         .sort("votes", -1)
@@ -714,38 +343,16 @@ async def credit_winner(battle_id: str = Form(...)):
         return {"success": False, "message": "No qualifying winner"}
     winner = covers[0]
     uname = winner.get("username", "")
-    sub = await db.subscriptions.find_one({"user_id": uname})
-    if sub:
-        await db.subscriptions.update_one(
-            {"user_id": uname}, {"$inc": {"reward_months": 1}}
-        )
-    else:
-        await db.subscriptions.insert_one(
-            {
-                "user_id": uname,
-                "tier_key": "individual",
-                "tier_name": "Individual",
-                "price": 0,
-                "status": "reward",
-                "trial_end": (
-                    datetime.now(timezone.utc) + timedelta(days=30)
-                ).isoformat(),
-                "started_at": datetime.now(timezone.utc).isoformat(),
-                "last_upload": None,
-                "active_band": False,
-                "reward_months": 1,
-            }
-        )
     await db.rewards.insert_one(
         {
             "battle_id": battle_id,
             "winner_username": uname,
             "cover_id": winner.get("id", ""),
-            "reward": "1_month_pro",
+            "reward": "champion_badge",
             "granted_at": datetime.now(timezone.utc).isoformat(),
         }
     )
-    return {"success": True, "winner": uname, "reward": "1 month Pro credited"}
+    return {"success": True, "winner": uname, "reward": "Champion badge credited"}
 
 
 # ── Vibe-Match Discovery ────────────────────────

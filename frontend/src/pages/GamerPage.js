@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Search, Music2, Gamepad2, Lock, ArrowRight, Mic2, Sparkles, ShoppingCart } from "lucide-react";
+import { Search, Music2, Gamepad2, Lock, ArrowRight, Mic2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
@@ -39,23 +39,9 @@ export default function GamerPage({ onPickedTrack, onOpenBackstage }) {
     } finally { setLoading(false); }
   };
 
-  const pickTrack = async (track) => {
-    try {
-      const gate = await axios.get(`${API}/catalog/in/${track.id || encodeURIComponent(track.title)}`);
-      if (gate.data?.requires_ownership) {
-        const own = await axios.get(`${API}/ownership/${userId.current}/status`);
-        if (!own.data?.is_owned) {
-          toast.error("This track is outside the curated catalog. Unlock the Creator Ecosystem ($79.98 AUD) or pick another track.", { duration: 5000 });
-          return;
-        }
-      }
-      onPickedTrack(track);
-      onOpenBackstage(track);
-    } catch (err) {
-      console.error("Catalog check err", err);
-      onPickedTrack(track);
-      onOpenBackstage(track);
-    }
+  const pickTrack = (track) => {
+    onPickedTrack(track);
+    onOpenBackstage(track);
   };
 
   return (
@@ -154,7 +140,7 @@ export default function GamerPage({ onPickedTrack, onOpenBackstage }) {
       <div className="px-4 mt-6">
         <p className="text-[10px] text-[#5C5C6B] text-center">
           <Sparkles className="inline w-3 h-3 mr-1 text-[#FF6B00]" />
-          Tracks outside the curated 3,000 require <ShoppingCart className="inline w-3 h-3 mx-0.5 text-[#FF6B00]" /> ownership.
+          Every track, every mode — <span className="text-[#39FF14] font-bold">100% free</span>.
         </p>
       </div>
     </div>

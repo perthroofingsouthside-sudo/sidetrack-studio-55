@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Crown, Upload, CheckCircle2, AlertCircle, Users, Heart, Camera, Sparkles, Swords, Eye, Play, Pause, Radio, Clock } from "lucide-react";
+import { User, Trophy, Star, ListMusic, Mic2, TrendingUp, Settings, Share2, Users, Heart, Camera, Sparkles, Swords, Eye, Play, Pause, Radio, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,16 +8,6 @@ import { API } from "@/App";
 import axios from "axios";
 import GamerAvatar, { DEFAULT_GAMER_AVATAR } from "@/components/GamerAvatar";
 import CreationLab from "@/components/CreationLab";
-
-const TIER_LABELS = {
-  stadium_vip: { name: "Stadium VIP", color: "#FF6B00", icon: Crown },
-  individual: { name: "Individual Pro", color: "#39FF14", icon: Star },
-  student: { name: "Student Pro", color: "#39FF14", icon: Star },
-  couple_duo: { name: "Duo Pro", color: "#FF6B00", icon: Star },
-  family: { name: "Family Pro", color: "#39FF14", icon: Star },
-  adult_band: { name: "Band Pro", color: "#FF6B00", icon: Mic2 },
-  under18_band: { name: "Young Band", color: "#39FF14", icon: Star },
-};
 
 // Gamer avatar — palette swatches used for the profile card background gradient.
 // Strict Pocket Products brand: only Neon Orange and Electric Green tones.
@@ -33,7 +23,6 @@ export default function SocialProfile({ onNavigate }) {
   const [username, setUsername] = useState(() => localStorage.getItem("sidetrack_username") || "");
   const [editing, setEditing] = useState(false);
   const [tempName, setTempName] = useState(username);
-  const [subStatus, setSubStatus] = useState(null);
   const [liveStats, setLiveStats] = useState(null);
   const [lane] = useState(() => localStorage.getItem("pp_lane") || "creator");
   const [photoUrl, setPhotoUrl] = useState(() => localStorage.getItem("pp_profile_photo") || "");
@@ -59,7 +48,6 @@ export default function SocialProfile({ onNavigate }) {
   );
 
   useEffect(() => {
-    loadSubStatus();
     loadLiveStats();
     loadProfileExtras();
     return () => { if (rapAudioRef.current) rapAudioRef.current.pause(); };
@@ -95,13 +83,6 @@ export default function SocialProfile({ onNavigate }) {
     audio.play().catch(() => { setPlayingRap(null); toast.error("Playback blocked"); });
     rapAudioRef.current = audio;
     setPlayingRap(rec.id);
-  };
-
-  const loadSubStatus = async () => {
-    try {
-      const res = await axios.get(`${API}/subscriptions/${userId.current}/status`);
-      if (res.data.success) setSubStatus(res.data);
-    } catch (err) { console.error("Load failed:", err); }
   };
 
   const loadLiveStats = async () => {
@@ -149,11 +130,6 @@ export default function SocialProfile({ onNavigate }) {
   };
 
   const currentPalette = GAMER_PALETTES.find(p => p.key === gamerAvatar.palette) || GAMER_PALETTES[1];
-
-  const tierKey = subStatus?.tier_key || "free";
-  const tierInfo = TIER_LABELS[tierKey];
-  const isBand = subStatus?.is_band;
-  const uploadStatus = subStatus?.upload_status;
 
   // Aggregate likes + views across kept raps (used in stats card)
   const totalRapLikes = raps.reduce((s, r) => s + (r.likes || 0), 0);
@@ -269,74 +245,20 @@ export default function SocialProfile({ onNavigate }) {
             </div>
           </div>
 
-          {/* Pro Status Indicator */}
-          {tierInfo && tierKey !== "free" ? (
-            <div className="rounded-2xl border p-4 flex items-center gap-4"
-              style={{ borderColor: `${tierInfo.color}30`, background: `${tierInfo.color}08`, boxShadow: `0 0 24px ${tierInfo.color}12` }}
-              data-testid="pro-status-indicator">
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-                style={{ background: `${tierInfo.color}20`, boxShadow: `0 0 14px ${tierInfo.color}30` }}>
-                <tierInfo.icon className="w-5 h-5" style={{ color: tierInfo.color }} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white" data-testid="pro-tier-name">{tierInfo.name}</p>
-                <p className="text-[10px] mt-0.5" style={{ color: `${tierInfo.color}99` }}>
-                  {subStatus?.subscription?.status === "trial" ? "Free trial active" : subStatus?.subscription?.status === "reward" ? "Competition reward" : "Active subscription"}
-                </p>
-              </div>
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
-                style={{ background: `${tierInfo.color}18`, color: tierInfo.color }}
-                data-testid="pro-status-badge">
-                {subStatus?.subscription?.status === "trial" ? "Trial" : subStatus?.subscription?.status === "reward" ? "Reward" : "Pro"}
-              </span>
+          {/* Free Access — everything unlocked */}
+          <button onClick={() => onNavigate && onNavigate("pricing")}
+            className="w-full rounded-2xl border border-[#39FF14]/25 p-4 flex items-center gap-4 text-left transition-all hover:border-[#39FF14]/50 group"
+            style={{ background: "rgba(57,255,20,0.05)" }} data-testid="free-access-card">
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ background: "rgba(57,255,20,0.15)", boxShadow: "0 0 16px rgba(57,255,20,0.25)" }}>
+              <Sparkles className="w-5 h-5 text-[#39FF14]" />
             </div>
-          ) : (
-            <button onClick={() => onNavigate && onNavigate("pricing")}
-              className="w-full rounded-2xl border border-[#FF6B00]/30 p-4 flex items-center gap-4 text-left transition-all hover:border-[#FF6B00]/50 group"
-              style={{ background: "rgba(255,107,0,0.06)" }} data-testid="go-pro-btn">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: "rgba(255,107,0,0.15)", boxShadow: "0 0 16px rgba(255,107,0,0.25)" }}>
-                <Crown className="w-5 h-5 text-[#FF6B00]" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-bold text-white group-hover:text-[#FF6B00] transition-colors">Stadium VIP & Pro Plans</p>
-                <p className="text-[10px] text-[#5C5C6B] mt-0.5">Neon badges, priority DMs, unlimited skips & more</p>
-              </div>
-              <span className="text-[#FF6B00] text-xs font-bold shrink-0">From $2.98</span>
-            </button>
-          )}
-
-          {/* Band Weekly Upload Tracker */}
-          {isBand && uploadStatus && (
-            <div className="rounded-2xl border border-[#FF6B00]/20 p-4 space-y-3"
-              style={{ background: "rgba(255,107,0,0.04)" }} data-testid="band-upload-tracker">
-              <div className="flex items-center justify-between">
-                <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.2em] font-bold text-[#FF6B00] flex items-center gap-2">
-                  <Upload className="w-3.5 h-3.5" /> Weekly Upload Tracker
-                </h3>
-                {uploadStatus.met ? (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-[#39FF14] uppercase tracking-wider" data-testid="upload-status-met">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Met
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-[#FF6B00] uppercase tracking-wider" data-testid="upload-status-pending">
-                    <AlertCircle className="w-3.5 h-3.5" /> Pending
-                  </span>
-                )}
-              </div>
-              <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                <div className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.min((uploadStatus.uploads_this_week / uploadStatus.required) * 100, 100)}%`,
-                    background: uploadStatus.met ? "#39FF14" : "#FF6B00",
-                    boxShadow: uploadStatus.met ? "0 0 10px rgba(57,255,20,0.5)" : "0 0 10px rgba(255,107,0,0.4)",
-                  }} data-testid="upload-progress-bar" />
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] text-[#5C5C6B]">{uploadStatus.uploads_this_week} / {uploadStatus.required} upload this week</span>
-                <span className="text-[10px] text-[#5C5C6B]">Resets {new Date(uploadStatus.week_end).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}</span>
-              </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-white group-hover:text-[#39FF14] transition-colors">Everything Unlocked — Free</p>
+              <p className="text-[10px] text-[#5C5C6B] mt-0.5">All lanes, Studio, Battles, Learn & Backstage. Artists keep 70% of their sales.</p>
             </div>
-          )}
+            <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#39FF14]/15 text-[#39FF14] shrink-0" data-testid="free-badge">Free</span>
+          </button>
 
           {/* Stats Grid — Live from DB + Rap Battle lifetime W/L */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3" data-testid="profile-stats">

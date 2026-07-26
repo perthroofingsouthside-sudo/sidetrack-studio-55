@@ -13,10 +13,6 @@ export default function LiveChat({ trackTitle }) {
   const [connected, setConnected] = useState(false);
   const [viewers, setViewers] = useState(0);
   const [username] = useState(() => localStorage.getItem("sidetrack_username") || "Fan");
-  const [userBadge] = useState(() => {
-    const tier = localStorage.getItem("sidetrack_tier") || "";
-    return tier === "stadium_vip" ? "VIP" : tier ? "PRO" : "";
-  });
   const scrollRef = useRef(null);
   const wsRef = useRef(null);
   const reconnectRef = useRef(null);
@@ -83,7 +79,7 @@ export default function LiveChat({ trackTitle }) {
   const sendMessage = () => {
     if (!input.trim()) return;
     if (mode === "live" && wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ user: username, text: input.trim(), badge: userBadge }));
+      wsRef.current.send(JSON.stringify({ user: username, text: input.trim() }));
     } else {
       setComments((prev) => [...prev, { id: Date.now(), user: username, text: input.trim(), ts: new Date().toISOString() }]);
     }
