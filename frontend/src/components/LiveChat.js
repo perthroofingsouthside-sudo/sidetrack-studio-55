@@ -137,11 +137,6 @@ export default function LiveChat({ trackTitle }) {
             {messages.map((msg) => (
               <div key={msg.id} className="animate-chat-in py-1" data-testid="live-message">
                 <span className="text-[10px] text-[#5C5C6B] mr-1.5">{fmtTime(msg.ts)}</span>
-                {msg.badge && (
-                  <span className={`text-[8px] font-black uppercase tracking-wider mr-1 px-1 py-0.5 rounded ${
-                    msg.badge === "VIP" ? "bg-[#FF6B00]/20 text-[#FF6B00]" : "bg-[#39FF14]/15 text-[#39FF14]"
-                  }`}>{msg.badge}</span>
-                )}
                 <span className={`text-xs font-bold ${msg.user === "SYSTEM" ? "text-[#5C5C6B] italic" : "text-[#39FF14]"}`}>{msg.user}</span>
                 <span className="text-xs text-[#8F8F9D] ml-1.5">{msg.text}</span>
               </div>

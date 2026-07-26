@@ -279,3 +279,18 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 ### Remaining backlog (unchanged)
 - P1: Decompose `BecomeAStar.js` (717 lines); "Show on Both" licensing constraints in Backstage.
 - P2: SEO fixes (robots.txt, sitemap.xml, llms.txt); refactor `_run_band_activity_check()`, `get_lyrics()`, `separate_stems()`; YouTube/TikTok OAuth (BLOCKED on user credentials).
+
+## Jul 26, 2026 — MAJOR PIVOT: APP IS NOW 100% FREE (iteration_35: 100% pass both)
+- **All paywalls removed**: $79.98 AUD ownership gate, $9.99/mo finance plan, all 9 subscription tiers, Stripe checkout/webhook — GONE.
+- Backend:
+  - `payments.py` rewritten as free stubs: `/ownership/{user}/status` → always owned; `/ownership/products` → empty; `/payments/checkout` + `/payments/status` → free message (no Stripe).
+  - `platform.py`: SUBSCRIPTION_TIERS deleted; `/subscriptions/tiers|select|{user}/status` → universal free-access stubs (is_pro/is_vip true); band activity check → no-op (scheduler-safe); band audit + band upload endpoints removed (404); `/rewards/credit-winner` → Champion badge only (no sub months).
+  - `lanes.py`: `/catalog/in/{track}` → `requires_ownership: false` always.
+  - **70/30 artist split RETAINED**: `/store/purchase` ($0.79/song → $0.55 artist / $0.24 platform), `/store/pricing`, `/store/library`, `/store/check` unchanged.
+  - Deleted obsolete tests: test_iteration19_payments, test_iteration20_ownership, test_subscriptions. New suite: `backend/tests/test_free_pivot.py` (16/16 pass).
+- Frontend:
+  - `PricingPage.js` rewritten → "100% Free. Forever." page (route "pricing" kept): free badge hero, "Start Creating — Free" CTA, 8-feature Everything Unlocked grid, artist-economy card (70/30 bar).
+  - `SocialProfile.js`: TIER_LABELS / subStatus / Pro card / go-pro-btn / band tracker removed → "Everything Unlocked — Free" card (free-access-card) linking to the free page.
+  - `GamerPage.js`: pickTrack ownership gate removed; footer → "Every track, every mode — 100% free."
+  - `LiveChat.js`: VIP/PRO badge logic fully removed.
+- Deployment health check passed earlier (Jun 10); re-verify before deploy after pivot.
