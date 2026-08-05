@@ -36,6 +36,7 @@ from routes.sync import router as sync_router
 from routes.jam import router as jam_router
 from routes.gamer_catalog import router as gamer_catalog_router
 from routes.battles import router as battles_router
+from routes.safety import router as safety_router
 
 # ── Register all route modules on the /api prefix ─
 api_router.include_router(core_router)
@@ -52,6 +53,7 @@ api_router.include_router(sync_router)
 api_router.include_router(jam_router)
 api_router.include_router(gamer_catalog_router)
 api_router.include_router(battles_router)
+api_router.include_router(safety_router)
 
 app.include_router(api_router)
 

@@ -19,7 +19,7 @@ export default function GuitarAid({ targetMidi, onPlayNote }) {
 
   return (
     <div className="w-full overflow-x-auto" data-testid="guitar-aid">
-      <div className="min-w-[420px] rounded-xl border border-[#FF6B00]/20 p-3"
+      <div className="min-w-[420px] rounded-xl border border-[#FF5F1F]/20 p-3"
         style={{ background: "linear-gradient(180deg, rgba(30,18,8,0.9), rgba(10,6,3,0.95))" }}>
         <div className="grid" style={{ gridTemplateColumns: `24px repeat(${FRETS + 1}, 1fr)` }}>
           {/* Fret numbers */}
@@ -29,7 +29,7 @@ export default function GuitarAid({ targetMidi, onPlayNote }) {
           ))}
           {STRING_MIDI.map((sm, s) => (
             <div key={`row-${s}`} className="contents">
-              <div className="flex items-center justify-center text-[10px] font-black text-[#FF6B00]">{STRING_LABELS[s]}</div>
+              <div className="flex items-center justify-center text-[10px] font-black text-[#FF5F1F]">{STRING_LABELS[s]}</div>
               {Array.from({ length: FRETS + 1 }, (_, f) => {
                 const midi = sm + f;
                 const isTarget = target && target.string === s && target.fret === f;

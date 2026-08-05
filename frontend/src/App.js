@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import "@/App.css";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -6,6 +6,8 @@ import axios from "axios";
 import BottomNav from "@/components/BottomNav";
 import GlobalPlayer from "@/components/GlobalPlayer";
 import ViewRouter from "@/router/ViewRouter";
+import AgeGate from "@/components/safety/AgeGate";
+import GraduationModal from "@/components/safety/GraduationModal";
 import { useGlobalAudioPlayer } from "@/hooks/useGlobalAudioPlayer";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -27,12 +29,52 @@ function App() {
   const [pendingBattleSong, setPendingBattleSong] = useState(null);
   const [recordMode, setRecordMode] = useState(() => localStorage.getItem("pp_record_mode") || "stadium");
 
+  // ── Grommet safety (under-18 → Gamer lane only) ───────────────────────
+  const [ageMode, setAgeMode] = useState(() => localStorage.getItem("pp_age_mode") || "");
+  const [showGraduation, setShowGraduation] = useState(false);
+  const isGrommet = ageMode === "grommet";
+
+  const selectAgeMode = useCallback(async (mode) => {
+    localStorage.setItem("pp_age_mode", mode);
+    setAgeMode(mode);
+    const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
+    axios.post(`${API}/safety/age-mode`, { user_id: uid, mode }).catch(() => {});
+    if (mode === "grommet") {
+      localStorage.setItem("pp_lane", "gamer");
+      setLaneState("gamer");
+      setCurrentView("battle");
+      toast.success("Gamer mode locked in — avatar identity protected");
+    }
+  }, []);
+
+  const handleGraduated = useCallback(() => {
+    localStorage.setItem("pp_age_mode", "adult");
+    setAgeMode("adult");
+    setShowGraduation(false);
+    toast.success("Creator mode unlocked — welcome to the full ecosystem!");
+  }, []);
+
+  // Grommets can never sit in the creator lane (covers stale localStorage)
+  useEffect(() => {
+    if (isGrommet && lane !== "gamer") {
+      localStorage.setItem("pp_lane", "gamer");
+      setLaneState("gamer");
+      setCurrentView("battle");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isGrommet]);
+
   const switchRecordMode = useCallback((m) => {
     setRecordMode(m);
     localStorage.setItem("pp_record_mode", m);
   }, []);
 
   const setLane = useCallback((newLane) => {
+    if (newLane === "creator" && localStorage.getItem("pp_age_mode") === "grommet") {
+      toast("Level up with a guardian to unlock Creator mode", { icon: "🔒" });
+      setShowGraduation(true);
+      return;
+    }
     setLaneState(newLane);
     localStorage.setItem("pp_lane", newLane);
     const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
@@ -161,7 +203,11 @@ function App() {
         hasSong={!!currentSong}
         lane={lane}
         onLaneChange={setLane}
+        isGrommet={isGrommet}
       />
+
+      {!ageMode && <AgeGate onSelect={selectAgeMode} />}
+      <GraduationModal open={showGraduation} onClose={() => setShowGraduation(false)} onGraduated={handleGraduated} />
 
       <Toaster position="top-center" theme="dark" />
     </div>

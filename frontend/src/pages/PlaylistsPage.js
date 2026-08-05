@@ -110,7 +110,7 @@ export default function PlaylistsPage({ onTrackSelect }) {
           <div className="flex-1 min-w-0">
             <h2 className="font-['Outfit'] text-lg font-bold truncate">{selectedPlaylist.name}</h2>
             <div className="flex items-center gap-2">
-              {selectedPlaylist.is_public ? <Globe className="w-3 h-3 text-[#39FF14]" /> : <Lock className="w-3 h-3 text-[#FF6B00]" />}
+              {selectedPlaylist.is_public ? <Globe className="w-3 h-3 text-[#39FF14]" /> : <Lock className="w-3 h-3 text-[#FF5F1F]" />}
               <span className="text-xs text-[#606070]">{selectedPlaylist.track_count} tracks</span>
             </div>
           </div>
@@ -127,14 +127,14 @@ export default function PlaylistsPage({ onTrackSelect }) {
           <div className="px-4 space-y-1 pb-24">
             {(selectedPlaylist.tracks || []).length === 0 && (
               <div className="surface-card p-8 text-center">
-                <ListMusic className="w-10 h-10 text-[#FF6B00]/20 mx-auto mb-3" />
+                <ListMusic className="w-10 h-10 text-[#FF5F1F]/20 mx-auto mb-3" />
                 <p className="text-sm text-[#606070]">No tracks yet. Search for songs on the Discover page and add them!</p>
               </div>
             )}
             {(selectedPlaylist.tracks || []).map((track, idx) => (
               <div key={track.track_id + idx} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 group" data-testid={`pl-track-${idx}`}>
-                <Button variant="ghost" size="icon" onClick={() => playPreview(track)} className="text-[#FF6B00] flex-shrink-0">
-                  {playingId === track.track_id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" fill="#FF6B00" />}
+                <Button variant="ghost" size="icon" onClick={() => playPreview(track)} className="text-[#FF5F1F] flex-shrink-0">
+                  {playingId === track.track_id ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" fill="#FF5F1F" />}
                 </Button>
                 {track.cover_url && <img src={track.cover_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />}
                 <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onTrackSelect && onTrackSelect(track)}>
@@ -159,12 +159,12 @@ export default function PlaylistsPage({ onTrackSelect }) {
       <div className="px-4 pt-6 pb-2 flex items-center justify-between">
         <div>
           <h1 className="font-['Outfit'] text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <ListMusic className="w-6 h-6 text-[#FF6B00]" />
+            <ListMusic className="w-6 h-6 text-[#FF5F1F]" />
             <span className="text-white">My Playlists</span>
           </h1>
           <p className="text-[#606070] text-xs mt-1">Your personal collection</p>
         </div>
-        <Button data-testid="create-playlist-btn" onClick={() => setShowCreate(!showCreate)} className="h-10 px-4 bg-[#FF6B00] hover:bg-[#FF8533] rounded-2xl text-sm font-bold gap-1.5 glow-orange">
+        <Button data-testid="create-playlist-btn" onClick={() => setShowCreate(!showCreate)} className="h-10 px-4 bg-[#FF5F1F] hover:bg-[#FF7A42] rounded-2xl text-sm font-bold gap-1.5 glow-orange">
           <Plus className="w-4 h-4" /> New
         </Button>
       </div>
@@ -176,12 +176,12 @@ export default function PlaylistsPage({ onTrackSelect }) {
             <Input data-testid="playlist-name-input" value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="Playlist name..." className="h-11 bg-[#05050A] border-white/10 text-white rounded-2xl" />
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                {newPublic ? <Globe className="w-4 h-4 text-[#39FF14]" /> : <Lock className="w-4 h-4 text-[#FF6B00]" />}
+                {newPublic ? <Globe className="w-4 h-4 text-[#39FF14]" /> : <Lock className="w-4 h-4 text-[#FF5F1F]" />}
                 <span className="text-sm text-[#A0A0B0]">{newPublic ? "Public" : "Private"}</span>
               </div>
               <Switch data-testid="privacy-toggle" checked={newPublic} onCheckedChange={setNewPublic} />
             </div>
-            <Button data-testid="save-playlist-btn" onClick={createPlaylist} className="w-full h-10 bg-[#FF6B00] hover:bg-[#FF8533] rounded-2xl font-bold">Create Playlist</Button>
+            <Button data-testid="save-playlist-btn" onClick={createPlaylist} className="w-full h-10 bg-[#FF5F1F] hover:bg-[#FF7A42] rounded-2xl font-bold">Create Playlist</Button>
           </div>
         </div>
       )}
@@ -190,25 +190,25 @@ export default function PlaylistsPage({ onTrackSelect }) {
         <div className="px-4 space-y-2 pb-24">
           {playlists.length === 0 && !showCreate && (
             <div className="surface-card p-8 text-center">
-              <ListMusic className="w-12 h-12 text-[#FF6B00]/20 mx-auto mb-3" />
+              <ListMusic className="w-12 h-12 text-[#FF5F1F]/20 mx-auto mb-3" />
               <p className="text-sm text-[#606070]">No playlists yet. Create your first one!</p>
             </div>
           )}
           {playlists.map((pl) => (
-            <div key={pl.id} onClick={() => openPlaylist(pl)} className="surface-card p-4 flex items-center gap-3 cursor-pointer hover:border-[#FF6B00]/30 transition-all group" data-testid={`playlist-card-${pl.id}`}>
+            <div key={pl.id} onClick={() => openPlaylist(pl)} className="surface-card p-4 flex items-center gap-3 cursor-pointer hover:border-[#FF5F1F]/30 transition-all group" data-testid={`playlist-card-${pl.id}`}>
               {pl.cover_url ? (
                 <img src={pl.cover_url} alt="" className="w-14 h-14 rounded-xl object-cover flex-shrink-0" />
               ) : (
-                <div className="w-14 h-14 rounded-xl bg-[#FF6B00]/10 flex items-center justify-center flex-shrink-0"><ListMusic className="w-6 h-6 text-[#FF6B00]" /></div>
+                <div className="w-14 h-14 rounded-xl bg-[#FF5F1F]/10 flex items-center justify-center flex-shrink-0"><ListMusic className="w-6 h-6 text-[#FF5F1F]" /></div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00]">{pl.name}</p>
+                <p className="text-sm font-medium text-white truncate group-hover:text-[#FF5F1F]">{pl.name}</p>
                 <div className="flex items-center gap-2 mt-1">
-                  {pl.is_public ? <Globe className="w-3 h-3 text-[#39FF14]" /> : <Lock className="w-3 h-3 text-[#FF6B00]" />}
+                  {pl.is_public ? <Globe className="w-3 h-3 text-[#39FF14]" /> : <Lock className="w-3 h-3 text-[#FF5F1F]" />}
                   <span className="text-xs text-[#606070]">{pl.track_count || 0} tracks</span>
                 </div>
               </div>
-              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); togglePrivacy(pl); }} className="text-[#606070] hover:text-[#FF6B00]">
+              <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); togglePrivacy(pl); }} className="text-[#606070] hover:text-[#FF5F1F]">
                 {pl.is_public ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
               </Button>
             </div>

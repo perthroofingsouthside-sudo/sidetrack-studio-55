@@ -8,15 +8,15 @@ const SKINS = {
   theater: {
     label: "Theater",
     floorTop: "#1a0500", floorMid: "#2a0d00", floorBottom: "#050202",
-    floorLine: "#FF6B00",
+    floorLine: "#FF5F1F",
     curtainStripes:
       "repeating-linear-gradient(90deg, #4a0000 0px, #6b0000 12px, #4a0000 24px, #2a0000 36px), linear-gradient(180deg, #6b0000, #2a0000)",
     valanceStripes:
       "repeating-linear-gradient(90deg, #4a0000 0px, #6b0000 10px, #4a0000 20px, #2a0000 30px)",
-    leftSpotlight: "rgba(255,107,0,0.18)",
+    leftSpotlight: "rgba(255,95,31,0.18)",
     rightSpotlight: "rgba(57,255,20,0.15)",
     centerSpotlight: "rgba(255,255,255,0.06)",
-    dustA: "#FF6B00",
+    dustA: "#FF5F1F",
     dustB: "#39FF14",
     sceneryFilter: "saturate(0.75) brightness(0.85)",
   },

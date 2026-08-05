@@ -239,12 +239,12 @@ export default function KoalaStudio({ onBack }) {
           </Button>
         )}
         <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-          style={{ background: "rgba(255,107,0,0.15)", boxShadow: "0 0 22px rgba(255,107,0,0.3)" }}>
-          <Grid3X3 className="w-5 h-5 text-[#FF6B00]" />
+          style={{ background: "rgba(255,95,31,0.15)", boxShadow: "0 0 22px rgba(255,95,31,0.3)" }}>
+          <Grid3X3 className="w-5 h-5 text-[#FF5F1F]" />
         </div>
         <div className="flex-1 min-w-0">
           <h1 className="font-['Outfit'] text-xl sm:text-2xl font-black text-white">
-            <span className="text-[#FF6B00] glow-text-orange">Studio</span>
+            <span className="text-[#FF5F1F] glow-text-orange">Studio</span>
           </h1>
           <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
             16-Pad Sampler · Sequencer · ADSR · Hold-FX
@@ -268,7 +268,7 @@ export default function KoalaStudio({ onBack }) {
               className={`h-9 px-3 rounded-xl text-[10px] font-black uppercase tracking-wider gap-1.5 border ${
                 recordingPad !== null
                   ? "bg-red-500 hover:bg-red-600 text-white border-red-500/50"
-                  : "bg-[#FF6B00]/15 hover:bg-[#FF6B00]/25 text-[#FF6B00] border-[#FF6B00]/40"
+                  : "bg-[#FF5F1F]/15 hover:bg-[#FF5F1F]/25 text-[#FF5F1F] border-[#FF5F1F]/40"
               }`}>
               {recordingPad !== null ? <><Square className="w-3 h-3" /> Stop Mic</> : <><Mic className="w-3 h-3" /> Mic → Pad {selected + 1}</>}
             </Button>
@@ -302,22 +302,22 @@ export default function KoalaStudio({ onBack }) {
                   data-testid={`studio-pad-${i}`}
                   onMouseDown={() => triggerPad(i)}
                   onContextMenu={(e) => { e.preventDefault(); setSelected(i); }}
-                  className={`relative aspect-square rounded-2xl border-2 transition-all flex flex-col items-center justify-center overflow-hidden
+                  className={`skeu-btn relative aspect-square rounded-2xl border-2 transition-all flex flex-col items-center justify-center overflow-hidden
                     ${isActive
-                      ? "bg-[#FF6B00] border-[#FF6B00] scale-95"
+                      ? "border-[#FF5F1F] scale-95"
                       : pad.hasSample
-                        ? "bg-[#FF6B00]/15 border-[#FF6B00]/50 hover:bg-[#FF6B00]/25"
-                        : "bg-white/3 border-white/10 hover:border-white/20"}
+                        ? "border-[#FF5F1F]/50"
+                        : "border-white/10 hover:border-white/20"}
                     ${isSel ? "ring-2 ring-[#39FF14] ring-offset-2 ring-offset-[#05050A]" : ""}
                   `}
                   style={isActive
-                    ? { boxShadow: "0 0 28px rgba(255,107,0,0.65)" }
+                    ? { boxShadow: "0 0 28px rgba(255,95,31,0.65), inset 0 2px 8px rgba(0,0,0,0.6)", background: "linear-gradient(180deg, #FF5F1F, #C24312)" }
                     : pad.hasSample
-                      ? { boxShadow: "0 0 14px rgba(255,107,0,0.25)" }
+                      ? { boxShadow: "inset 0 1px 0 rgba(255,150,90,0.2), 0 0 14px rgba(255,95,31,0.3), 0 3px 8px rgba(0,0,0,0.55)", background: "linear-gradient(180deg, #33231A, #1A120C)" }
                       : undefined}
                 >
                   <span className="text-[9px] font-black uppercase tracking-wider opacity-60"
-                    style={{ color: isActive ? "#fff" : pad.hasSample ? "#FF6B00" : "#5C5C6B" }}>
+                    style={{ color: isActive ? "#fff" : pad.hasSample ? "#FF5F1F" : "#5C5C6B" }}>
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   {pad.label && (
@@ -334,11 +334,11 @@ export default function KoalaStudio({ onBack }) {
           </div>
 
           {/* Hold-FX bar */}
-          <div className="rounded-2xl border border-white/5 p-3" style={{ background: "rgba(15,15,22,0.5)" }} data-testid="studio-holdfx-bar">
+          <div className="skeu-panel p-3" data-testid="studio-holdfx-bar">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-[#FF6B00]" />
-                <p className="text-[10px] uppercase tracking-[0.25em] text-[#FF6B00] font-black">Hold-FX</p>
+                <Zap className="w-3.5 h-3.5 text-[#FF5F1F]" />
+                <p className="text-[10px] uppercase tracking-[0.25em] text-[#FF5F1F] font-black">Hold-FX</p>
               </div>
               <span className="text-[9px] uppercase tracking-wider text-[#5C5C6B] font-bold">
                 Amount {Math.round(fxAmount * 100)}%
@@ -352,10 +352,10 @@ export default function KoalaStudio({ onBack }) {
                   onClick={() => engageFx(fx.key)}
                   className={`h-10 rounded-xl text-[9px] font-black uppercase tracking-wider border transition-all ${
                     holdFx === fx.key
-                      ? "bg-[#FF6B00] text-white border-[#FF6B00]"
-                      : "border-white/10 text-[#A0A0B0] hover:text-white hover:border-[#FF6B00]/40"
+                      ? "bg-[#FF5F1F] text-white border-[#FF5F1F]"
+                      : "border-white/10 text-[#A0A0B0] hover:text-white hover:border-[#FF5F1F]/40"
                   }`}
-                  style={holdFx === fx.key ? { boxShadow: "0 0 16px rgba(255,107,0,0.55)" } : undefined}>
+                  style={holdFx === fx.key ? { boxShadow: "0 0 16px rgba(255,95,31,0.55)" } : undefined}>
                   {fx.label}
                 </button>
               ))}
@@ -366,7 +366,7 @@ export default function KoalaStudio({ onBack }) {
           </div>
 
           {/* Step sequencer */}
-          <div className="rounded-2xl border border-white/5 p-3" style={{ background: "rgba(15,15,22,0.5)" }} data-testid="studio-sequencer">
+          <div className="skeu-panel p-3" data-testid="studio-sequencer">
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex items-center gap-2">
                 <button
@@ -405,8 +405,8 @@ export default function KoalaStudio({ onBack }) {
                       : row)))}
                     className={`h-8 rounded-md border transition-all ${
                       on
-                        ? "bg-[#FF6B00] border-[#FF6B00]"
-                        : "bg-white/5 border-white/10 hover:border-[#FF6B00]/40"
+                        ? "bg-[#FF5F1F] border-[#FF5F1F]"
+                        : "bg-white/5 border-white/10 hover:border-[#FF5F1F]/40"
                     } ${playing ? "ring-2 ring-[#39FF14]" : ""}`}
                   />
                 );
@@ -421,7 +421,7 @@ export default function KoalaStudio({ onBack }) {
         {/* SIDE — stem mixer + selected-pad config */}
         <aside className="space-y-3" data-testid="studio-side-panel">
           {/* Stem Mixer */}
-          <div className="rounded-2xl border border-white/5 p-3" style={{ background: "rgba(15,15,22,0.5)" }} data-testid="studio-stem-mixer">
+          <div className="skeu-panel p-3" data-testid="studio-stem-mixer">
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#39FF14] font-black mb-2.5">Stem Mixer</p>
             <div className="grid grid-cols-5 gap-1.5">
               {STEM_OPTS.map((s) => (
@@ -445,7 +445,7 @@ export default function KoalaStudio({ onBack }) {
                 </div>
               ))}
               <div className="flex flex-col items-center gap-1.5">
-                <p className="text-[8px] uppercase tracking-wider text-[#FF6B00] font-black">MST</p>
+                <p className="text-[8px] uppercase tracking-wider text-[#FF5F1F] font-black">MST</p>
                 <Slider orientation="vertical" min={0} max={100} step={1}
                   value={[stemVol.master]}
                   onValueChange={([v]) => setStemVol((sv) => ({ ...sv, master: v }))}
@@ -457,12 +457,12 @@ export default function KoalaStudio({ onBack }) {
           </div>
 
           {/* Selected pad config */}
-          <div className="rounded-2xl border border-white/5 p-3" style={{ background: "rgba(15,15,22,0.5)" }} data-testid="studio-pad-config">
+          <div className="skeu-panel p-3" data-testid="studio-pad-config">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-[0.25em] text-[#FF6B00] font-black">
+              <p className="text-[10px] uppercase tracking-[0.25em] text-[#FF5F1F] font-black">
                 Pad {selected + 1} · {padCfg?.label || "Empty"}
               </p>
-              <Disc3 className="w-3.5 h-3.5 text-[#FF6B00]" />
+              <Disc3 className="w-3.5 h-3.5 text-[#FF5F1F]" />
             </div>
 
             {/* Stem route */}
@@ -514,7 +514,7 @@ export default function KoalaStudio({ onBack }) {
                   onClick={() => updateFilter("type", opt.k)}
                   className={`h-7 rounded-lg text-[9px] font-black uppercase tracking-wider border ${
                     padCfg?.filter?.type === opt.k
-                      ? "bg-[#FF6B00] text-white border-[#FF6B00]"
+                      ? "bg-[#FF5F1F] text-white border-[#FF5F1F]"
                       : "border-white/10 text-[#A0A0B0] hover:text-white"
                   }`}>
                   {opt.label}
@@ -554,7 +554,7 @@ export default function KoalaStudio({ onBack }) {
               <Button onClick={() => setShowSearch(false)} variant="ghost" size="icon" className="text-[#5C5C6B]" data-testid="studio-search-close">
                 <Square className="w-4 h-4" />
               </Button>
-              <p className="text-[10px] uppercase tracking-[0.3em] text-[#FF6B00] font-black">
+              <p className="text-[10px] uppercase tracking-[0.3em] text-[#FF5F1F] font-black">
                 Sample Library · Pad {selected + 1}
               </p>
             </div>
@@ -566,7 +566,7 @@ export default function KoalaStudio({ onBack }) {
                 className="h-10 bg-[#0F0F16] border-white/10 text-white text-sm rounded-xl" />
               <Button onClick={doSearch} disabled={searching || !query.trim()}
                 data-testid="studio-search-btn"
-                className="h-10 px-4 bg-[#FF6B00] hover:bg-[#FF8533] rounded-xl text-sm font-black">
+                className="h-10 px-4 bg-[#FF5F1F] hover:bg-[#FF7A42] rounded-xl text-sm font-black">
                 {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Go"}
               </Button>
             </div>
@@ -576,13 +576,13 @@ export default function KoalaStudio({ onBack }) {
                   key={`${t.track_id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
                   onClick={() => sampleFromTrack(t, selected)}
                   data-testid={`studio-search-result-${idx}`}
-                  className="w-full flex items-center gap-2 p-2 rounded-xl border border-white/5 hover:border-[#FF6B00]/40 hover:bg-[#FF6B00]/5 text-left">
+                  className="w-full flex items-center gap-2 p-2 rounded-xl border border-white/5 hover:border-[#FF5F1F]/40 hover:bg-[#FF5F1F]/5 text-left">
                   {t.cover_url && <img src={t.cover_url} alt="" className="w-9 h-9 rounded-lg object-cover" />}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-white truncate">{t.title}</p>
                     <p className="text-[10px] text-[#5C5C6B] truncate">{t.artist}</p>
                   </div>
-                  <Upload className="w-3.5 h-3.5 text-[#FF6B00]" />
+                  <Upload className="w-3.5 h-3.5 text-[#FF5F1F]" />
                 </button>
               ))}
             </div>

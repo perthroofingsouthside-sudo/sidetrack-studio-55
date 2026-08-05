@@ -162,7 +162,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           <div className="min-w-0 flex-1">
             <h2 className="font-['Outfit'] text-[13px] font-black tracking-tight leading-tight">
               <span className="text-white">Pocket</span>{" "}
-              <span className="text-[#FF6B00]">Products</span>
+              <span className="text-[#FF5F1F]">Products</span>
             </h2>
             <p className="text-[8px] text-[#39FF14] font-bold uppercase tracking-[0.15em] mt-0.5">Live Stage</p>
             {isRecording && (
@@ -182,7 +182,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
             <Button
               data-testid="switch-stadium-btn"
               onClick={onSwitchStadium}
-              className="w-full h-8 mb-1 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start font-black uppercase tracking-wider bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A] hover:opacity-90"
+              className="w-full h-8 mb-1 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start font-black uppercase tracking-wider bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] text-[#05050A] hover:opacity-90"
             >
               <Camera className="w-3 h-3 shrink-0" />
               <span className="truncate">Stadium</span>
@@ -194,7 +194,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                 onClick={() => { if (!isRecording) setLayout(l.key); }}
                 className={`w-full h-8 px-2.5 rounded-lg text-[10px] gap-1.5 transition-all justify-start font-bold ${
                   layout === l.key
-                    ? "bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.5)]"
+                    ? "bg-[#FF5F1F] text-white shadow-[0_0_12px_rgba(255,95,31,0.5)]"
                     : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15 hover:text-white"
                 }`}>
                 <l.icon className="w-3 h-3 shrink-0" />
@@ -234,7 +234,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
               } catch (e) { console.error("cleanup toggle err", e); }
             }}
               className={`w-full h-7 px-2.5 rounded-lg text-[10px] gap-1.5 justify-start border transition-all font-bold ${
-                liveCleanup ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10" : "border-white/10 text-[#5C5C6B] hover:text-white"
+                liveCleanup ? "border-[#FF5F1F]/40 text-[#FF5F1F] bg-[#FF5F1F]/10" : "border-white/10 text-[#5C5C6B] hover:text-white"
               }`}>
               <Sparkles className="w-3 h-3 shrink-0" /> Cleanup
             </Button>
@@ -281,8 +281,8 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
                   {!streamRef.current && !isRecording && (
                     <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none">
-                      <div className="w-16 h-16 rounded-full bg-[#FF6B00]/5 flex items-center justify-center mb-3 border border-[#FF6B00]/15">
-                        <Camera className="w-7 h-7 text-[#FF6B00]/25" />
+                      <div className="w-16 h-16 rounded-full bg-[#FF5F1F]/5 flex items-center justify-center mb-3 border border-[#FF5F1F]/15">
+                        <Camera className="w-7 h-7 text-[#FF5F1F]/25" />
                       </div>
                       <p className="text-sm text-[#8F8F9D] font-['Outfit'] font-semibold">Your Stage</p>
                       <p className="text-[10px] text-[#5C5C6B]/60 mt-1.5">Tap mic to start</p>
@@ -290,9 +290,9 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                   )}
                   <div className="absolute top-3 left-3 z-40 flex items-center gap-2">
                     <AvatarRing name="You" size="sm" isActive={isActive} intensity={intensity} icon={Mic} label="Host" />
-                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] border-[#FF6B00]/30" data-testid="first-man-badge">First Man</span>
+                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5F1F] border-[#FF5F1F]/30" data-testid="first-man-badge">First Man</span>
                     {aiBgRemoval && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#39FF14] border-[#39FF14]/30">AI BG</span>}
-                    {liveCleanup && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#FF6B00] border-[#FF6B00]/30" data-testid="live-cleanup-badge">Cleanup</span>}
+                    {liveCleanup && <span className="badge-glass px-2 py-1 rounded-full text-[8px] font-bold uppercase tracking-wider text-[#FF5F1F] border-[#FF5F1F]/30" data-testid="live-cleanup-badge">Cleanup</span>}
                   </div>
                   {isRecording && (
                     <div className="absolute bottom-4 left-4 z-40 badge-glass rounded-full px-3 py-1.5 flex items-center gap-2">
@@ -329,7 +329,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
               <div className="flex-1 flex flex-col p-2 sm:p-3 gap-2 min-h-0 layout-transition" data-testid="viewer-layout">
                 {/* Main Lead Frame — vertical portrait ~72% */}
                 <div className="flex-[72] relative rounded-2xl overflow-hidden neon-frame-orange arena-glow scan-line mx-auto w-full max-w-md"
-                  style={{ aspectRatio: "9/16", maxHeight: "100%", background: "radial-gradient(ellipse at 50% 100%, rgba(255,107,0,0.08) 0%, #06060C 60%)" }}
+                  style={{ aspectRatio: "9/16", maxHeight: "100%", background: "radial-gradient(ellipse at 50% 100%, rgba(255,95,31,0.08) 0%, #06060C 60%)" }}
                   data-testid="arena-frame">
                   <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-35" />
 
@@ -341,17 +341,17 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                   {/* Centered lead performer avatar */}
                   <div className="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
                     <AvatarRing name="Lead" size="lg" isActive={isActive} intensity={intensity} icon={Mic} />
-                    <p className="text-[10px] text-[#FF6B00]/70 font-bold uppercase tracking-[0.2em] mt-3">Lead</p>
+                    <p className="text-[10px] text-[#FF5F1F]/70 font-bold uppercase tracking-[0.2em] mt-3">Lead</p>
                   </div>
 
                   {/* Arena HUD */}
                   <div className="absolute top-3 left-3 z-40 flex items-center gap-2">
-                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF6B00] flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-[#FF6B00] animate-pulse shadow-[0_0_6px_rgba(255,107,0,0.6)]" /> Live Arena
+                    <span className="badge-glass px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5F1F] flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-[#FF5F1F] animate-pulse shadow-[0_0_6px_rgba(255,95,31,0.6)]" /> Live Arena
                     </span>
                   </div>
                   <div className="absolute top-3 right-3 z-40 badge-glass rounded-full px-3 py-1 flex items-center gap-1.5">
-                    <Eye className="w-3 h-3 text-[#FF6B00]" />
+                    <Eye className="w-3 h-3 text-[#FF5F1F]" />
                     <span className="text-[10px] text-white font-bold">0</span>
                   </div>
                 </div>
@@ -375,13 +375,13 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
             {/* ── SPLIT LAYOUT: Camera + Lyrics ── */}
             {layout === "split" && (
               <div className="flex-1 flex flex-col p-3 gap-2">
-                <div className="relative h-[45%] bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl neon-ambient-glow border border-[#FF6B00]/20" data-testid="camera-section">
+                <div className="relative h-[45%] bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl neon-ambient-glow border border-[#FF5F1F]/20" data-testid="camera-section">
                   <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
                   {!streamRef.current && !isRecording && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
                       <img src={STAGE_BG} alt="" className="absolute inset-0 w-full h-full object-cover opacity-20" />
                       <div className="relative z-10 text-center">
-                        <Camera className="w-12 h-12 text-[#FF6B00]/40 mb-2 mx-auto" />
+                        <Camera className="w-12 h-12 text-[#FF5F1F]/40 mb-2 mx-auto" />
                         <p className="text-xs text-[#5C5C6B]">Camera activates when recording</p>
                       </div>
                     </div>
@@ -398,7 +398,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                     <div className="p-4 space-y-2">
                       {currentChord && (
                         <div className="text-center mb-3 pb-3 border-b border-white/5">
-                          <span className="text-3xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</span>
+                          <span className="text-3xl font-['Outfit'] font-black text-[#FF5F1F] glow-text-orange tracking-tighter">{currentChord.chord}</span>
                         </div>
                       )}
                       {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
@@ -434,12 +434,12 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
               <div className="flex-1 bg-[#0A0A0F] flex flex-col items-center justify-center p-4 rounded-xl m-3 border border-white/5" data-testid="guitar-full">
                 {currentChord ? (
                   <div className="text-center animate-fade-in">
-                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange tracking-tighter">{currentChord.chord}</div>
+                    <div className="text-6xl sm:text-8xl font-['Outfit'] font-black text-[#FF5F1F] glow-text-orange tracking-tighter">{currentChord.chord}</div>
                     <GuitarDiagram chord={currentChord.chord} />
                     {lyrics?.chords && (
                       <div className="flex gap-3 mt-6 justify-center flex-wrap">
                         {upcomingChords.map((c) => (
-                          <span key={`${c.time}-${c.chord}`} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF6B00]/10 text-[#FF6B00]/50">{c.chord}</span>
+                          <span key={`${c.time}-${c.chord}`} className="text-lg font-['Outfit'] font-bold px-3 py-1 rounded-xl bg-[#FF5F1F]/10 text-[#FF5F1F]/50">{c.chord}</span>
                         ))}
                       </div>
                     )}
@@ -474,7 +474,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
 
               <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
                 className={`w-14 h-14 rounded-full transition-all ${
-                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(255,107,0,0.5)]"
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF5F1F] hover:bg-[#FF7A42] shadow-[0_0_30px_rgba(255,95,31,0.5)]"
                 }`}>
                 {isRecording ? <Square className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
               </Button>
@@ -498,7 +498,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
                 <Button
                   data-testid="trim-share-btn"
                   onClick={() => setShowTrimModal(true)}
-                  className="h-8 px-4 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1.5 border border-[#FF6B00]/30 bg-[#FF6B00]/10 text-[#FF6B00] hover:bg-[#FF6B00]/20 transition-all"
+                  className="h-8 px-4 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1.5 border border-[#FF5F1F]/30 bg-[#FF5F1F]/10 text-[#FF5F1F] hover:bg-[#FF5F1F]/20 transition-all"
                 >
                   <Scissors className="w-3 h-3" /> Trim & Share
                 </Button>

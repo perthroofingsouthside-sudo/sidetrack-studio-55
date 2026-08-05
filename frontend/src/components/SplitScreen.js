@@ -38,7 +38,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
     <div className="grid grid-cols-2 gap-3" data-testid="split-screen">
       {/* Left: Guitar Chords */}
       <div className="surface-card p-4 flex flex-col" data-testid="chords-panel">
-        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#FF6B00] mb-3">
+        <span className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#FF5F1F] mb-3">
           Guitar Chords
         </span>
 
@@ -59,7 +59,7 @@ export default function SplitScreen({ lyrics, currentTime }) {
           {nextChords.map((c, i) => (
             <span
               key={`${c.time}-${i}`}
-              className="text-sm font-['Outfit'] font-bold px-2 py-1 rounded-lg bg-[#FF6B00]/10 text-[#FF6B00]/60"
+              className="text-sm font-['Outfit'] font-bold px-2 py-1 rounded-lg bg-[#FF5F1F]/10 text-[#FF5F1F]/60"
             >
               {c.chord}
             </span>
@@ -137,7 +137,7 @@ function ChordDiagram({ chord }) {
                 key={f}
                 className={`w-3 h-3 rounded-full border ${
                   fret === f
-                    ? "bg-[#FF6B00] border-[#FF6B00]"
+                    ? "bg-[#FF5F1F] border-[#FF5F1F]"
                     : "border-white/10 bg-transparent"
                 }`}
               />

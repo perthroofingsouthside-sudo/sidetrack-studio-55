@@ -155,11 +155,11 @@ export default function BeatMaker({ userId }) {
   };
 
   return (
-    <div className="rounded-2xl border border-[#FF6B00]/25 p-4 sm:p-5" style={{ background: "rgba(255,107,0,0.04)" }} data-testid="beat-maker">
+    <div className="rounded-2xl border border-[#FF5F1F]/25 p-4 sm:p-5" style={{ background: "rgba(255,95,31,0.04)" }} data-testid="beat-maker">
       {/* Header */}
       <div className="flex items-center gap-2.5 mb-4">
-        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,107,0,0.15)" }}>
-          <Wand2 className="w-4.5 h-4.5 text-[#FF6B00]" />
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,95,31,0.15)" }}>
+          <Wand2 className="w-4.5 h-4.5 text-[#FF5F1F]" />
         </div>
         <div className="flex-1">
           <h3 className="font-['Outfit'] text-sm font-black text-white">Make a Beat</h3>
@@ -179,7 +179,7 @@ export default function BeatMaker({ userId }) {
               data-testid={`beat-genre-${g.key}`}
               className={`px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all border ${
                 genre === g.key
-                  ? "border-[#FF6B00] bg-[#FF6B00]/15 text-[#FF6B00]"
+                  ? "border-[#FF5F1F] bg-[#FF5F1F]/15 text-[#FF5F1F]"
                   : "border-white/10 text-[#5C5C6B] hover:text-white"
               }`}
             >
@@ -230,7 +230,7 @@ export default function BeatMaker({ userId }) {
               data-testid={`beat-key-${k}`}
               className={`w-7 h-7 rounded text-[10px] font-bold transition-all border ${
                 keySig === k
-                  ? "border-[#FF6B00] bg-[#FF6B00]/15 text-[#FF6B00]"
+                  ? "border-[#FF5F1F] bg-[#FF5F1F]/15 text-[#FF5F1F]"
                   : "border-white/10 text-[#5C5C6B]"
               }`}
             >
@@ -246,8 +246,8 @@ export default function BeatMaker({ userId }) {
           onClick={handleGenerate}
           disabled={generating || humming}
           data-testid="beat-generate-btn"
-          className="h-10 rounded-xl text-xs font-bold text-[#05050A] bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90 transition-all"
-          style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}
+          className="h-10 rounded-xl text-xs font-bold text-[#05050A] bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] hover:opacity-90 transition-all"
+          style={{ boxShadow: "0 0 20px rgba(255,95,31,0.3)" }}
         >
           {generating ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Generating...</> : <><Sparkles className="w-4 h-4 mr-2" /> Generate</>}
         </Button>
@@ -296,7 +296,7 @@ export default function BeatMaker({ userId }) {
                   {hits.slice(0, 32).map((h, i) => (
                     <span key={`${drum}-step-${i}`}
                       className={`h-1.5 flex-1 rounded-sm transition-colors ${
-                        h ? (drum === "kick" || drum === "bass" ? "bg-[#FF6B00]" : "bg-[#39FF14]") : "bg-white/5"
+                        h ? (drum === "kick" || drum === "bass" ? "bg-[#FF5F1F]" : "bg-[#39FF14]") : "bg-white/5"
                       }`}
                     />
                   ))}

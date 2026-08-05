@@ -1,0 +1,43 @@
+{
+  "summary": "Iteration 36 - Grommet Safety + Skeu UI + Peer Ratings. Ran 16 pytest cases (100% pass after 1 test-data fix). Frontend Playwright verified: AgeGate on fresh visitor, grommet lock icon on Creator toggle, Graduation modal (Get Guardian PIN -> PIN display -> wrong PIN 403 -> correct PIN graduation, mode flips to adult), grommet identity banner + Avatar3D 4 presets with persistence, Learn AI Grade card (S / 100/100 / Pitch+Timing shown, POST /api/gamer/grade fired), Studio skeu-panel + studio-pad-grid render, brand orange #FF5F1F everywhere after fixing one stray #FF6B00 in sonner.jsx. Adult regression smoke (Discover/Profile/Playlists/Backstage nav) all load without console errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "LearnPage completion", "issue": "POST /api/gamer/grade fires twice on lesson completion (likely StrictMode double-invoke inside functional state updater). Non-breaking but duplicates grade_history rows.", "selector": "learn-complete", "priority": "LOW"}
+    ],
+    "integration_issues": [
+      {"flow": "Battle Hub StarRating widget", "issue": "Could not verify star-rating-{id} widget or Top Rated chip in-UI: /api/rap-battles/archive returns empty battles[]; the seeded rating for item_id 'battle_demo1' has no corresponding archived battle row, so ArchiveSection renders nothing (archive-empty). Backend rating flow itself passes (upsert/avg/count/my_stars/top all validated).", "affected_selectors": ["star-rating-battle_demo1", "top-rated-battle_demo1", "battle-archive"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_safety_grommet.py",
+    "/app/test_reports/pytest/iter36_safety.xml"
+  ],
+  "action_items": [
+    "Seed an archived rap-battle row for 'battle_demo1' (or expose a dev seed endpoint) so the front-end StarRating + Top Rated chip flow can be verified end-to-end in the Battle Hub archive.",
+    "Investigate double POST to /api/gamer/grade on Learn lesson completion — the axios.post is inside a setMisses() functional updater, which will fire twice under React StrictMode. Move the API call out of the state updater (e.g., useEffect on `done`) so it fires exactly once.",
+    "GraduationModal reads userId from localStorage 'sidetrack_voter_id' with fallback 'anon'. If the id hasn't been generated yet on first render, all such users share the graduation state of the 'anon' account (observed as immediate 'already_graduated' on a fresh grommet). Ensure sidetrack_voter_id is initialized before AgeGate submit, or drop the 'anon' fallback in GraduationModal."
+  ],
+  "critical_code_review_comments": [
+    "safety.py: peer_ratings upsert correctly indexed by (rater_id, item_id) — good.",
+    "safety.py: /safety/graduation/approve uses `attempts >= 5` before comparing code, so the 6th attempt with the correct PIN would still be blocked — desired per spec (must re-request PIN).",
+    "LearnPage.js:157-169: AI-grade axios.post is embedded inside a setMisses updater — under React 18 StrictMode dev, functional updaters run twice, causing double POST. Should be moved to a useEffect keyed on `done`.",
+    "GraduationModal.js:16: fallback 'anon' user id conflates unrelated fresh grommets; use a required prop or a guaranteed-initialized voter id.",
+    "sonner.jsx had one leftover '#FF6B00' (fixed inline) — consider replacing hardcoded brand hexes with a single CSS var (--brand-orange) to prevent future drift."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_safety_grommet.py",
+    "/app/frontend/src/components/ui/sonner.jsx"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "~85% (all reachable flows pass; BattleHub star widget blocked by empty archive seed)"},
+  "test_credentials": "None — no auth. Fresh users need localStorage cleared to trigger AgeGate; setting sidetrack_voter_id before AgeGate ensures a unique user for graduation.",
+  "seed_data_creation": "Backend pytest created ephemeral TEST_-prefixed users + peer_ratings rows. Non-destructive to existing seeded 'battle_demo1' rating.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend fully covered by /app/backend/tests/test_safety_grommet.py (16 tests, all pass). To re-run: `pytest /app/backend/tests/test_safety_grommet.py -v`. For Battle Hub star widget UI validation, seed an archived battle row matching item_id 'battle_demo1' first, then navigate Connect → Battle Hub → scroll to Archive section as an adult user.",
+  "rca of the issue": "Star widget UI could not be verified because the seeded peer_rating references a battle_id that does not exist in the archive collection. Frontend behaves correctly (renders archive-empty state), but the intended end-to-end flow (rate → summary update → Top Rated chip) needs a matching archived battle document."
+}

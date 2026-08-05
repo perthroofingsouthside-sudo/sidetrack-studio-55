@@ -4,7 +4,7 @@
 import { useEffect, useRef } from "react";
 import { noteName } from "@/services/PitchDetector";
 
-const LANE_COLORS = ["#FF6B00", "#39FF14", "#FFA64D", "#7FFF8E"];
+const LANE_COLORS = ["#FF5F1F", "#39FF14", "#FFA64D", "#7FFF8E"];
 
 export default function NoteHighway({ notes, currentIdx, hitFlash }) {
   const ref = useRef(null);
@@ -58,7 +58,7 @@ export default function NoteHighway({ notes, currentIdx, hitFlash }) {
       // Strike line
       ctx.fillStyle = "rgba(255,255,255,0.06)";
       ctx.fillRect(VP_X - NEAR_W / 2, STRIKE_Y - 4, NEAR_W, 8);
-      ctx.fillStyle = "rgba(255,107,0,0.55)";
+      ctx.fillStyle = "rgba(255,95,31,0.55)";
       ctx.fillRect(VP_X - NEAR_W / 2, STRIKE_Y - 2, NEAR_W, 4);
 
       // Hit flash burst

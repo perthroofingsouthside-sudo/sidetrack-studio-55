@@ -51,7 +51,7 @@ export default function JamVideoGrid({ localStream, peers, micMuted, camOff, onT
       <div className="flex items-center justify-between">
         <p className="text-[9px] font-black uppercase tracking-wider text-[#5C5C6B]">
           Live Video · {status === "live" ? <span className="text-[#39FF14]">connected</span>
-            : status === "connecting" ? <span className="text-[#FF6B00]">connecting…</span>
+            : status === "connecting" ? <span className="text-[#FF5F1F]">connecting…</span>
             : status === "error" ? <span className="text-red-400">error</span>
             : <span className="text-[#5C5C6B]">idle</span>}
         </p>

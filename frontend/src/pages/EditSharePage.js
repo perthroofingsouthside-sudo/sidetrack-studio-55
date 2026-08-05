@@ -81,7 +81,7 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
       <div className="min-h-screen bg-[#05050A] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#A0A0B0]">No recording to edit</p>
-          <Button data-testid="go-back-btn" onClick={onBack} className="mt-4 bg-[#FF6B00]">
+          <Button data-testid="go-back-btn" onClick={onBack} className="mt-4 bg-[#FF5F1F]">
             Go Back
           </Button>
         </div>
@@ -133,7 +133,7 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
       <div className="px-4 py-4" data-testid="waveform-editor">
         <div className="surface-card p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Scissors className="w-4 h-4 text-[#FF6B00]" />
+            <Scissors className="w-4 h-4 text-[#FF5F1F]" />
             <span className="text-sm font-['Outfit'] font-bold text-white">Trim</span>
           </div>
 
@@ -147,7 +147,7 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
                   <div
                     key={`bar-${i}`}
                     className={`flex-1 rounded-full transition-colors ${
-                      inRange ? "bg-[#FF6B00]" : "bg-white/10"
+                      inRange ? "bg-[#FF5F1F]" : "bg-white/10"
                     }`}
                     style={{ height: `${h}%` }}
                   />
@@ -199,7 +199,7 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
             <Button
               data-testid="preview-trim-btn"
               onClick={handlePlayPreview}
-              className="flex-1 bg-[#12121A] border border-white/10 hover:border-[#FF6B00]/40 text-white"
+              className="flex-1 bg-[#12121A] border border-white/10 hover:border-[#FF5F1F]/40 text-white"
             >
               {isPlaying ? "Stop Preview" : "Preview Trim"}
             </Button>
@@ -221,8 +221,8 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
         <Button
           data-testid="open-in-studio-btn"
           onClick={() => onOpenInStudio && onOpenInStudio(recording)}
-          className="w-full h-12 bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90 text-[#05050A] font-black rounded-2xl transition-all hover:-translate-y-0.5"
-          style={{ boxShadow: "0 0 24px rgba(255,107,0,0.35)" }}
+          className="w-full h-12 bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] hover:opacity-90 text-[#05050A] font-black rounded-2xl transition-all hover:-translate-y-0.5"
+          style={{ boxShadow: "0 0 24px rgba(255,95,31,0.35)" }}
         >
           <Music2 className="w-5 h-5 mr-2" />
           Open in Studio · Remix & Separate Stems
@@ -231,7 +231,7 @@ export default function EditSharePage({ recording, song, onBack, onOpenInStudio 
           data-testid="download-btn"
           onClick={handleDownload}
           variant="ghost"
-          className="w-full h-11 border border-[#FF6B00]/30 text-[#FF6B00] font-bold rounded-2xl hover:bg-[#FF6B00]/10 transition-all"
+          className="w-full h-11 border border-[#FF5F1F]/30 text-[#FF5F1F] font-bold rounded-2xl hover:bg-[#FF5F1F]/10 transition-all"
         >
           <Download className="w-4 h-4 mr-2" />
           Download Recording

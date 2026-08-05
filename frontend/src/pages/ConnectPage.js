@@ -198,8 +198,8 @@ export default function ConnectPage() {
           <Button variant="ghost" size="icon" onClick={() => { setView("inbox"); setActiveConvo(null); }} className="text-[#5C5C6B] hover:text-white" data-testid="chat-back-btn">
             <ArrowLeft className="w-5 h-5" />
           </Button>
-          <div className="w-9 h-9 rounded-full bg-[#FF6B00]/15 flex items-center justify-center">
-            <span className="text-xs font-bold text-[#FF6B00]">{(activeConvo.other_user || "?")[0].toUpperCase()}</span>
+          <div className="w-9 h-9 rounded-full bg-[#FF5F1F]/15 flex items-center justify-center">
+            <span className="text-xs font-bold text-[#FF5F1F]">{(activeConvo.other_user || "?")[0].toUpperCase()}</span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-white truncate" data-testid="chat-user-name">{activeConvo.other_user}</p>
@@ -208,7 +208,7 @@ export default function ConnectPage() {
           <Button variant="ghost" size="icon" onClick={() => startCall(activeConvo.other_user)} className="text-[#39FF14] hover:bg-[#39FF14]/10 rounded-full" data-testid="start-video-call">
             <Video className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={sendJamInvite} className="text-[#FF6B00] hover:bg-[#FF6B00]/10 rounded-full" data-testid="send-jam-invite" title="Invite to Jam">
+          <Button variant="ghost" size="icon" onClick={sendJamInvite} className="text-[#FF5F1F] hover:bg-[#FF5F1F]/10 rounded-full" data-testid="send-jam-invite" title="Invite to Jam">
             <Music2 className="w-5 h-5" />
           </Button>
         </div>
@@ -217,7 +217,7 @@ export default function ConnectPage() {
         <div className="flex-1 overflow-y-auto px-4 py-3 space-y-2" ref={scrollRef} data-testid="chat-messages">
           {messages.length === 0 && (
             <div className="text-center py-12">
-              <MessageCircle className="w-10 h-10 text-[#FF6B00]/15 mx-auto mb-3" />
+              <MessageCircle className="w-10 h-10 text-[#FF5F1F]/15 mx-auto mb-3" />
               <p className="text-sm text-[#5C5C6B]">Start the conversation</p>
             </div>
           )}
@@ -227,7 +227,7 @@ export default function ConnectPage() {
               <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`} data-testid="chat-message-bubble">
                 <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm ${
                   isMine
-                    ? "bg-[#FF6B00] text-white rounded-br-md"
+                    ? "bg-[#FF5F1F] text-white rounded-br-md"
                     : "bg-white/5 text-[#C0C0C8] rounded-bl-md"
                 }`}>
                   {msg.text}
@@ -255,16 +255,16 @@ export default function ConnectPage() {
               data-testid="dm-voice-call-btn"
               variant="ghost"
               title="Start voice call"
-              className="h-11 w-11 rounded-xl bg-[#FF6B00]/12 border border-[#FF6B00]/30 text-[#FF6B00] hover:bg-[#FF6B00]/20 shrink-0"
+              className="h-11 w-11 rounded-xl bg-[#FF5F1F]/12 border border-[#FF5F1F]/30 text-[#FF5F1F] hover:bg-[#FF5F1F]/20 shrink-0"
             >
               <Phone className="w-4 h-4" />
             </Button>
             <Input data-testid="dm-input" value={input} onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Type a message..."
-              className="h-11 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-sm focus:border-[#FF6B00]" />
+              className="h-11 bg-[#0F0F16] border-white/10 text-white placeholder:text-[#5C5C6B] rounded-xl text-sm focus:border-[#FF5F1F]" />
             <Button data-testid="dm-send-btn" onClick={sendMessage}
-              className="h-11 w-11 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white shrink-0">
+              className="h-11 w-11 rounded-xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white shrink-0">
               <Send className="w-4 h-4" />
             </Button>
           </div>
@@ -281,7 +281,7 @@ export default function ConnectPage() {
           {/* Header */}
           <div className="flex items-center justify-between">
             <h1 className="font-['Outfit'] text-2xl font-black text-white" data-testid="connect-heading">Connect</h1>
-            <Button onClick={() => setShowNewDm(true)} className="h-9 px-3 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white text-xs font-bold gap-1.5" data-testid="new-dm-btn">
+            <Button onClick={() => setShowNewDm(true)} className="h-9 px-3 rounded-xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white text-xs font-bold gap-1.5" data-testid="new-dm-btn">
               <UserPlus className="w-3.5 h-3.5" /> New Message
             </Button>
           </div>
@@ -290,15 +290,15 @@ export default function ConnectPage() {
           <button
             onClick={() => setView("battle-hub")}
             data-testid="open-battle-hub"
-            className="w-full text-left rounded-2xl border border-[#FF6B00]/30 hover:border-[#FF6B00]/60 transition-all p-3.5 flex items-center gap-3 group relative overflow-hidden"
+            className="w-full text-left rounded-2xl border border-[#FF5F1F]/30 hover:border-[#FF5F1F]/60 transition-all p-3.5 flex items-center gap-3 group relative overflow-hidden"
             style={{
-              background: "linear-gradient(135deg, rgba(255,107,0,0.12), rgba(57,255,20,0.05))",
-              boxShadow: "0 0 24px rgba(255,107,0,0.18)",
+              background: "linear-gradient(135deg, rgba(255,95,31,0.12), rgba(57,255,20,0.05))",
+              boxShadow: "0 0 24px rgba(255,95,31,0.18)",
             }}
           >
-            <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-[#FF6B00]/15 blur-2xl" />
-            <div className="relative z-10 w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/20 flex-shrink-0">
-              <Swords className="w-5 h-5 text-[#FF6B00]" />
+            <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-[#FF5F1F]/15 blur-2xl" />
+            <div className="relative z-10 w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF5F1F]/20 flex-shrink-0">
+              <Swords className="w-5 h-5 text-[#FF5F1F]" />
             </div>
             <div className="relative z-10 flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
@@ -309,7 +309,7 @@ export default function ConnectPage() {
                 Register · auto-match · 45s each · live voting · Top 200 quarterly
               </p>
             </div>
-            <span className="relative z-10 text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+            <span className="relative z-10 text-[10px] text-[#FF5F1F] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
               Enter →
             </span>
           </button>
@@ -320,7 +320,7 @@ export default function ConnectPage() {
               <Input value={newDmUser} onChange={(e) => setNewDmUser(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && startNewDm()}
                 placeholder="Enter username..."
-                className="h-10 bg-[#0F0F16] border-white/10 text-white rounded-xl text-sm focus:border-[#FF6B00]"
+                className="h-10 bg-[#0F0F16] border-white/10 text-white rounded-xl text-sm focus:border-[#FF5F1F]"
                 data-testid="new-dm-input" autoFocus />
               <Button onClick={startNewDm} className="h-10 px-4 rounded-xl bg-[#39FF14] hover:bg-[#39FF14]/80 text-[#05050A] text-xs font-bold" data-testid="new-dm-start">Start</Button>
               <Button onClick={() => setShowNewDm(false)} variant="ghost" className="h-10 text-[#5C5C6B]">Cancel</Button>
@@ -358,11 +358,11 @@ export default function ConnectPage() {
           {/* Conversations */}
           <section data-testid="conversations-section">
             <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.2em] font-bold text-[#5C5C6B] mb-3 flex items-center gap-2">
-              <MessageCircle className="w-3.5 h-3.5 text-[#FF6B00]" /> Messages
+              <MessageCircle className="w-3.5 h-3.5 text-[#FF5F1F]" /> Messages
             </h3>
             {conversations.length === 0 ? (
               <div className="text-center py-12 surface-card rounded-2xl">
-                <MessageCircle className="w-10 h-10 text-[#FF6B00]/15 mx-auto mb-3" />
+                <MessageCircle className="w-10 h-10 text-[#FF5F1F]/15 mx-auto mb-3" />
                 <p className="text-sm text-[#5C5C6B]">No messages yet</p>
                 <p className="text-xs text-[#5C5C6B]/60 mt-1">Tap &ldquo;New Message&rdquo; to start a conversation</p>
               </div>
@@ -372,14 +372,14 @@ export default function ConnectPage() {
                   <button key={convo.convo_id} onClick={() => openConversation(convo)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/[0.03] transition-all text-left group"
                     data-testid={`convo-${convo.convo_id}`}>
-                    <div className="w-11 h-11 rounded-full bg-[#FF6B00]/10 flex items-center justify-center shrink-0 border border-[#FF6B00]/20 group-hover:border-[#FF6B00]/40">
-                      <span className="text-sm font-bold text-[#FF6B00]">{(convo.other_user || "?")[0].toUpperCase()}</span>
+                    <div className="w-11 h-11 rounded-full bg-[#FF5F1F]/10 flex items-center justify-center shrink-0 border border-[#FF5F1F]/20 group-hover:border-[#FF5F1F]/40">
+                      <span className="text-sm font-bold text-[#FF5F1F]">{(convo.other_user || "?")[0].toUpperCase()}</span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="text-sm font-bold text-white truncate">{convo.other_user}</p>
                         {convo.unread > 0 && (
-                          <span className="w-5 h-5 rounded-full bg-[#FF6B00] text-white text-[9px] font-bold flex items-center justify-center" data-testid="unread-badge">{convo.unread}</span>
+                          <span className="w-5 h-5 rounded-full bg-[#FF5F1F] text-white text-[9px] font-bold flex items-center justify-center" data-testid="unread-badge">{convo.unread}</span>
                         )}
                       </div>
                       <p className="text-xs text-[#5C5C6B] truncate">{convo.last_message}</p>

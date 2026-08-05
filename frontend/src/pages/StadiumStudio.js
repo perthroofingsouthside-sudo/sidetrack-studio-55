@@ -21,7 +21,7 @@ const STEMS = [
   { key: "drums",  label: "Drums",  color: "#39FF14" },
   { key: "bass",   label: "Bass",   color: "#39FF14" },
   { key: "keys",   label: "Keys",   color: "#39FF14" },
-  { key: "master", label: "Master", color: "#FF6B00" },
+  { key: "master", label: "Master", color: "#FF5F1F" },
 ];
 
 // dB meter — animated vertical bars driven by a per-stem level state
@@ -35,7 +35,7 @@ function DbMeter({ level, color }) {
         const idx = segs - 1 - i; // top down
         const on = idx < lit;
         const isPeak = idx >= 13;
-        const segColor = isPeak && on ? "#FF6B00" : on ? color : "rgba(255,255,255,0.06)";
+        const segColor = isPeak && on ? "#FF5F1F" : on ? color : "rgba(255,255,255,0.06)";
         return (
           <div
             key={`seg-${idx}`}
@@ -93,8 +93,8 @@ function StemRow({ stem, value, muted, soloed, onVolume, onMute, onSolo, level }
           data-testid={`stem-${stem.key}-mute`}
           className={`w-7 h-5 rounded text-[8px] font-black uppercase tracking-wider border transition-all ${
             muted
-              ? "bg-[#FF6B00] text-white border-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.55)]"
-              : "bg-transparent text-[#FF6B00]/60 border-[#FF6B00]/30 hover:text-[#FF6B00]"
+              ? "bg-[#FF5F1F] text-white border-[#FF5F1F] shadow-[0_0_8px_rgba(255,95,31,0.55)]"
+              : "bg-transparent text-[#FF5F1F]/60 border-[#FF5F1F]/30 hover:text-[#FF5F1F]"
           }`}
         >
           M
@@ -126,9 +126,9 @@ function NeonWaveform({ active, height = 96 }) {
       ctx.clearRect(0, 0, w, h);
       // 2 overlapping waves
       const grad = ctx.createLinearGradient(0, 0, w, 0);
-      grad.addColorStop(0, "rgba(255,107,0,0.0)");
-      grad.addColorStop(0.5, "#FF6B00");
-      grad.addColorStop(1, "rgba(255,107,0,0.0)");
+      grad.addColorStop(0, "rgba(255,95,31,0.0)");
+      grad.addColorStop(0.5, "#FF5F1F");
+      grad.addColorStop(1, "rgba(255,95,31,0.0)");
       const drawWave = (amp, freq, offset, alpha) => {
         ctx.beginPath();
         for (let x = 0; x <= w; x += 2) {
@@ -140,7 +140,7 @@ function NeonWaveform({ active, height = 96 }) {
         ctx.globalAlpha = alpha;
         ctx.lineWidth = 2;
         ctx.shadowBlur = 14;
-        ctx.shadowColor = "#FF6B00";
+        ctx.shadowColor = "#FF5F1F";
         ctx.stroke();
       };
       drawWave(h * 0.32, 0.024, 0.04, 0.85);
@@ -386,7 +386,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
       {/* Ambient stage glow */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/4 w-[60%] h-[60%] -translate-x-1/2"
-          style={{ background: "radial-gradient(ellipse at top, rgba(255,107,0,0.16) 0%, transparent 65%)", filter: "blur(8px)" }} />
+          style={{ background: "radial-gradient(ellipse at top, rgba(255,95,31,0.16) 0%, transparent 65%)", filter: "blur(8px)" }} />
         <div className="absolute top-0 right-1/4 w-[60%] h-[60%] translate-x-1/2"
           style={{ background: "radial-gradient(ellipse at top, rgba(57,255,20,0.13) 0%, transparent 65%)", filter: "blur(8px)" }} />
       </div>
@@ -397,11 +397,11 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
           {/* Punk date chip */}
           <span data-testid="date-chip" className="px-2.5 h-7 rounded-full flex items-center gap-1.5 text-[9px] font-black uppercase tracking-[0.25em]"
             style={{
-              background: "rgba(255,107,0,0.06)",
-              border: "1px solid rgba(255,107,0,0.6)",
-              color: "#FF6B00",
+              background: "rgba(255,95,31,0.06)",
+              border: "1px solid rgba(255,95,31,0.6)",
+              color: "#FF5F1F",
               backdropFilter: "blur(12px)",
-              boxShadow: "0 0 14px rgba(255,107,0,0.25), inset 0 0 6px rgba(255,107,0,0.15)",
+              boxShadow: "0 0 14px rgba(255,95,31,0.25), inset 0 0 6px rgba(255,95,31,0.15)",
             }}>
             <Clock className="w-2.5 h-2.5" />
             Yesterday
@@ -416,7 +416,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
         </div>
         <div className="flex-1 text-center min-w-0">
           <h1 className="font-['Outfit'] font-black text-white leading-none tracking-tight truncate text-xl sm:text-3xl"
-            style={{ textShadow: "0 0 18px rgba(255,107,0,0.45), 0 0 36px rgba(255,107,0,0.2)" }}
+            style={{ textShadow: "0 0 18px rgba(255,95,31,0.45), 0 0 36px rgba(255,95,31,0.2)" }}
             data-testid="stadium-song-title">{songTitle}</h1>
           <p className="text-[10px] sm:text-xs text-[#A0A0B0] font-bold mt-0.5 truncate" data-testid="stadium-song-artist">{songArtist}</p>
         </div>
@@ -439,7 +439,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
         </button>
         <button onClick={() => setMobileTab("tools")} data-testid="mobile-tab-tools"
           className={`flex-1 h-8 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center justify-center gap-1.5 ${
-            mobileTab === "tools" ? "bg-[#FF6B00] text-white" : "border border-white/10 text-[#A0A0B0]"
+            mobileTab === "tools" ? "bg-[#FF5F1F] text-white" : "border border-white/10 text-[#A0A0B0]"
           }`}>
           <Wand2 className="w-3 h-3" /> Tools
         </button>
@@ -478,7 +478,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
               {/* Master gain meta */}
               <div className="mt-3 pt-3 border-t border-white/5 text-center">
                 <p className="text-[8px] uppercase tracking-wider text-[#5C5C6B] font-bold">Master</p>
-                <p className="text-base font-['Outfit'] font-black text-[#FF6B00]" data-testid="master-db">
+                <p className="text-base font-['Outfit'] font-black text-[#FF5F1F]" data-testid="master-db">
                   {muted.master ? "—∞" : `${((volumes.master - 100) / 2).toFixed(1)} dB`}
                 </p>
               </div>
@@ -497,27 +497,27 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
                   </>
                 ) : (
                   <div className="absolute inset-0"
-                    style={{ background: "radial-gradient(ellipse at center, rgba(255,107,0,0.12), transparent 70%)" }} />
+                    style={{ background: "radial-gradient(ellipse at center, rgba(255,95,31,0.12), transparent 70%)" }} />
                 )}
                 {/* Big "neon halo" focus */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="relative w-56 h-56 sm:w-72 sm:h-72 rounded-full"
                     style={{
                       background: isPerforming
-                        ? "radial-gradient(circle, rgba(255,107,0,0.35) 0%, transparent 70%)"
-                        : "radial-gradient(circle, rgba(255,107,0,0.18) 0%, transparent 70%)",
-                      boxShadow: isPerforming ? "0 0 60px rgba(255,107,0,0.4)" : "none",
+                        ? "radial-gradient(circle, rgba(255,95,31,0.35) 0%, transparent 70%)"
+                        : "radial-gradient(circle, rgba(255,95,31,0.18) 0%, transparent 70%)",
+                      boxShadow: isPerforming ? "0 0 60px rgba(255,95,31,0.4)" : "none",
                     }}>
                     {songCover ? (
                       <img src={songCover} alt="" className="absolute inset-4 rounded-full object-cover border border-white/10"
-                        style={{ boxShadow: isPerforming ? "0 0 32px rgba(255,107,0,0.55)" : "0 0 12px rgba(0,0,0,0.5)" }} />
+                        style={{ boxShadow: isPerforming ? "0 0 32px rgba(255,95,31,0.55)" : "0 0 12px rgba(0,0,0,0.5)" }} />
                     ) : (
                       <div className="absolute inset-4 rounded-full flex items-center justify-center"
                         style={{
-                          background: "radial-gradient(circle, rgba(255,107,0,0.2), rgba(57,255,20,0.05))",
-                          border: "1px solid rgba(255,107,0,0.3)",
+                          background: "radial-gradient(circle, rgba(255,95,31,0.2), rgba(57,255,20,0.05))",
+                          border: "1px solid rgba(255,95,31,0.3)",
                         }}>
-                        <Mic className="w-16 h-16 text-[#FF6B00]/70" />
+                        <Mic className="w-16 h-16 text-[#FF5F1F]/70" />
                       </div>
                     )}
                   </div>
@@ -547,12 +547,12 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
                   className={`w-14 h-14 rounded-full ${
                     isPerforming
                       ? "bg-red-500 hover:bg-red-600"
-                      : "bg-gradient-to-br from-[#FF6B00] to-[#FF8533]"
+                      : "bg-gradient-to-br from-[#FF5F1F] to-[#FF7A42]"
                   } text-white`}
                   style={{
                     boxShadow: isPerforming
                       ? "0 0 28px rgba(255,0,0,0.55)"
-                      : "0 0 28px rgba(255,107,0,0.6)",
+                      : "0 0 28px rgba(255,95,31,0.6)",
                   }}
                 >
                   {isPerforming ? <Square className="w-6 h-6" fill="white" /> : <Mic className="w-6 h-6" />}
@@ -612,7 +612,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
 
               {/* Section 2 — AI Beat Maker prompt */}
               <div data-testid="ai-beat-section" className="pt-3 border-t border-white/5">
-                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#FF6B00] mb-2 flex items-center gap-1">
+                <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[#FF5F1F] mb-2 flex items-center gap-1">
                   <Sparkles className="w-3 h-3" /> AI Beat Maker
                 </p>
                 <Input value={beatPrompt} onChange={(e) => setBeatPrompt(e.target.value)}
@@ -641,7 +641,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
                 </div>
                 <Button onClick={generateBeat} disabled={beatGenerating}
                   data-testid="ai-beat-generate"
-                  className="w-full mt-1.5 h-9 rounded-lg bg-[#FF6B00] hover:bg-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider gap-1.5">
+                  className="w-full mt-1.5 h-9 rounded-lg bg-[#FF5F1F] hover:bg-[#FF7A42] text-white text-[10px] font-black uppercase tracking-wider gap-1.5">
                   {beatGenerating ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
                   {beatGenerating ? "Generating…" : "Generate Beat"}
                 </Button>
@@ -687,12 +687,12 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
             <div className="absolute inset-y-0 left-0 transition-[width]"
               style={{
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #FF6B00, #39FF14)",
-                boxShadow: "0 0 10px rgba(255,107,0,0.55)",
+                background: "linear-gradient(90deg, #FF5F1F, #39FF14)",
+                boxShadow: "0 0 10px rgba(255,95,31,0.55)",
               }} />
           </div>
           <span className="text-[10px] font-mono text-[#A0A0B0]">{fmt(totalSec)}</span>
-          <span className="hidden sm:inline-flex items-center px-2 h-6 rounded-full border border-[#FF6B00]/40 bg-[#FF6B00]/8 text-[#FF6B00] text-[10px] font-black tracking-wider" data-testid="bpm-pill">
+          <span className="hidden sm:inline-flex items-center px-2 h-6 rounded-full border border-[#FF5F1F]/40 bg-[#FF5F1F]/8 text-[#FF5F1F] text-[10px] font-black tracking-wider" data-testid="bpm-pill">
             BPM <span className="ml-1 text-white">{bpm}</span>
           </span>
           <span className="hidden sm:inline-flex items-center px-2 h-6 rounded-full border border-[#39FF14]/40 bg-[#39FF14]/8 text-[#39FF14] text-[10px] font-black tracking-wider" data-testid="key-pill">
@@ -701,7 +701,7 @@ export default function StadiumStudio({ song, onSwitchClassic }) {
         </div>
         {/* Compact mobile-only BPM + KEY row */}
         <div className="sm:hidden flex items-center justify-center gap-2 mt-1.5">
-          <span className="inline-flex items-center px-2 h-5 rounded-full border border-[#FF6B00]/40 bg-[#FF6B00]/8 text-[#FF6B00] text-[9px] font-black tracking-wider">
+          <span className="inline-flex items-center px-2 h-5 rounded-full border border-[#FF5F1F]/40 bg-[#FF5F1F]/8 text-[#FF5F1F] text-[9px] font-black tracking-wider">
             BPM <span className="ml-1 text-white">{bpm}</span>
           </span>
           <span className="inline-flex items-center px-2 h-5 rounded-full border border-[#39FF14]/40 bg-[#39FF14]/8 text-[#39FF14] text-[9px] font-black tracking-wider">

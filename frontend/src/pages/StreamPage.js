@@ -133,12 +133,12 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
           {/* Header */}
           <div className="px-4 sm:px-6 pt-5 pb-2 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF6B00] to-[#39FF14] flex items-center justify-center shadow-[0_0_20px_rgba(255,107,0,0.3)]">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#FF5F1F] to-[#39FF14] flex items-center justify-center shadow-[0_0_20px_rgba(255,95,31,0.3)]">
                 <Music2 className="w-5 h-5 text-black" />
               </div>
               <div>
                 <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black tracking-[-0.03em] leading-none">
-                  <span className="text-white">Pocket</span><span className="text-[#FF6B00]"> Products</span>
+                  <span className="text-white">Pocket</span><span className="text-[#FF5F1F]"> Products</span>
                 </h1>
               </div>
             </div>
@@ -156,10 +156,10 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
                 <Input data-testid="search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   placeholder="Search songs, artists, albums..."
-                  className="pl-10 h-12 bg-[#0F0F16] border-white/5 text-white placeholder:text-[#5C5C6B] rounded-2xl focus:border-[#FF6B00] text-sm" />
+                  className="pl-10 h-12 bg-[#0F0F16] border-white/5 text-white placeholder:text-[#5C5C6B] rounded-2xl focus:border-[#FF5F1F] text-sm" />
               </div>
               <Button data-testid="search-btn" onClick={handleSearch} disabled={searching}
-                className="h-12 px-6 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(255,107,0,0.6)] text-white rounded-2xl font-bold transition-all">
+                className="h-12 px-6 bg-[#FF5F1F] hover:bg-[#FF7A42] hover:shadow-[0_0_20px_rgba(255,95,31,0.6)] text-white rounded-2xl font-bold transition-all">
                 {searching ? "..." : "Search"}
               </Button>
             </div>
@@ -170,7 +170,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
             {[{ key: "browse", label: "Browse", icon: TrendingUp }, { key: "search", label: "Results", icon: Search }].map((tab) => (
               <Button key={tab.key} data-testid={`tab-${tab.key}`} onClick={() => setActiveTab(tab.key)}
                 className={`h-9 px-4 rounded-full text-xs gap-1.5 transition-all ${
-                  activeTab === tab.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.4)]" : "bg-[#0F0F16] text-[#8F8F9D] border border-white/5 hover:border-white/15"
+                  activeTab === tab.key ? "bg-[#FF5F1F] text-white shadow-[0_0_16px_rgba(255,95,31,0.4)]" : "bg-[#0F0F16] text-[#8F8F9D] border border-white/5 hover:border-white/15"
                 }`}>
                 <tab.icon className="w-3 h-3" />{tab.label}
               </Button>
@@ -198,12 +198,12 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
                 {forYou.length > 0 && (
                   <section data-testid="for-you-section">
                     <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-4 flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-[#FF6B00]" /> For You
+                      <Sparkles className="w-4 h-4 text-[#FF5F1F]" /> For You
                     </h3>
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 scrollbar-hide">
                       {forYou.map((track) => (
                         <div key={track.id} className="flex-shrink-0 w-36 group cursor-pointer" onClick={() => handleSelectForStudio(track)}>
-                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-[#FF6B00]/20 group-hover:border-[#FF6B00]/50 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.25)] transition-all duration-300 relative">
+                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-[#FF5F1F]/20 group-hover:border-[#FF5F1F]/50 group-hover:shadow-[0_0_20px_rgba(255,95,31,0.25)] transition-all duration-300 relative">
                             <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2">
                               <Play className="w-5 h-5 text-white" />
@@ -211,7 +211,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
                           </div>
                           <p className="text-xs font-medium text-white truncate">{track.title}</p>
                           <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}</p>
-                          {track.reason && <p className="text-[8px] text-[#FF6B00]/60 truncate mt-0.5">{track.reason}</p>}
+                          {track.reason && <p className="text-[8px] text-[#FF5F1F]/60 truncate mt-0.5">{track.reason}</p>}
                         </div>
                       ))}
                     </div>
@@ -222,12 +222,12 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
                 {topAlbums.length > 0 && (
                   <section data-testid="top-albums">
                     <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#8F8F9D] mb-4 flex items-center gap-2">
-                      <Album className="w-4 h-4 text-[#FF6B00]" /> Top Albums
+                      <Album className="w-4 h-4 text-[#FF5F1F]" /> Top Albums
                     </h3>
                     <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:-mx-6 sm:px-6 scrollbar-hide">
                       {topAlbums.map((album) => (
                         <div key={album.id} className="flex-shrink-0 w-36 group cursor-pointer">
-                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#FF6B00]/40 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.2)] transition-all duration-300">
+                          <div className="w-36 h-36 rounded-2xl overflow-hidden mb-2 border border-white/5 group-hover:border-[#FF5F1F]/40 group-hover:shadow-[0_0_20px_rgba(255,95,31,0.2)] transition-all duration-300">
                             <img src={album.cover_url || album.cover_thumb} alt={album.name}
                               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy" />
                           </div>
@@ -257,7 +257,7 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
 
                 {topSongs.length === 0 && topAlbums.length === 0 && (
                   <div className="text-center py-16" data-testid="loading-browse">
-                    <Disc3 className="w-12 h-12 text-[#FF6B00]/30 mx-auto mb-4 animate-spin" />
+                    <Disc3 className="w-12 h-12 text-[#FF5F1F]/30 mx-auto mb-4 animate-spin" />
                     <p className="text-sm text-[#5C5C6B]">Loading music...</p>
                   </div>
                 )}
@@ -300,14 +300,14 @@ export default function StreamPage({ onTrackSelect, nowPlaying, isPlaying, playT
                 {playlists.map((pl) => (
                   <button key={pl.id} data-testid={`add-to-pl-${pl.id}`} onClick={() => addToPlaylist(pl.id, addingTrack)}
                     className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 transition-all text-left">
-                    <div className="w-10 h-10 rounded-lg bg-[#FF6B00]/10 flex items-center justify-center flex-shrink-0">
-                      <ListMusic className="w-4 h-4 text-[#FF6B00]" />
+                    <div className="w-10 h-10 rounded-lg bg-[#FF5F1F]/10 flex items-center justify-center flex-shrink-0">
+                      <ListMusic className="w-4 h-4 text-[#FF5F1F]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-white truncate">{pl.name}</p>
                       <p className="text-[10px] text-[#5C5C6B]">{pl.track_count || 0} tracks</p>
                     </div>
-                    <Plus className="w-4 h-4 text-[#FF6B00]" />
+                    <Plus className="w-4 h-4 text-[#FF5F1F]" />
                   </button>
                 ))}
               </div>
@@ -324,7 +324,7 @@ function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, onAddTo
   const isActive = nowPlaying?.id === track.id;
   return (
     <div className={`flex items-center gap-3 p-3 rounded-xl transition-all duration-200 group ${
-      isActive ? "bg-[#FF6B00]/8 border border-[#FF6B00]/20" : "hover:bg-white/[0.03]"
+      isActive ? "bg-[#FF5F1F]/8 border border-[#FF5F1F]/20" : "hover:bg-white/[0.03]"
     }`} data-testid={`track-row-${idx}`}>
       <div className="w-7 text-center flex-shrink-0">
         <span className="text-xs text-[#5C5C6B] group-hover:hidden font-mono">{String(idx + 1).padStart(2, "0")}</span>
@@ -349,7 +349,7 @@ function TrackRow({ track, idx, nowPlaying, isPlaying, onPlay, onStudio, onAddTo
         <Plus className="w-4 h-4" />
       </Button>
       <Button data-testid={`studio-btn-${idx}`} onClick={() => onStudio(track)} variant="ghost" size="icon"
-        className="text-[#FF6B00]/50 hover:text-[#39FF14] hover:bg-[#FF6B00]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Open in Studio">
+        className="text-[#FF5F1F]/50 hover:text-[#39FF14] hover:bg-[#FF5F1F]/10 rounded-full flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Open in Studio">
         <Music2 className="w-4 h-4" />
       </Button>
     </div>

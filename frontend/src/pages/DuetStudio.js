@@ -168,7 +168,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
       <div className="min-h-screen bg-[#05050A] flex items-center justify-center">
         <div className="text-center">
           <p className="text-[#A0A0B0]">No cover selected for duet</p>
-          <Button data-testid="duet-go-back-btn" onClick={onBack} className="mt-4 bg-[#FF6B00]">Go Back</Button>
+          <Button data-testid="duet-go-back-btn" onClick={onBack} className="mt-4 bg-[#FF5F1F]">Go Back</Button>
         </div>
       </div>
     );
@@ -252,7 +252,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
         />
         {!streamRef.current && !isRecording && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]">
-            <Camera className="w-10 h-10 text-[#FF6B00]/40 mb-2" />
+            <Camera className="w-10 h-10 text-[#FF5F1F]/40 mb-2" />
             <p className="text-xs text-[#606070]">Your camera activates when you start</p>
           </div>
         )}
@@ -283,7 +283,7 @@ export default function DuetStudio({ battle, cover, onRecordingComplete, onBack 
           className={`w-16 h-16 rounded-full transition-all ${
             isRecording
               ? "bg-red-500 hover:bg-red-600 animate-pulse"
-              : "bg-gradient-to-br from-[#FF6B00] to-[#39FF14] hover:opacity-90 glow-orange"
+              : "bg-gradient-to-br from-[#FF5F1F] to-[#39FF14] hover:opacity-90 glow-orange"
           }`}
         >
           {isRecording ? <Square className="w-7 h-7 text-white" /> : <Mic className="w-7 h-7 text-white" />}

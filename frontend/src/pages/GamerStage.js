@@ -15,7 +15,7 @@ const PERFORMANCE_MODES = [
 ];
 
 // Guitar Hero lane palette — strict Pocket Products brand (Orange + Green, with tonal variants)
-const LANE_COLORS = ["#FF6B00", "#39FF14", "#FFA64D", "#7FFF8E"]; // orange, green, light-orange, light-green
+const LANE_COLORS = ["#FF5F1F", "#39FF14", "#FFA64D", "#7FFF8E"]; // orange, green, light-orange, light-green
 
 // Bezier light-trail background (SVG)
 function LightTrails() {
@@ -23,9 +23,9 @@ function LightTrails() {
     <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
       <defs>
         <linearGradient id="trail1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#FF6B00" stopOpacity="0" />
-          <stop offset="50%" stopColor="#FF6B00" stopOpacity="0.5" />
-          <stop offset="100%" stopColor="#FF6B00" stopOpacity="0" />
+          <stop offset="0%" stopColor="#FF5F1F" stopOpacity="0" />
+          <stop offset="50%" stopColor="#FF5F1F" stopOpacity="0.5" />
+          <stop offset="100%" stopColor="#FF5F1F" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="trail2" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#39FF14" stopOpacity="0" />
@@ -118,7 +118,7 @@ function FallingNotesHighway({ active, bpm = 128 }) {
       // Strike line (hit zone) — glowing horizontal bar
       ctx.fillStyle = "rgba(255,255,255,0.06)";
       ctx.fillRect(VP_X - NEAR_LANE_W / 2, STRIKE_Y - 4, NEAR_LANE_W, 8);
-      ctx.fillStyle = "rgba(255,107,0,0.55)";
+      ctx.fillStyle = "rgba(255,95,31,0.55)";
       ctx.fillRect(VP_X - NEAR_LANE_W / 2, STRIKE_Y - 2, NEAR_LANE_W, 4);
 
       // Spawn notes synced to BPM (one note every 1/2 beat)
@@ -344,12 +344,12 @@ export default function GamerStage({ battle, onExit }) {
         )}
         <div className="flex-1 text-center min-w-0">
           <h1 className="font-['Outfit'] font-black text-white truncate text-lg sm:text-2xl leading-none"
-            style={{ textShadow: "0 0 14px rgba(255,107,0,0.45)" }} data-testid="stage-song-title">{songTitle}</h1>
+            style={{ textShadow: "0 0 14px rgba(255,95,31,0.45)" }} data-testid="stage-song-title">{songTitle}</h1>
           <p className="text-[10px] text-[#A0A0B0] truncate mt-0.5">{songArtist}</p>
         </div>
         <button onClick={() => setFireCount((c) => c + 1)} data-testid="stage-fire"
-          className="flex items-center gap-1 px-2 h-7 rounded-full border border-[#FF6B00]/40 bg-[#FF6B00]/8">
-          <Flame className="w-3 h-3 text-[#FF6B00]" />
+          className="flex items-center gap-1 px-2 h-7 rounded-full border border-[#FF5F1F]/40 bg-[#FF5F1F]/8">
+          <Flame className="w-3 h-3 text-[#FF5F1F]" />
           <span className="text-[10px] font-black text-white">{fireCount}</span>
         </button>
         <button onClick={() => setHeartCount((c) => c + 1)} data-testid="stage-heart"
@@ -366,7 +366,7 @@ export default function GamerStage({ battle, onExit }) {
             <button key={key} onClick={() => setModeKey(key)} data-testid={`mode-${key}`}
               className={`px-3 h-8 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                 modeKey === key
-                  ? "bg-[#FF6B00] text-white shadow-[0_0_14px_rgba(255,107,0,0.55)]"
+                  ? "bg-[#FF5F1F] text-white shadow-[0_0_14px_rgba(255,95,31,0.55)]"
                   : "border border-white/10 text-[#A0A0B0] hover:text-white"
               }`}>
               <Icon className="w-3 h-3" />
@@ -402,17 +402,17 @@ export default function GamerStage({ battle, onExit }) {
 
         {/* CENTER — Dynamic avatar */}
         <section data-testid="stage-avatar-pane" className="relative rounded-2xl border border-white/8 overflow-hidden flex items-center justify-center"
-          style={{ background: "radial-gradient(ellipse at center, rgba(255,107,0,0.12), transparent 70%), #05050A" }}>
+          style={{ background: "radial-gradient(ellipse at center, rgba(255,95,31,0.12), transparent 70%), #05050A" }}>
           {/* Spotlight halo behind avatar */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="w-[280px] h-[280px] rounded-full"
               style={{
-                background: "radial-gradient(circle, rgba(255,107,0,0.3) 0%, transparent 70%)",
-                boxShadow: "0 0 80px rgba(255,107,0,0.4)",
+                background: "radial-gradient(circle, rgba(255,95,31,0.3) 0%, transparent 70%)",
+                boxShadow: "0 0 80px rgba(255,95,31,0.4)",
               }} />
           </div>
           <div className="relative" data-testid="stage-avatar">
-            <GamerAvatar avatar={stageAvatar} size={300} glowColor={modeKey === "rap" ? "#39FF14" : "#FF6B00"} />
+            <GamerAvatar avatar={stageAvatar} size={300} glowColor={modeKey === "rap" ? "#39FF14" : "#FF5F1F"} />
             {/* For "both" mode, draw a small mic icon next to the guitar avatar */}
             {modeKey === "both" && (
               <div className="absolute -bottom-2 right-2 w-12 h-12 rounded-full flex items-center justify-center"
@@ -423,7 +423,7 @@ export default function GamerStage({ battle, onExit }) {
           </div>
           {/* Mode caption */}
           <p className="absolute bottom-3 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.35em] font-black text-white/70" data-testid="stage-mode-caption">
-            Performing · <span className="text-[#FF6B00]">{mode.label}</span>
+            Performing · <span className="text-[#FF5F1F]">{mode.label}</span>
             {vocalDropped && <span className="text-[#39FF14] ml-2">· Acapella Mode</span>}
           </p>
         </section>
@@ -448,10 +448,10 @@ export default function GamerStage({ battle, onExit }) {
           <span className="text-[10px] font-mono text-[#A0A0B0]" data-testid="stage-elapsed">{fmt(elapsedSec)}</span>
           <div className="relative flex-1 h-1 rounded-full bg-white/8 overflow-hidden">
             <div className="absolute inset-y-0 left-0 transition-[width]"
-              style={{ width: `${progress}%`, background: "linear-gradient(90deg, #FF6B00, #39FF14)", boxShadow: "0 0 10px rgba(255,107,0,0.55)" }} />
+              style={{ width: `${progress}%`, background: "linear-gradient(90deg, #FF5F1F, #39FF14)", boxShadow: "0 0 10px rgba(255,95,31,0.55)" }} />
           </div>
           <span className="text-[10px] font-mono text-[#A0A0B0]">{fmt(totalSec)}</span>
-          <span className="inline-flex items-center px-2 h-6 rounded-full border border-[#FF6B00]/40 bg-[#FF6B00]/8 text-[#FF6B00] text-[10px] font-black tracking-wider" data-testid="stage-bpm">
+          <span className="inline-flex items-center px-2 h-6 rounded-full border border-[#FF5F1F]/40 bg-[#FF5F1F]/8 text-[#FF5F1F] text-[10px] font-black tracking-wider" data-testid="stage-bpm">
             BPM <span className="ml-1 text-white">{bpm}</span>
           </span>
           <span className="inline-flex items-center px-2 h-6 rounded-full border border-[#39FF14]/40 bg-[#39FF14]/8 text-[#39FF14] text-[10px] font-black tracking-wider" data-testid="stage-key">

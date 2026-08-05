@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 
 const COLLECTIONS = [
-  { key: "hottest_100",     label: "Hottest 100", Icon: Trophy, accent: "#FF6B00" },
+  { key: "hottest_100",     label: "Hottest 100", Icon: Trophy, accent: "#FF5F1F" },
   { key: "hip_hop_top_200", label: "Top 200 Hip-Hop", Icon: Flame,   accent: "#39FF14" },
 ];
 
@@ -157,15 +157,15 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
       {collection === "hottest_100" && (
         <div className="px-4 sm:px-6 pt-3" data-testid="year-picker">
           <div className="flex items-center gap-2 mb-2">
-            <Calendar className="w-3 h-3 text-[#FF6B00]" />
-            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#FF6B00]">Year</p>
+            <Calendar className="w-3 h-3 text-[#FF5F1F]" />
+            <p className="text-[9px] uppercase tracking-[0.3em] font-black text-[#FF5F1F]">Year</p>
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-hide">
             {years.map((y) => (
               <button key={y} onClick={() => setYear(y)} data-testid={`year-${y}`}
                 className={`flex-shrink-0 px-3 h-8 rounded-full text-[11px] font-black tracking-wider border transition-all ${
                   year === y
-                    ? "bg-[#FF6B00] text-white border-[#FF6B00] shadow-[0_0_14px_rgba(255,107,0,0.5)]"
+                    ? "bg-[#FF5F1F] text-white border-[#FF5F1F] shadow-[0_0_14px_rgba(255,95,31,0.5)]"
                     : "bg-transparent text-[#A0A0B0] border-white/10 hover:text-white hover:border-white/30"
                 }`}>{y}</button>
             ))}
@@ -195,7 +195,7 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
         <div className="px-4 sm:px-6 pb-32 space-y-1.5" data-testid="catalog-list">
           {!loading && tracks.length === 0 && (
             <div className="py-16 text-center" data-testid="catalog-empty">
-              <Music2 className="w-12 h-12 text-[#FF6B00]/30 mx-auto mb-3" />
+              <Music2 className="w-12 h-12 text-[#FF5F1F]/30 mx-auto mb-3" />
               <p className="text-sm font-bold text-white mb-1">No tracks found</p>
               <p className="text-[11px] text-[#5C5C6B]">Try a different year or clear your search.</p>
             </div>
@@ -206,14 +206,14 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
             <div key={`${t.track_id || "x"}-${t.year ?? "_"}-${t.rank ?? i}`}
               data-testid={`catalog-track-${i}`}
               className={`w-full flex items-center gap-2.5 p-2.5 rounded-xl border transition-all ${
-                isPlaying ? "border-[#39FF14]/50 bg-[#39FF14]/8 shadow-[0_0_18px_rgba(57,255,20,0.18)]" : "border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5"
+                isPlaying ? "border-[#39FF14]/50 bg-[#39FF14]/8 shadow-[0_0_18px_rgba(57,255,20,0.18)]" : "border-white/5 hover:border-[#FF5F1F]/30 hover:bg-[#FF5F1F]/5"
               }`}>
               {/* Rank badge */}
               <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-['Outfit'] font-black text-sm"
                 style={{
-                  background: t.source === "top_200_hip_hop" ? "rgba(57,255,20,0.12)" : "rgba(255,107,0,0.12)",
-                  color: t.source === "top_200_hip_hop" ? "#39FF14" : "#FF6B00",
-                  border: `1px solid ${t.source === "top_200_hip_hop" ? "rgba(57,255,20,0.25)" : "rgba(255,107,0,0.25)"}`,
+                  background: t.source === "top_200_hip_hop" ? "rgba(57,255,20,0.12)" : "rgba(255,95,31,0.12)",
+                  color: t.source === "top_200_hip_hop" ? "#39FF14" : "#FF5F1F",
+                  border: `1px solid ${t.source === "top_200_hip_hop" ? "rgba(57,255,20,0.25)" : "rgba(255,95,31,0.25)"}`,
                 }}>
                 #{t.rank}
               </div>
@@ -247,8 +247,8 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
               <button onClick={() => enterBattle(t)}
                 data-testid={`catalog-battle-${i}`}
                 title="Take this song to the Battle Stage"
-                className="px-3 h-9 rounded-full flex items-center gap-1.5 flex-shrink-0 bg-gradient-to-r from-[#FF6B00] to-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider transition-all hover:scale-105"
-                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.45)" }}>
+                className="px-3 h-9 rounded-full flex items-center gap-1.5 flex-shrink-0 bg-gradient-to-r from-[#FF5F1F] to-[#FF7A42] text-white text-[10px] font-black uppercase tracking-wider transition-all hover:scale-105"
+                style={{ boxShadow: "0 0 14px rgba(255,95,31,0.45)" }}>
                 <Swords className="w-3 h-3" />
                 Battle
               </button>
@@ -284,8 +284,8 @@ export default function GamerTracksPage({ onTrackSelect, onBattleTrack }) {
                 <Pause className="w-3.5 h-3.5" />
               </button>
               <button onClick={() => enterBattle(t)} data-testid="catalog-now-playing-battle"
-                className="px-3 h-8 rounded-full bg-gradient-to-r from-[#FF6B00] to-[#FF8533] text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5"
-                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.5)" }}>
+                className="px-3 h-8 rounded-full bg-gradient-to-r from-[#FF5F1F] to-[#FF7A42] text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5"
+                style={{ boxShadow: "0 0 14px rgba(255,95,31,0.5)" }}>
                 <Swords className="w-3 h-3" />
                 Battle
               </button>

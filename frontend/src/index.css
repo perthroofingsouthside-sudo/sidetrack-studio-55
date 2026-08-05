@@ -97,7 +97,7 @@ h1, h2, h3, h4, h5, h6 {
   background: #05050A;
 }
 ::-webkit-scrollbar-thumb {
-  background: #FF6B00;
+  background: #FF5F1F;
   border-radius: 4px;
 }
 
@@ -118,7 +118,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Neon glow utilities */
 .glow-orange {
-  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4), 0 0 60px rgba(255, 107, 0, 0.15);
+  box-shadow: 0 0 20px rgba(255, 95, 31, 0.4), 0 0 60px rgba(255, 95, 31, 0.15);
 }
 
 .glow-cyan {
@@ -126,7 +126,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glow-text-orange {
-  text-shadow: 0 0 20px rgba(255, 107, 0, 0.6);
+  text-shadow: 0 0 20px rgba(255, 95, 31, 0.6);
 }
 
 .glow-text-green {
@@ -135,14 +135,14 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Stem colors */
 .stem-vocals { color: #39FF14; }
-.stem-guitar { color: #FF6B00; }
+.stem-guitar { color: #FF5F1F; }
 .stem-bass { color: #FF3B30; }
-.stem-drums { color: #FF6B00; }
+.stem-drums { color: #FF5F1F; }
 
 .bg-stem-vocals { background-color: #39FF14; }
-.bg-stem-guitar { background-color: #FF6B00; }
+.bg-stem-guitar { background-color: #FF5F1F; }
 .bg-stem-bass { background-color: #FF3B30; }
-.bg-stem-drums { background-color: #FF6B00; }
+.bg-stem-drums { background-color: #FF5F1F; }
 
 /* Animations */
 @keyframes pulse-ring {
@@ -263,10 +263,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Chord highlight */
 .chord-active {
-  color: #FF6B00;
+  color: #FF5F1F;
   font-size: 2rem;
   font-weight: 800;
-  text-shadow: 0 0 30px rgba(255, 107, 0, 0.6);
+  text-shadow: 0 0 30px rgba(255, 95, 31, 0.6);
 }
 
 /* Surface card */
@@ -293,7 +293,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Neon progress bar */
 .neon-progress {
-  background: linear-gradient(90deg, #FF6B00, #39FF14);
+  background: linear-gradient(90deg, #FF5F1F, #39FF14);
   box-shadow: 0 0 12px rgba(57, 255, 20, 0.5);
   border-radius: 9999px;
   height: 3px;
@@ -301,7 +301,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Live stage ambient */
 .stage-ambient {
-  background: radial-gradient(ellipse at 50% 120%, rgba(255, 107, 0, 0.08) 0%, transparent 60%);
+  background: radial-gradient(ellipse at 50% 120%, rgba(255, 95, 31, 0.08) 0%, transparent 60%);
 }
 
 /* Chat message fade-in */
@@ -315,7 +315,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Neon ambient glow for video */
 .neon-ambient-glow {
-  box-shadow: 0 0 60px rgba(255, 107, 0, 0.12), 0 0 120px rgba(57, 255, 20, 0.06);
+  box-shadow: 0 0 60px rgba(255, 95, 31, 0.12), 0 0 120px rgba(57, 255, 20, 0.06);
 }
 
 /* ── Premium Stage Effects ── */
@@ -330,18 +330,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Orange neon frame with glow pulse */
 .neon-frame-orange {
-  border: 2px solid rgba(255, 107, 0, 0.4);
+  border: 2px solid rgba(255, 95, 31, 0.4);
   box-shadow:
-    0 0 20px rgba(255, 107, 0, 0.12),
-    0 0 60px rgba(255, 107, 0, 0.06),
+    0 0 20px rgba(255, 95, 31, 0.12),
+    0 0 60px rgba(255, 95, 31, 0.06),
     inset 0 0 40px rgba(0, 0, 0, 0.5);
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 .neon-frame-orange:hover {
-  border-color: rgba(255, 107, 0, 0.7);
+  border-color: rgba(255, 95, 31, 0.7);
   box-shadow:
-    0 0 30px rgba(255, 107, 0, 0.25),
-    0 0 80px rgba(255, 107, 0, 0.1),
+    0 0 30px rgba(255, 95, 31, 0.25),
+    0 0 80px rgba(255, 95, 31, 0.1),
     inset 0 0 40px rgba(0, 0, 0, 0.4);
 }
 
@@ -365,17 +365,17 @@ h1, h2, h3, h4, h5, h6 {
 /* Arena glow — cinematic viewer frame */
 .arena-glow {
   box-shadow:
-    0 0 40px rgba(255, 107, 0, 0.15),
-    0 0 100px rgba(255, 107, 0, 0.06),
-    0 0 200px rgba(255, 107, 0, 0.03),
+    0 0 40px rgba(255, 95, 31, 0.15),
+    0 0 100px rgba(255, 95, 31, 0.06),
+    0 0 200px rgba(255, 95, 31, 0.03),
     inset 0 0 80px rgba(0, 0, 0, 0.6);
   transition: box-shadow 0.5s ease;
 }
 .arena-glow:hover {
   box-shadow:
-    0 0 60px rgba(255, 107, 0, 0.2),
-    0 0 140px rgba(255, 107, 0, 0.08),
-    0 0 240px rgba(255, 107, 0, 0.04),
+    0 0 60px rgba(255, 95, 31, 0.2),
+    0 0 140px rgba(255, 95, 31, 0.08),
+    0 0 240px rgba(255, 95, 31, 0.04),
     inset 0 0 80px rgba(0, 0, 0, 0.5);
 }
 
@@ -404,7 +404,7 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(255, 107, 0, 0.4), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 95, 31, 0.4), transparent);
   animation: scan-move 4s linear infinite;
   z-index: 25;
   pointer-events: none;
@@ -425,15 +425,15 @@ h1, h2, h3, h4, h5, h6 {
 .neon-corners-orange::before {
   top: 0; left: 0;
   width: 24px; height: 24px;
-  border-top: 2px solid rgba(255, 107, 0, 0.6);
-  border-left: 2px solid rgba(255, 107, 0, 0.6);
+  border-top: 2px solid rgba(255, 95, 31, 0.6);
+  border-left: 2px solid rgba(255, 95, 31, 0.6);
   border-top-left-radius: 16px;
 }
 .neon-corners-orange::after {
   bottom: 0; right: 0;
   width: 24px; height: 24px;
-  border-bottom: 2px solid rgba(255, 107, 0, 0.6);
-  border-right: 2px solid rgba(255, 107, 0, 0.6);
+  border-bottom: 2px solid rgba(255, 95, 31, 0.6);
+  border-right: 2px solid rgba(255, 95, 31, 0.6);
   border-bottom-right-radius: 16px;
 }
 
@@ -443,16 +443,16 @@ h1, h2, h3, h4, h5, h6 {
 .avatar-ring {
   position: relative;
   border-radius: 50%;
-  border: 3px solid #FF6B00;
-  box-shadow: 0 0 12px rgba(255, 107, 0, 0.3), inset 0 0 8px rgba(255, 107, 0, 0.1);
+  border: 3px solid #FF5F1F;
+  box-shadow: 0 0 12px rgba(255, 95, 31, 0.3), inset 0 0 8px rgba(255, 95, 31, 0.1);
   transition: all 0.3s ease;
 }
 
 /* Green glow ring (active — voice/instrument detected) */
 .avatar-ring-active {
-  border-color: #FF6B00;
+  border-color: #FF5F1F;
   box-shadow:
-    0 0 12px rgba(255, 107, 0, 0.3),
+    0 0 12px rgba(255, 95, 31, 0.3),
     0 0 0 4px rgba(57, 255, 20, 0.15),
     0 0 0 6px rgba(57, 255, 20, 0.08),
     0 0 25px rgba(57, 255, 20, 0.4),
@@ -463,7 +463,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes avatar-pulse {
   0%, 100% {
     box-shadow:
-      0 0 12px rgba(255, 107, 0, 0.3),
+      0 0 12px rgba(255, 95, 31, 0.3),
       0 0 0 4px rgba(57, 255, 20, 0.15),
       0 0 0 6px rgba(57, 255, 20, 0.08),
       0 0 25px rgba(57, 255, 20, 0.4),
@@ -471,7 +471,7 @@ h1, h2, h3, h4, h5, h6 {
   }
   50% {
     box-shadow:
-      0 0 16px rgba(255, 107, 0, 0.4),
+      0 0 16px rgba(255, 95, 31, 0.4),
       0 0 0 5px rgba(57, 255, 20, 0.25),
       0 0 0 8px rgba(57, 255, 20, 0.12),
       0 0 35px rgba(57, 255, 20, 0.6),
@@ -481,9 +481,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Dynamic intensity — driven by JS via CSS variable --glow-intensity */
 .avatar-ring-dynamic {
-  border-color: #FF6B00;
+  border-color: #FF5F1F;
   box-shadow:
-    0 0 12px rgba(255, 107, 0, 0.3),
+    0 0 12px rgba(255, 95, 31, 0.3),
     0 0 0 calc(3px + var(--glow-intensity, 0) * 4px) rgba(57, 255, 20, calc(0.05 + var(--glow-intensity, 0) * 0.25)),
     0 0 calc(15px + var(--glow-intensity, 0) * 40px) rgba(57, 255, 20, calc(var(--glow-intensity, 0) * 0.5));
   transition: box-shadow 0.1s ease;
@@ -495,7 +495,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 .avatar-ring-sm.avatar-ring-active {
   box-shadow:
-    0 0 8px rgba(255, 107, 0, 0.2),
+    0 0 8px rgba(255, 95, 31, 0.2),
     0 0 0 3px rgba(57, 255, 20, 0.12),
     0 0 18px rgba(57, 255, 20, 0.3);
 }
@@ -505,3 +505,184 @@ h1, h2, h3, h4, h5, h6 {
     display: contents !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   SKEUOMORPHIC HARDWARE SKIN — premium music hardware aesthetic.
+   Brushed metal, tactile depth, deep charcoal, neon glow accents.
+   ═══════════════════════════════════════════════════════════════ */
+
+body {
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(255, 95, 31, 0.05), transparent 55%),
+    linear-gradient(180deg, #101014 0%, #0A0A0D 30%, #060608 100%);
+  background-attachment: fixed;
+}
+
+/* Fine brushed-metal grain overlay for panels */
+.skeu-panel,
+.surface-card,
+.glass-heavy {
+  position: relative;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px),
+    linear-gradient(180deg, #1C1C22 0%, #131318 45%, #0E0E12 100%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-top-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.55),
+    0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+.glass-heavy {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+.skeu-panel { border-radius: 1.25rem; }
+
+/* Recessed screen / LCD inset (for meters, lyrics, note highways) */
+.skeu-screen {
+  background: linear-gradient(180deg, #060608 0%, #0B0B10 100%);
+  border: 1px solid rgba(0, 0, 0, 0.9);
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+  box-shadow:
+    inset 0 3px 10px rgba(0, 0, 0, 0.85),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  border-radius: 0.9rem;
+}
+
+/* Tactile hardware button */
+.skeu-btn {
+  background: linear-gradient(180deg, #26262E 0%, #17171D 55%, #101015 100%);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  border-top-color: rgba(255, 255, 255, 0.16);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 3px 8px rgba(0, 0, 0, 0.55);
+  transition: box-shadow 0.12s ease, transform 0.08s ease, background 0.15s ease;
+}
+.skeu-btn:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.7),
+    0 1px 3px rgba(0, 0, 0, 0.5);
+}
+.skeu-btn-lit {
+  background: linear-gradient(180deg, #33231A 0%, #1E140E 100%);
+  border-color: rgba(255, 95, 31, 0.55);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 150, 90, 0.25),
+    0 0 16px rgba(255, 95, 31, 0.45),
+    0 3px 8px rgba(0, 0, 0, 0.55);
+}
+.skeu-btn-lit-green {
+  background: linear-gradient(180deg, #16251A 0%, #0D170F 100%);
+  border-color: rgba(57, 255, 20, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(120, 255, 100, 0.22),
+    0 0 16px rgba(57, 255, 20, 0.4),
+    0 3px 8px rgba(0, 0, 0, 0.55);
+}
+
+/* Rotary knob (metal cap + glow indicator line via ::after rotated by --knob-angle) */
+.skeu-knob {
+  position: relative;
+  border-radius: 9999px;
+  background:
+    radial-gradient(circle at 32% 28%, #3A3A44 0%, #202027 42%, #121216 78%, #0A0A0D 100%);
+  border: 1px solid rgba(0, 0, 0, 0.85);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -3px 6px rgba(0, 0, 0, 0.6),
+    0 4px 10px rgba(0, 0, 0, 0.65),
+    0 0 0 3px rgba(255, 255, 255, 0.03);
+}
+.skeu-knob::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8%;
+  width: 2px;
+  height: 30%;
+  margin-left: -1px;
+  border-radius: 2px;
+  background: #FF5F1F;
+  box-shadow: 0 0 6px rgba(255, 95, 31, 0.9);
+  transform-origin: 50% 140%;
+  transform: rotate(var(--knob-angle, 0deg));
+}
+
+/* Global tactile press feedback */
+button:active { transform: translateY(0.5px); }
+
+/* Hardware fader rail for Radix sliders (span-based) */
+[data-orientation] > .bg-primary\/20,
+.skeu-fader-track {
+  background: linear-gradient(180deg, #060608, #101014) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9), inset 0 -1px 0 rgba(255,255,255,0.05);
+}
+
+/* Native range inputs → hardware faders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #060608, #14141A);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  margin-top: -6px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #34343E 0%, #1B1B21 60%, #101014 100%);
+  border: 1px solid rgba(0, 0, 0, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    0 0 10px rgba(255, 95, 31, 0.45),
+    0 2px 5px rgba(0, 0, 0, 0.6);
+}
+
+/* Panel screws — decorative corners */
+.skeu-screw {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 30%, #4A4A55, #17171C 75%);
+  box-shadow: inset 0 -1px 1px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.06);
+  position: absolute;
+}
+.skeu-screw::after {
+  content: "";
+  position: absolute;
+  inset: 2px 3px;
+  height: 1px;
+  top: 50%;
+  background: rgba(0, 0, 0, 0.75);
+  transform: rotate(45deg);
+}
+
+/* VU-style LED meter strip */
+.skeu-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  background: #1A1A20;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+}
+.skeu-led.on-green { background: #39FF14; box-shadow: 0 0 6px rgba(57,255,20,0.8); }
+.skeu-led.on-orange { background: #FF5F1F; box-shadow: 0 0 6px rgba(255,95,31,0.8); }
+
+/* Brand-coloured focus — kill the browser's default cyan outline */
+:focus-visible {
+  outline: 2px solid rgba(255, 95, 31, 0.6) !important;
+  outline-offset: 1px;
+}
+button:focus:not(:focus-visible) { outline: none !important; }

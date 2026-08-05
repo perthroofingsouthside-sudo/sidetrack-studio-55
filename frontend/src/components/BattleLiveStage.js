@@ -141,7 +141,7 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
     <div className="min-h-screen bg-[#05050A] pb-24 relative overflow-hidden" data-testid="battle-live-stage">
       {/* Pulsing backdrop */}
       <div className="absolute inset-0 pointer-events-none z-0">
-        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] rounded-full bg-[#FF6B00]/10 blur-[120px] animate-pulse" />
+        <div className="absolute top-0 left-1/4 w-[400px] h-[400px] rounded-full bg-[#FF5F1F]/10 blur-[120px] animate-pulse" />
         <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[#39FF14]/10 blur-[120px] animate-pulse" />
       </div>
 
@@ -151,8 +151,8 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
           <X className="w-5 h-5" />
         </Button>
         <div className="flex items-center gap-2 flex-1">
-          <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#FF6B00] animate-pulse" : "bg-[#5C5C6B]"}`} />
-          <span className="text-[10px] uppercase tracking-[0.35em] font-black text-[#FF6B00]">
+          <span className={`w-2 h-2 rounded-full ${isLive ? "bg-[#FF5F1F] animate-pulse" : "bg-[#5C5C6B]"}`} />
+          <span className="text-[10px] uppercase tracking-[0.35em] font-black text-[#FF5F1F]">
             {isLive ? "Live" : isDone ? "Archived" : battle.status}
           </span>
         </div>
@@ -192,8 +192,8 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
         <div className="rounded-2xl border border-white/5 p-3" style={{ background: "rgba(15,15,22,0.6)" }} data-testid="battle-beat-progress">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <Mic className="w-3.5 h-3.5 text-[#FF6B00]" />
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[#FF6B00] font-black">45s Each · 90s Beat</span>
+              <Mic className="w-3.5 h-3.5 text-[#FF5F1F]" />
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#FF5F1F] font-black">45s Each · 90s Beat</span>
             </div>
             <span className="text-[10px] font-mono text-[#5C5C6B]">{Math.floor(elapsed)}s / {TOTAL_SEC}s</span>
           </div>
@@ -202,8 +202,8 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
               className="h-full transition-[width] duration-200 linear"
               style={{
                 width: `${Math.min(100, (elapsed / TOTAL_SEC) * 100)}%`,
-                background: "linear-gradient(90deg, #FF6B00, #39FF14)",
-                boxShadow: "0 0 12px rgba(255,107,0,0.4)",
+                background: "linear-gradient(90deg, #FF5F1F, #39FF14)",
+                boxShadow: "0 0 12px rgba(255,95,31,0.4)",
               }}
             />
             {/* Turn-switch marker at 45s */}
@@ -213,7 +213,7 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
             <Button
               onClick={manualStart}
               data-testid="battle-manual-start"
-              className="mt-3 w-full h-10 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-xs uppercase tracking-wider"
+              className="mt-3 w-full h-10 rounded-xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-xs uppercase tracking-wider"
             >
               <Radio className="w-3.5 h-3.5 mr-1.5" /> Tap to Start Beat
             </Button>
@@ -229,7 +229,7 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
                 onClick={() => vote("a")}
                 disabled={voting}
                 data-testid="battle-vote-a"
-                className="flex-1 h-12 rounded-2xl bg-[#FF6B00]/15 hover:bg-[#FF6B00]/25 border border-[#FF6B00]/40 text-[#FF6B00] font-black text-xs uppercase tracking-wider gap-2"
+                className="flex-1 h-12 rounded-2xl bg-[#FF5F1F]/15 hover:bg-[#FF5F1F]/25 border border-[#FF5F1F]/40 text-[#FF5F1F] font-black text-xs uppercase tracking-wider gap-2"
               >
                 <ThumbsUp className="w-3.5 h-3.5" /> {battle.profile_a.display_name}
               </Button>
@@ -247,7 +247,7 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
 
         {isLive && isParticipant && (
           <p className="text-[10px] text-[#5C5C6B] text-center" data-testid="battle-no-self-vote">
-            <Mic className="inline w-3 h-3 mr-1 text-[#FF6B00]" />
+            <Mic className="inline w-3 h-3 mr-1 text-[#FF5F1F]" />
             Drop your bars over the beat — viewers are voting live.
           </p>
         )}
@@ -289,12 +289,12 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
 }
 
 function RapperStage({ profile, side, votes, pct, isFirst, isActive }) {
-  const colour = side === "a" ? "#FF6B00" : "#39FF14";
+  const colour = side === "a" ? "#FF5F1F" : "#39FF14";
   return (
     <div
       className="relative rounded-3xl border p-4 overflow-hidden transition-shadow duration-500"
       style={{
-        background: `linear-gradient(180deg, rgba(${side === "a" ? "255,107,0" : "57,255,20"}, 0.10), rgba(15,15,22,0.6))`,
+        background: `linear-gradient(180deg, rgba(${side === "a" ? "255,95,31" : "57,255,20"}, 0.10), rgba(15,15,22,0.6))`,
         borderColor: isActive ? colour : `${colour}55`,
         boxShadow: isActive ? `0 0 34px ${colour}66` : `0 0 22px ${colour}22`,
       }}

@@ -19,9 +19,9 @@ const emitMix = (event, stem, value) => {
 
 const STEMS = [
   { key: "vocals", label: "VOX", color: "#39FF14" },
-  { key: "guitar", label: "GTR", color: "#FF6B00" },
+  { key: "guitar", label: "GTR", color: "#FF5F1F" },
   { key: "bass", label: "BAS", color: "#FF3B30" },
-  { key: "drums", label: "DRM", color: "#FF6B00" },
+  { key: "drums", label: "DRM", color: "#FF5F1F" },
 ];
 
 const ARTIST_PRESETS = {
@@ -79,8 +79,8 @@ export default function StemMixer({ volumes, muted, onVolumeChange, onMuteToggle
             onClick={() => applyPreset(name)}
             className={`h-6 px-2.5 rounded-full text-[9px] font-bold shrink-0 transition-all ${
               activePreset === name
-                ? "bg-[#FF6B00] text-white shadow-[0_0_12px_rgba(255,107,0,0.4)]"
-                : "bg-white/5 text-[#5C5C6B] border border-white/5 hover:border-[#FF6B00]/30"
+                ? "bg-[#FF5F1F] text-white shadow-[0_0_12px_rgba(255,95,31,0.4)]"
+                : "bg-white/5 text-[#5C5C6B] border border-white/5 hover:border-[#FF5F1F]/30"
             }`}
           >
             {name}

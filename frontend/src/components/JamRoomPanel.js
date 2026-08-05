@@ -203,7 +203,7 @@ export default function JamRoomPanel({ song, onMembersChange }) {
             ))}
           </div>
           <Button onClick={() => doJoin()} disabled={joining || !code} data-testid="jam-join-btn"
-            className="w-full h-8 rounded-lg bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-[10px]">
+            className="w-full h-8 rounded-lg bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-bold text-[10px]">
             {joining ? <Loader2 className="w-3 h-3 animate-spin" /> : "Join"}
           </Button>
         </div>
@@ -247,13 +247,13 @@ export default function JamRoomPanel({ song, onMembersChange }) {
         {(room.members || []).map(m => (
           <div key={m.user_id}
             className={`flex items-center gap-1.5 px-2 py-1 rounded ${
-              m.is_host ? "bg-[#FF6B00]/10 border border-[#FF6B00]/25" : "bg-white/5"
+              m.is_host ? "bg-[#FF5F1F]/10 border border-[#FF5F1F]/25" : "bg-white/5"
             }`}
             data-testid={`jam-member-${m.user_id}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${m.is_host ? "bg-[#FF6B00]" : "bg-[#39FF14]"} animate-pulse`} />
-            {m.is_host && <Crown className="w-2.5 h-2.5 text-[#FF6B00]" />}
+            <div className={`w-1.5 h-1.5 rounded-full ${m.is_host ? "bg-[#FF5F1F]" : "bg-[#39FF14]"} animate-pulse`} />
+            {m.is_host && <Crown className="w-2.5 h-2.5 text-[#FF5F1F]" />}
             <p className="text-[10px] font-bold text-white truncate flex-1">{m.user_name}</p>
-            <span className={`text-[8px] uppercase tracking-wider font-bold ${m.is_host ? "text-[#FF6B00]" : "text-[#39FF14]"}`}>
+            <span className={`text-[8px] uppercase tracking-wider font-bold ${m.is_host ? "text-[#FF5F1F]" : "text-[#39FF14]"}`}>
               {m.role}
             </span>
           </div>

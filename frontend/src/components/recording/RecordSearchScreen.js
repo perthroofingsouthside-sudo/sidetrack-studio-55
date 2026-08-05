@@ -49,7 +49,7 @@ export default function RecordSearchScreen({ onSongSelect }) {
   if (isCreator) {
     return (
       <div className="min-h-screen bg-[#05050A] flex flex-col items-center justify-center" data-testid="record-search-screen">
-        <Sparkles className="w-10 h-10 text-[#FF6B00]/40 mb-3 animate-pulse" />
+        <Sparkles className="w-10 h-10 text-[#FF5F1F]/40 mb-3 animate-pulse" />
         <p className="text-sm text-[#5C5C6B]">Opening Original Live Stage…</p>
       </div>
     );
@@ -94,9 +94,9 @@ export default function RecordSearchScreen({ onSongSelect }) {
                 key={track.id || idx}
                 data-testid={`record-track-${idx}`}
                 onClick={() => selectTrack(track)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF6B00]/8 transition-all text-left group"
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF5F1F]/8 transition-all text-left group"
               >
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF6B00]/30 relative">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF5F1F]/30 relative">
                   {track.cover_url ? (
                     <img src={track.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
@@ -105,14 +105,14 @@ export default function RecordSearchScreen({ onSongSelect }) {
                     </div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Mic className="w-5 h-5 text-[#FF6B00]" />
+                    <Mic className="w-5 h-5 text-[#FF5F1F]" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00] transition-colors">{track.title}</p>
+                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF5F1F] transition-colors">{track.title}</p>
                   <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}{track.album ? ` — ${track.album}` : ""}</p>
                 </div>
-                <span className="text-[10px] text-[#FF6B00] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Record</span>
+                <span className="text-[10px] text-[#FF5F1F] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Record</span>
               </button>
             ))}
           </div>

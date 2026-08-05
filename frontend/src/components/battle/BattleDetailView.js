@@ -21,7 +21,7 @@ export default function BattleDetailView({
         <Button
           data-testid="enter-battle-btn"
           onClick={onEnterSubmit}
-          className="h-9 px-4 bg-[#FF6B00] hover:bg-[#FF8533] rounded-2xl text-sm font-bold gap-1.5"
+          className="h-9 px-4 bg-[#FF5F1F] hover:bg-[#FF7A42] rounded-2xl text-sm font-bold gap-1.5"
         >
           <Mic className="w-3.5 h-3.5" /> Enter
         </Button>
@@ -34,7 +34,7 @@ export default function BattleDetailView({
           <div>
             <p className="text-sm text-[#A0A0B0]">{battle.challenge_text || "Record your best cover!"}</p>
             <div className="flex items-center gap-3 mt-2">
-              <span className="text-xs text-[#FF6B00] flex items-center gap-1">
+              <span className="text-xs text-[#FF5F1F] flex items-center gap-1">
                 <Users className="w-3 h-3" />{battle.cover_count || 0} covers
               </span>
               <span className="text-xs text-[#606070]">{battle.status}</span>
@@ -44,11 +44,11 @@ export default function BattleDetailView({
       </div>
       <div className="px-4">
         <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-          <Trophy className="w-4 h-4 text-[#FF6B00]" /> Covers
+          <Trophy className="w-4 h-4 text-[#FF5F1F]" /> Covers
         </h3>
         {covers.length === 0 && (
           <div className="surface-card p-8 text-center">
-            <Swords className="w-10 h-10 text-[#FF6B00]/30 mx-auto mb-3" />
+            <Swords className="w-10 h-10 text-[#FF5F1F]/30 mx-auto mb-3" />
             <p className="text-sm text-[#606070]">No covers yet. Be the first!</p>
           </div>
         )}
@@ -58,12 +58,12 @@ export default function BattleDetailView({
               key={cover.id}
               data-testid={`cover-${idx}`}
               className={`surface-card p-3 flex items-center gap-3 ${
-                idx === 0 && cover.votes > 0 ? "border-[#FF6B00]/30" : ""
+                idx === 0 && cover.votes > 0 ? "border-[#FF5F1F]/30" : ""
               }`}
             >
               <div className="w-8 text-center flex-shrink-0">
                 {idx === 0 && cover.votes > 0
-                  ? <Trophy className="w-5 h-5 text-[#FF6B00] mx-auto" />
+                  ? <Trophy className="w-5 h-5 text-[#FF5F1F] mx-auto" />
                   : <span className="text-sm text-[#606070] font-bold">{idx + 1}</span>}
               </div>
               <Button
@@ -71,11 +71,11 @@ export default function BattleDetailView({
                 variant="ghost"
                 size="icon"
                 onClick={() => onPlayCover(cover)}
-                className="flex-shrink-0 text-[#FF6B00]"
+                className="flex-shrink-0 text-[#FF5F1F]"
               >
                 {playingCoverId === cover.id
                   ? <Pause className="w-5 h-5" />
-                  : <Play className="w-5 h-5" fill="#FF6B00" />}
+                  : <Play className="w-5 h-5" fill="#FF5F1F" />}
               </Button>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-white truncate">{cover.title}</p>
@@ -97,7 +97,7 @@ export default function BattleDetailView({
                   onClick={() => onDuet(cover)}
                   variant="ghost"
                   size="icon"
-                  className="text-[#A0A0B0] hover:text-[#FF6B00] hover:bg-[#FF6B00]/10 rounded-full"
+                  className="text-[#A0A0B0] hover:text-[#FF5F1F] hover:bg-[#FF5F1F]/10 rounded-full"
                   title="Duet with this cover"
                 >
                   <Users className="w-4 h-4" />

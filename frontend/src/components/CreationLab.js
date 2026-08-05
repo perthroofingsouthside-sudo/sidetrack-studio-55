@@ -53,7 +53,7 @@ export default function CreationLab({ open, avatar, onClose, onSave }) {
   const [tab, setTab] = useState("skin");
 
   // Live preview glow follows the chosen top color (kid-pleasing instant feedback)
-  const glowColor = useMemo(() => draft.topColor || "#FF6B00", [draft.topColor]);
+  const glowColor = useMemo(() => draft.topColor || "#FF5F1F", [draft.topColor]);
 
   const patch = (p) => setDraft((d) => ({ ...d, ...p }));
   const reset = () => setDraft({ ...DEFAULT_GAMER_AVATAR });
@@ -107,7 +107,7 @@ export default function CreationLab({ open, avatar, onClose, onSave }) {
                   <button key={key} onClick={() => setTab(key)} data-testid={`lab-tab-${key}`}
                     className={`flex-shrink-0 px-3 h-9 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 transition-all ${
                       tab === key
-                        ? "bg-[#FF6B00] text-white shadow-[0_0_14px_rgba(255,107,0,0.45)]"
+                        ? "bg-[#FF5F1F] text-white shadow-[0_0_14px_rgba(255,95,31,0.45)]"
                         : "bg-white/4 text-[#A0A0B0] hover:text-white"
                     }`}>
                     <Icon className="w-3 h-3" />
@@ -239,7 +239,7 @@ export default function CreationLab({ open, avatar, onClose, onSave }) {
             Cancel
           </Button>
           <Button onClick={save} data-testid="creation-lab-save"
-            className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A] font-black text-sm uppercase tracking-wider"
+            className="flex-1 h-10 rounded-xl bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] text-[#05050A] font-black text-sm uppercase tracking-wider"
             style={{ boxShadow: "0 0 22px rgba(57,255,20,0.45)" }}>
             <Check className="w-4 h-4 mr-1.5" />
             Save Avatar

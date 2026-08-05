@@ -7,10 +7,10 @@ import { API } from "@/App";
 import axios from "axios";
 
 const DESTINATIONS = [
-  { key: "internal_live",  Icon: Radio,   label: "Live Stage",   accent: "#FF6B00", note: "Stream to in-app viewers immediately" },
+  { key: "internal_live",  Icon: Radio,   label: "Live Stage",   accent: "#FF5F1F", note: "Stream to in-app viewers immediately" },
   { key: "youtube",        Icon: Youtube, label: "YouTube",      accent: "#FF0000", note: "Upload as video (needs YouTube OAuth)" },
   { key: "rtmp",           Icon: Radio,   label: "RTMP Live",    accent: "#39FF14", note: "Twitch / YouTube Live / custom server" },
-  { key: "tiktok",         Icon: Music,   label: "TikTok",       accent: "#FF6B00", note: "Requires TikTok developer approval" },
+  { key: "tiktok",         Icon: Music,   label: "TikTok",       accent: "#FF5F1F", note: "Requires TikTok developer approval" },
   { key: "instagram",      Icon: Globe,   label: "Instagram",    accent: "#E1306C", note: "Native share (no upload API)" },
 ];
 
@@ -55,11 +55,11 @@ export default function PublishPanel({ recording, song }) {
   };
 
   return (
-    <div className="rounded-2xl border border-[#FF6B00]/25 p-4 space-y-3"
-         style={{ background: "rgba(255,107,0,0.04)" }} data-testid="publish-panel">
+    <div className="rounded-2xl border border-[#FF5F1F]/25 p-4 space-y-3"
+         style={{ background: "rgba(255,95,31,0.04)" }} data-testid="publish-panel">
       <div className="flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,107,0,0.18)" }}>
-          <Radio className="w-4 h-4 text-[#FF6B00]" />
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(255,95,31,0.18)" }}>
+          <Radio className="w-4 h-4 text-[#FF5F1F]" />
         </div>
         <div className="flex-1">
           <h3 className="font-['Outfit'] text-sm font-black text-white">Publish & Stream</h3>
@@ -105,8 +105,8 @@ export default function PublishPanel({ recording, song }) {
 
       <Button onClick={publish} disabled={publishing || selected.size === 0}
         data-testid="publish-go-btn"
-        className="w-full h-10 rounded-xl text-xs font-black text-[#05050A] bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90"
-        style={{ boxShadow: "0 0 22px rgba(255,107,0,0.35)" }}>
+        className="w-full h-10 rounded-xl text-xs font-black text-[#05050A] bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] hover:opacity-90"
+        style={{ boxShadow: "0 0 22px rgba(255,95,31,0.35)" }}>
         {publishing ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <Radio className="w-4 h-4 mr-1.5" />}
         {publishing ? "Publishing..." : `Go Live · ${selected.size} ${selected.size === 1 ? "destination" : "destinations"}`}
       </Button>
@@ -120,9 +120,9 @@ export default function PublishPanel({ recording, song }) {
             return (
               <div key={k} className="flex items-start gap-2 px-2 py-1.5 rounded-lg" style={{ background: "rgba(255,255,255,0.03)" }}>
                 {isOk ? <CheckCircle2 className="w-3.5 h-3.5 text-[#39FF14] mt-0.5 shrink-0" />
-                  : <AlertTriangle className="w-3.5 h-3.5 text-[#FF6B00] mt-0.5 shrink-0" />}
+                  : <AlertTriangle className="w-3.5 h-3.5 text-[#FF5F1F] mt-0.5 shrink-0" />}
                 <div className="min-w-0 flex-1">
-                  <p className="text-[11px] font-bold text-white">{dest?.label || k}: <span className={isOk ? "text-[#39FF14]" : "text-[#FF6B00]"}>{v.status.replace("_", " ")}</span></p>
+                  <p className="text-[11px] font-bold text-white">{dest?.label || k}: <span className={isOk ? "text-[#39FF14]" : "text-[#FF5F1F]"}>{v.status.replace("_", " ")}</span></p>
                   <p className="text-[9px] text-[#5C5C6B] leading-tight">{v.note}</p>
                 </div>
               </div>

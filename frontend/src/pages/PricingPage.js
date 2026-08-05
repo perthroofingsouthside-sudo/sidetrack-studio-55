@@ -11,13 +11,13 @@ import { API } from "@/App";
 import axios from "axios";
 
 const FREE_FEATURES = [
-  { Icon: Music2, label: "Creator Studio", desc: "16-pad sampler, stems, AI beats", accent: "#FF6B00" },
+  { Icon: Music2, label: "Creator Studio", desc: "16-pad sampler, stems, AI beats", accent: "#FF5F1F" },
   { Icon: Gamepad2, label: "Gamer Lane", desc: "Karaoke game, avatars, Backstage AI", accent: "#39FF14" },
-  { Icon: Swords, label: "Battle Stage", desc: "Rap battles, matchmaking, voting", accent: "#FF6B00" },
+  { Icon: Swords, label: "Battle Stage", desc: "Rap battles, matchmaking, voting", accent: "#FF5F1F" },
   { Icon: GraduationCap, label: "Learn Mode", desc: "Guitar & piano with pitch feedback", accent: "#39FF14" },
-  { Icon: Mic2, label: "Recording", desc: "Stem separation, vocal drops, mixing", accent: "#FF6B00" },
+  { Icon: Mic2, label: "Recording", desc: "Stem separation, vocal drops, mixing", accent: "#FF5F1F" },
   { Icon: Users, label: "Connect", desc: "Jam rooms, duets, vibe-match", accent: "#39FF14" },
-  { Icon: Radio, label: "Full Catalog", desc: "Every curated track, zero locks", accent: "#FF6B00" },
+  { Icon: Radio, label: "Full Catalog", desc: "Every curated track, zero locks", accent: "#FF5F1F" },
   { Icon: Heart, label: "Social Profile", desc: "Posting, playlists, followers", accent: "#39FF14" },
 ];
 
@@ -48,7 +48,7 @@ export default function PricingPage({ onBack }) {
           </span>
           <h1 className="font-['Outfit'] text-4xl sm:text-5xl font-black text-white leading-tight" data-testid="pricing-heading">
             100% <span className="text-[#39FF14]" style={{ textShadow: "0 0 24px rgba(57,255,20,0.5)" }}>Free.</span>{" "}
-            <span className="text-[#FF6B00]" style={{ textShadow: "0 0 24px rgba(255,107,0,0.5)" }}>Forever.</span>
+            <span className="text-[#FF5F1F]" style={{ textShadow: "0 0 24px rgba(255,95,31,0.5)" }}>Forever.</span>
           </h1>
           <p className="text-sm text-[#A0A0B0] mt-3 max-w-md mx-auto">
             Every lane, every feature, every track — completely free for everyone. Just join and create.
@@ -80,12 +80,12 @@ export default function PricingPage({ onBack }) {
 
       {/* Artist economy */}
       <div className="px-4 mt-6">
-        <div className="rounded-2xl border border-[#FF6B00]/25 p-5"
-          style={{ background: "rgba(255,107,0,0.05)" }} data-testid="artist-economy-card">
+        <div className="rounded-2xl border border-[#FF5F1F]/25 p-5"
+          style={{ background: "rgba(255,95,31,0.05)" }} data-testid="artist-economy-card">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-              style={{ background: "rgba(255,107,0,0.15)", boxShadow: "0 0 16px rgba(255,107,0,0.3)" }}>
-              <TrendingUp className="w-5 h-5 text-[#FF6B00]" />
+              style={{ background: "rgba(255,95,31,0.15)", boxShadow: "0 0 16px rgba(255,95,31,0.3)" }}>
+              <TrendingUp className="w-5 h-5 text-[#FF5F1F]" />
             </div>
             <div>
               <p className="text-sm font-bold text-white">Artists Get Paid</p>
@@ -95,7 +95,7 @@ export default function PricingPage({ onBack }) {
           <div className="flex items-center gap-3">
             <div className="flex-1 h-3 rounded-full overflow-hidden flex">
               <div style={{ width: `${artistCut}%`, background: "#39FF14", boxShadow: "0 0 10px rgba(57,255,20,0.5)" }} />
-              <div style={{ width: `${100 - artistCut}%`, background: "rgba(255,107,0,0.4)" }} />
+              <div style={{ width: `${100 - artistCut}%`, background: "rgba(255,95,31,0.4)" }} />
             </div>
           </div>
           <div className="flex items-center justify-between mt-2">

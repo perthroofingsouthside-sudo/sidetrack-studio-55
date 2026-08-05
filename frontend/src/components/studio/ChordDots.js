@@ -10,7 +10,7 @@ export default function ChordDots({ chord }) {
   const W = 72, H = 64, sx = 8, sy = 6, gx = (W - 2 * sx) / 5, gy = (H - sy - 6) / 4;
   return (
     <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} className="mt-1" data-testid="chord-svg">
-      <line x1={sx} y1={sy} x2={W - sx} y2={sy} stroke="#FF6B00" strokeWidth="2.5" />
+      <line x1={sx} y1={sy} x2={W - sx} y2={sy} stroke="#FF5F1F" strokeWidth="2.5" />
       {[1, 2, 3, 4].map((f) => (
         <line key={f} x1={sx} y1={sy + f * gy} x2={W - sx} y2={sy + f * gy} stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
       ))}
@@ -20,7 +20,7 @@ export default function ChordDots({ chord }) {
       {frets.map((f, i) => {
         if (f <= 0) return null;
         const cx = sx + i * gx, cy = sy + (f - 0.5) * gy;
-        return <circle key={`dot-${i}`} cx={cx} cy={cy} r={4} fill="#FF6B00" filter="url(#glow)" />;
+        return <circle key={`dot-${i}`} cx={cx} cy={cy} r={4} fill="#FF5F1F" filter="url(#glow)" />;
       })}
       {frets.map((f, i) => {
         const cx = sx + i * gx;

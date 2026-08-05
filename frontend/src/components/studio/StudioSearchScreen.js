@@ -129,7 +129,7 @@ export default function StudioSearchScreen({ onSongSelect }) {
           <div className="flex items-center gap-1 mb-6 rounded-full border border-white/10 p-1" style={{ background: "rgba(15,15,22,0.6)" }} data-testid="studio-tabs">
             <button onClick={() => setActiveTab("create")} data-testid="studio-tab-create"
               className={`px-4 h-8 rounded-full text-[11px] font-black uppercase tracking-wider transition-all ${
-                activeTab === "create" ? "bg-[#FF6B00] text-white shadow-[0_0_14px_rgba(255,107,0,0.4)]" : "text-[#5C5C6B]"
+                activeTab === "create" ? "bg-[#FF5F1F] text-white shadow-[0_0_14px_rgba(255,95,31,0.4)]" : "text-[#5C5C6B]"
               }`}>
               Create
             </button>
@@ -158,7 +158,7 @@ export default function StudioSearchScreen({ onSongSelect }) {
                 <Music2 className="w-8 h-8 text-[#39FF14]/30" />
                 <p className="text-sm font-bold text-white">No tracks yet</p>
                 <p className="text-[11px] text-[#5C5C6B] px-6 text-center">Record on the Record page or upload from device to start your library.</p>
-                <Button onClick={() => setActiveTab("create")} className="mt-3 h-9 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold text-xs">
+                <Button onClick={() => setActiveTab("create")} className="mt-3 h-9 rounded-full bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-bold text-xs">
                   Start a recording
                 </Button>
               </div>
@@ -174,8 +174,8 @@ export default function StudioSearchScreen({ onSongSelect }) {
                       is_my_track: true,
                     })}
                     className="w-full flex items-center gap-3 p-3 rounded-xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${t.lane === "gamer" ? "bg-[#39FF14]/12" : "bg-[#FF6B00]/12"}`}>
-                      <Music2 className={`w-4 h-4 ${t.lane === "gamer" ? "text-[#39FF14]" : "text-[#FF6B00]"}`} />
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${t.lane === "gamer" ? "bg-[#39FF14]/12" : "bg-[#FF5F1F]/12"}`}>
+                      <Music2 className={`w-4 h-4 ${t.lane === "gamer" ? "text-[#39FF14]" : "text-[#FF5F1F]"}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-white truncate">{t.song_title || t.title || "Untitled"}</p>
@@ -195,7 +195,7 @@ export default function StudioSearchScreen({ onSongSelect }) {
             <Sparkles className="w-10 h-10 text-[#39FF14]/40 mb-3" />
             <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white mb-1">
               {isCreator
-                ? <>Your <span className="text-[#FF6B00]">Original</span> Studio</>
+                ? <>Your <span className="text-[#FF5F1F]">Original</span> Studio</>
                 : <>Create <span className="text-[#39FF14]">Original</span> Music</>}
             </h2>
             <p className="text-sm text-[#5C5C6B] mb-6 text-center max-w-md">
@@ -217,8 +217,8 @@ export default function StudioSearchScreen({ onSongSelect }) {
                 onClick={() => deviceImportRef.current?.click()}
                 disabled={importing}
                 data-testid="studio-device-import-btn"
-                className="w-full h-11 rounded-xl bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A] font-black text-sm hover:opacity-90"
-                style={{ boxShadow: "0 0 22px rgba(255,107,0,0.35)" }}
+                className="w-full h-11 rounded-xl bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] text-[#05050A] font-black text-sm hover:opacity-90"
+                style={{ boxShadow: "0 0 22px rgba(255,95,31,0.35)" }}
               >
                 {importing ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />}
                 Upload from Device
@@ -307,8 +307,8 @@ export default function StudioSearchScreen({ onSongSelect }) {
                       }}
                       data-testid={`studio-record-pick-${i}`}
                       className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left">
-                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${r.lane === "gamer" ? "bg-[#39FF14]/12" : "bg-[#FF6B00]/12"}`}>
-                        <Mic className={`w-4 h-4 ${r.lane === "gamer" ? "text-[#39FF14]" : "text-[#FF6B00]"}`} />
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${r.lane === "gamer" ? "bg-[#39FF14]/12" : "bg-[#FF5F1F]/12"}`}>
+                        <Mic className={`w-4 h-4 ${r.lane === "gamer" ? "text-[#39FF14]" : "text-[#FF5F1F]"}`} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold text-white truncate">{r.song_title || r.title || "Untitled"}</p>
@@ -360,22 +360,22 @@ export default function StudioSearchScreen({ onSongSelect }) {
           <div className="w-full max-w-lg space-y-1 pb-24" data-testid="studio-search-results">
             {results.map((track, idx) => (
               <button key={track.id || idx} data-testid={`studio-track-${idx}`} onClick={() => selectTrack(track)}
-                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF6B00]/8 transition-all text-left group">
-                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF6B00]/30 relative">
+                className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF5F1F]/8 transition-all text-left group">
+                <div className="w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 border border-white/5 group-hover:border-[#FF5F1F]/30 relative">
                   {track.cover_url ? (
                     <img src={track.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
                   ) : (
                     <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Music2 className="w-5 h-5 text-[#5C5C6B]" /></div>
                   )}
                   <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Play className="w-5 h-5 text-[#FF6B00]" />
+                    <Play className="w-5 h-5 text-[#FF5F1F]" />
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00] transition-colors">{track.title}</p>
+                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF5F1F] transition-colors">{track.title}</p>
                   <p className="text-[10px] text-[#5C5C6B] truncate">{track.artist}</p>
                 </div>
-                <span className="text-[10px] text-[#FF6B00] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Open</span>
+                <span className="text-[10px] text-[#FF5F1F] font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity shrink-0">Open</span>
               </button>
             ))}
           </div>

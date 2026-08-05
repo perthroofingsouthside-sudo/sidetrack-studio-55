@@ -160,8 +160,8 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
           <div className="absolute inset-y-0 right-0 w-1/2"
             style={{ background: "repeating-linear-gradient(90deg, #2a0000 0px, #6b0000 12px, #4a0000 24px)" }} />
           {/* Curtain crack revealing distant stage light */}
-          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-gradient-to-b from-[#FF6B00] via-[#39FF14] to-[#FF6B00]"
-            style={{ boxShadow: "0 0 60px #FF6B00, 0 0 120px rgba(255,107,0,0.4)" }} />
+          <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-2 bg-gradient-to-b from-[#FF5F1F] via-[#39FF14] to-[#FF5F1F]"
+            style={{ boxShadow: "0 0 60px #FF5F1F, 0 0 120px rgba(255,95,31,0.4)" }} />
           <p className="relative z-10 text-[10px] uppercase tracking-[0.4em] font-black text-white/40">Backstage</p>
         </div>
       )}
@@ -193,7 +193,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
           <div className="absolute inset-y-0 right-0 origin-right animate-[curtainOpenR_1.8s_ease-in_both]"
             style={{ width: "50%", background: "repeating-linear-gradient(90deg, #2a0000 0px, #6b0000 12px, #4a0000 24px)" }} />
           <div className="absolute inset-0 animate-[whitewash_1.8s_ease-in_both]"
-            style={{ background: "radial-gradient(circle at center, #39FF14 0%, #FF6B00 30%, transparent 70%)" }} />
+            style={{ background: "radial-gradient(circle at center, #39FF14 0%, #FF5F1F 30%, transparent 70%)" }} />
         </div>
       )}
 
@@ -208,7 +208,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
               <div key={`sl-${x}`} className="absolute top-0 w-32 h-full"
                 style={{
                   left: `${x}%`, transform: "translateX(-50%)",
-                  background: "linear-gradient(180deg, rgba(255,107,0,0.3), transparent 80%)",
+                  background: "linear-gradient(180deg, rgba(255,95,31,0.3), transparent 80%)",
                   filter: "blur(8px)",
                 }} />
             ))}
@@ -231,23 +231,23 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
               {Array.from({ length: 24 }).map((_, i) => {
                 const x = (i * 49) % 1200;
                 const y = 50 + (i % 3) * 14;
-                return <circle key={`hand-${i}`} cx={x} cy={y} r="4" fill={i % 2 === 0 ? "#FF6B00" : "#39FF14"}
+                return <circle key={`hand-${i}`} cx={x} cy={y} r="4" fill={i % 2 === 0 ? "#FF5F1F" : "#39FF14"}
                   opacity="0.85" filter="url(#glow)" />;
               })}
               <defs><filter id="glow"><feGaussianBlur stdDeviation="2" /></filter></defs>
             </svg>
           </div>
-          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.4em] font-black text-[#FF6B00]"
-            style={{ textShadow: "0 0 16px #FF6B00" }}>The Crowd Goes Wild</p>
+          <p className="absolute top-4 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.4em] font-black text-[#FF5F1F]"
+            style={{ textShadow: "0 0 16px #FF5F1F" }}>The Crowd Goes Wild</p>
         </div>
       )}
 
       {/* 5. Zoom to avatar */}
       {phase === "zoom_avatar" && (
         <div className="absolute inset-0 flex items-center justify-center" data-testid="phase-zoom-avatar"
-          style={{ background: "radial-gradient(ellipse at center, rgba(255,107,0,0.3), #000 70%)" }}>
+          style={{ background: "radial-gradient(ellipse at center, rgba(255,95,31,0.3), #000 70%)" }}>
           <div className="animate-[zoomIn_1.6s_ease-out_both]">
-            <GamerAvatar avatar={userAvatar} size={420} glowColor="#FF6B00" />
+            <GamerAvatar avatar={userAvatar} size={420} glowColor="#FF5F1F" />
           </div>
           <p className="absolute bottom-12 text-[10px] uppercase tracking-[0.45em] font-black text-white/80">Your Performance</p>
         </div>
@@ -258,14 +258,14 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
         <div className="absolute inset-0 flex flex-col" data-testid="phase-playback">
           {/* Hero header */}
           <div className="relative flex-1 flex flex-col items-center justify-center"
-            style={{ background: "radial-gradient(ellipse at top, rgba(255,107,0,0.18), #05050A 70%)" }}>
+            style={{ background: "radial-gradient(ellipse at top, rgba(255,95,31,0.18), #05050A 70%)" }}>
             <div className="absolute top-0 left-0 right-0 h-1/3"
               style={{ background: "radial-gradient(ellipse at center top, rgba(255,235,59,0.18), transparent 70%)", filter: "blur(8px)" }} />
             <div className="relative scale-90">
-              <GamerAvatar avatar={userAvatar} size={260} glowColor="#FF6B00" />
+              <GamerAvatar avatar={userAvatar} size={260} glowColor="#FF5F1F" />
             </div>
             <h2 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white text-center mt-4 px-4"
-              style={{ textShadow: "0 0 18px rgba(255,107,0,0.55)" }} data-testid="cinema-song-title">
+              style={{ textShadow: "0 0 18px rgba(255,95,31,0.55)" }} data-testid="cinema-song-title">
               {(recording.song_title || recording.title || "Untitled Set").toUpperCase()}
             </h2>
             <p className="text-xs text-[#A0A0B0] mt-1">{recording.artist || "You"}</p>
@@ -296,7 +296,7 @@ export default function BackstageCinema({ recording, currentUserId, onClose }) {
             <button onClick={toggleShowBoth} data-testid="cinema-show-both-toggle"
               className={`w-full h-9 rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-wider transition-all ${
                 showBoth
-                  ? "bg-gradient-to-r from-[#FF6B00] to-[#39FF14] text-[#05050A]"
+                  ? "bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] text-[#05050A]"
                   : "border border-white/15 text-[#A0A0B0] hover:text-white"
               }`}>
               <Share2 className="w-3 h-3" />

@@ -8,13 +8,15 @@ import { API } from "@/App";
 import axios from "axios";
 import GamerAvatar, { DEFAULT_GAMER_AVATAR } from "@/components/GamerAvatar";
 import CreationLab from "@/components/CreationLab";
+import Avatar3DPicker, { Avatar3DPortrait, getAvatar3D } from "@/components/avatar3d/Avatar3D";
+import { ShieldCheck } from "lucide-react";
 
 // Gamer avatar — palette swatches used for the profile card background gradient.
 // Strict Pocket Products brand: only Neon Orange and Electric Green tones.
 const GAMER_PALETTES = [
   { key: "neon-green", from: "#39FF14", to: "#0F1A0F" },
-  { key: "neon-orange", from: "#FF6B00", to: "#1A0F08" },
-  { key: "split", from: "#FF6B00", to: "#39FF14" },
+  { key: "neon-orange", from: "#FF5F1F", to: "#1A0F08" },
+  { key: "split", from: "#FF5F1F", to: "#39FF14" },
   { key: "ember", from: "#FFA64D", to: "#1A0F08" },
   { key: "mint", from: "#7FFF8E", to: "#0F1A0F" },
 ];
@@ -35,6 +37,8 @@ export default function SocialProfile({ onNavigate }) {
     }
   });
   const [showAvatarBuilder, setShowAvatarBuilder] = useState(false);
+  const isGrommet = localStorage.getItem("pp_age_mode") === "grommet";
+  const [avatar3d, setAvatar3d] = useState(() => getAvatar3D());
   // New profile data — Battle stats, playlists, kept recordings ("My Raps")
   const [battleSnapshot, setBattleSnapshot] = useState(null);
   const [playlists, setPlaylists] = useState([]);
@@ -138,7 +142,7 @@ export default function SocialProfile({ onNavigate }) {
   const battleLosses = battleSnapshot?.user?.lifetime_losses ?? 0;
 
   const stats = [
-    { label: "Battle Wins",  value: battleWins,                       icon: Trophy,    color: "#FF6B00", testId: "stat-wins" },
+    { label: "Battle Wins",  value: battleWins,                       icon: Trophy,    color: "#FF5F1F", testId: "stat-wins" },
     { label: "Battle Losses", value: battleLosses,                    icon: Swords,    color: "#5C5C6B", testId: "stat-losses" },
     { label: "Likes",        value: (liveStats?.total_votes ?? 0) + totalRapLikes, icon: Heart, color: "#39FF14", testId: "stat-likes" },
     { label: "Views",        value: totalRapViews + (liveStats?.battles ?? 0) * 10, icon: Eye, color: "#39FF14", testId: "stat-views" },
@@ -153,7 +157,7 @@ export default function SocialProfile({ onNavigate }) {
             <div className="h-28 opacity-25" style={{
               background: lane === "gamer"
                 ? `linear-gradient(90deg, ${currentPalette.from}, ${currentPalette.to})`
-                : "linear-gradient(90deg, #FF6B00, #39FF14)",
+                : "linear-gradient(90deg, #FF5F1F, #39FF14)",
             }} />
             <div className="px-5 pb-5 -mt-10">
               {/* AVATAR — lane-aware (Creator: photo / Gamer: Creation Lab character) */}
@@ -180,13 +184,13 @@ export default function SocialProfile({ onNavigate }) {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     data-testid="creator-photo-edit"
-                    className="group w-20 h-20 rounded-2xl bg-[#0F0F16] border-4 border-[#05050A] flex items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.03] shadow-[0_0_30px_rgba(255,107,0,0.3)]"
+                    className="group w-20 h-20 rounded-2xl bg-[#0F0F16] border-4 border-[#05050A] flex items-center justify-center relative overflow-hidden transition-transform hover:scale-[1.03] shadow-[0_0_30px_rgba(255,95,31,0.3)]"
                     title="Upload profile photo"
                   >
                     {photoUrl ? (
                       <img src={photoUrl} alt="Profile" className="w-full h-full object-cover" data-testid="creator-photo-img" />
                     ) : (
-                      <User className="w-8 h-8 text-[#FF6B00]" />
+                      <User className="w-8 h-8 text-[#FF5F1F]" />
                     )}
                     <span className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                       <Camera className="w-5 h-5 text-white" />
@@ -204,7 +208,7 @@ export default function SocialProfile({ onNavigate }) {
                     <button
                       onClick={clearPhoto}
                       data-testid="creator-photo-clear"
-                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#FF6B00] text-white text-[10px] font-bold flex items-center justify-center"
+                      className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-[#FF5F1F] text-white text-[10px] font-bold flex items-center justify-center"
                       title="Remove photo"
                     >
                       ×
@@ -219,7 +223,7 @@ export default function SocialProfile({ onNavigate }) {
                       onKeyDown={(e) => e.key === "Enter" && saveName()}
                       className="h-9 bg-[#0F0F16] border-white/10 text-white rounded-xl text-sm"
                       data-testid="profile-name-input" autoFocus />
-                    <Button onClick={saveName} className="h-9 px-3 bg-[#FF6B00] rounded-xl text-xs" data-testid="profile-save-btn">Save</Button>
+                    <Button onClick={saveName} className="h-9 px-3 bg-[#FF5F1F] rounded-xl text-xs" data-testid="profile-save-btn">Save</Button>
                   </div>
                 ) : (
                   <>
@@ -244,6 +248,32 @@ export default function SocialProfile({ onNavigate }) {
               )}
             </div>
           </div>
+
+          {/* Grommet identity protection */}
+          {isGrommet && (
+            <div className="rounded-2xl border border-[#39FF14]/25 p-3.5 flex items-center gap-3"
+              style={{ background: "rgba(57,255,20,0.04)" }} data-testid="grommet-identity-banner">
+              <ShieldCheck className="w-5 h-5 text-[#39FF14] shrink-0" />
+              <p className="text-[10px] text-[#A0A0B0] leading-snug">
+                <span className="text-[#39FF14] font-bold">Identity protected</span> — Grommet accounts use 3D avatars only.
+                No real faces, real names or personal info in public areas. AI grades your skills on pitch &amp; timing.
+              </p>
+            </div>
+          )}
+
+          {/* 3D Stage Avatar — cinematic Pixar-style presets */}
+          {(lane === "gamer" || isGrommet) && (
+            <div className="skeu-panel rounded-2xl p-4" data-testid="avatar3d-section">
+              <div className="flex items-center gap-3 mb-3">
+                <Avatar3DPortrait preset={avatar3d} size={52} />
+                <div>
+                  <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.2em] font-bold text-[#39FF14]">3D Stage Avatar</h3>
+                  <p className="text-[9px] text-[#5C5C6B] mt-0.5">Cinematic lighting · stage outfits · your public face</p>
+                </div>
+              </div>
+              <Avatar3DPicker onChange={setAvatar3d} />
+            </div>
+          )}
 
           {/* Free Access — everything unlocked */}
           <button onClick={() => onNavigate && onNavigate("pricing")}
@@ -310,7 +340,7 @@ function BattleStatusSection({ snapshot, onNavigate }) {
 
   return (
     <section data-testid="profile-battle-status">
-      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
+      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF5F1F] mb-2 flex items-center gap-1.5">
         <Swords className="w-3.5 h-3.5" /> Battle Status
       </h3>
 
@@ -318,23 +348,23 @@ function BattleStatusSection({ snapshot, onNavigate }) {
         <button
           onClick={() => onNavigate && onNavigate("connect")}
           data-testid="profile-active-battle"
-          className="w-full text-left rounded-2xl border border-[#FF6B00]/40 p-3.5 flex items-center gap-3 hover:border-[#FF6B00]/70 transition-all"
-          style={{ background: "linear-gradient(135deg, rgba(255,107,0,0.10), rgba(57,255,20,0.04))", boxShadow: "0 0 18px rgba(255,107,0,0.18)" }}
+          className="w-full text-left rounded-2xl border border-[#FF5F1F]/40 p-3.5 flex items-center gap-3 hover:border-[#FF5F1F]/70 transition-all"
+          style={{ background: "linear-gradient(135deg, rgba(255,95,31,0.10), rgba(57,255,20,0.04))", boxShadow: "0 0 18px rgba(255,95,31,0.18)" }}
         >
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/20 flex-shrink-0">
-            <Radio className={`w-5 h-5 text-[#FF6B00] ${active.status === "live" ? "animate-pulse" : ""}`} />
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF5F1F]/20 flex-shrink-0">
+            <Radio className={`w-5 h-5 text-[#FF5F1F] ${active.status === "live" ? "animate-pulse" : ""}`} />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-black text-white truncate">
               vs <span className="text-[#39FF14]">{active.user_a === snapshot.user?.user_id ? active.profile_b.display_name : active.profile_a.display_name}</span>
             </p>
-            <p className="text-[10px] uppercase tracking-wider text-[#FF6B00] font-bold">
+            <p className="text-[10px] uppercase tracking-wider text-[#FF5F1F] font-bold">
               {active.status === "pending_agreement" ? "Awaiting agreement"
                 : active.status === "agreed" ? "Ready to go live"
                 : "LIVE — drop your bars"}
             </p>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6B00]">Open →</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF5F1F]">Open →</span>
         </button>
       ) : inQueue ? (
         <button
@@ -355,16 +385,16 @@ function BattleStatusSection({ snapshot, onNavigate }) {
         <button
           onClick={() => onNavigate && onNavigate("connect")}
           data-testid="profile-register-cta"
-          className="w-full text-left rounded-2xl border border-dashed border-[#FF6B00]/30 p-3.5 flex items-center gap-3 hover:border-[#FF6B00]/60 hover:bg-[#FF6B00]/5 transition-all"
+          className="w-full text-left rounded-2xl border border-dashed border-[#FF5F1F]/30 p-3.5 flex items-center gap-3 hover:border-[#FF5F1F]/60 hover:bg-[#FF5F1F]/5 transition-all"
         >
-          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF6B00]/10 flex-shrink-0">
-            <Swords className="w-5 h-5 text-[#FF6B00]" />
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center bg-[#FF5F1F]/10 flex-shrink-0">
+            <Swords className="w-5 h-5 text-[#FF5F1F]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-black text-white">Not registered for a battle</p>
             <p className="text-[10px] text-[#5C5C6B]">Head to Connect → Battle Hub to enter the queue.</p>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF6B00]">Register →</span>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF5F1F]">Register →</span>
         </button>
       )}
 
@@ -433,7 +463,7 @@ function PlaylistsSection({ playlists, onNavigate }) {
               data-testid={`profile-playlist-${idx}`}
               className="flex-shrink-0 w-28 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2"
             >
-              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF5F1F]/10 flex items-center justify-center">
                 {pl.cover_url
                   ? <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
                   : <ListMusic className="w-7 h-7 text-[#39FF14]/40" />}
@@ -453,12 +483,12 @@ function PlaylistsSection({ playlists, onNavigate }) {
 function MyRapsSection({ raps, playingId, onToggle }) {
   return (
     <section data-testid="profile-my-raps">
-      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
+      <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF5F1F] mb-2 flex items-center gap-1.5">
         <Mic2 className="w-3.5 h-3.5" /> My Raps
       </h3>
       {raps.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center" data-testid="profile-my-raps-empty">
-          <Mic2 className="w-9 h-9 text-[#FF6B00]/20 mx-auto mb-2" />
+          <Mic2 className="w-9 h-9 text-[#FF5F1F]/20 mx-auto mb-2" />
           <p className="text-sm font-bold text-white">No raps posted yet</p>
           <p className="text-[10px] text-[#5C5C6B] mt-1">Battles &amp; Backstage performances you keep will show here.</p>
         </div>
@@ -470,18 +500,18 @@ function MyRapsSection({ raps, playingId, onToggle }) {
               <div
                 key={r.id}
                 data-testid={`profile-rap-${r.id}`}
-                className="rounded-2xl border border-white/5 hover:border-[#FF6B00]/30 transition-all p-3 flex items-center gap-3"
+                className="rounded-2xl border border-white/5 hover:border-[#FF5F1F]/30 transition-all p-3 flex items-center gap-3"
                 style={{ background: "rgba(15,15,22,0.5)" }}
               >
                 <button
                   onClick={() => onToggle(r)}
                   data-testid={`profile-rap-play-${r.id}`}
                   className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                    isPlaying ? "bg-[#FF6B00]" : "bg-[#FF6B00]/15 hover:bg-[#FF6B00]/25"
+                    isPlaying ? "bg-[#FF5F1F]" : "bg-[#FF5F1F]/15 hover:bg-[#FF5F1F]/25"
                   }`}
-                  style={isPlaying ? { boxShadow: "0 0 16px rgba(255,107,0,0.45)" } : undefined}
+                  style={isPlaying ? { boxShadow: "0 0 16px rgba(255,95,31,0.45)" } : undefined}
                 >
-                  {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-[#FF6B00] ml-0.5" />}
+                  {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-[#FF5F1F] ml-0.5" />}
                 </button>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-white truncate">{r.song_title || "Untitled rap"}</p>
@@ -496,7 +526,7 @@ function MyRapsSection({ raps, playingId, onToggle }) {
                     <Heart className="w-3 h-3 text-[#39FF14]" /> {r.likes || 0}
                   </span>
                   <span className="flex items-center gap-1" data-testid={`profile-rap-views-${r.id}`}>
-                    <Eye className="w-3 h-3 text-[#FF6B00]" /> {r.views || 0}
+                    <Eye className="w-3 h-3 text-[#FF5F1F]" /> {r.views || 0}
                   </span>
                 </div>
               </div>

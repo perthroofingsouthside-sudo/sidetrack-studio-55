@@ -44,10 +44,10 @@ export default function NowPlayingHero({
             <div className="absolute inset-0 bg-gradient-to-b from-[#05050A]/40 via-[#05050A]/70 to-[#05050A]" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#FF6B00]/10 via-[#0A0A0F] to-[#39FF14]/10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#FF5F1F]/10 via-[#0A0A0F] to-[#39FF14]/10" />
         )}
         {/* Neon ambient glow */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full bg-[#FF6B00]/10 blur-[120px]" />
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[480px] h-[480px] rounded-full bg-[#FF5F1F]/10 blur-[120px]" />
       </div>
 
       {/* Foreground content */}
@@ -62,10 +62,10 @@ export default function NowPlayingHero({
         <div className="relative w-64 h-64 sm:w-72 sm:h-72 mb-6" data-testid="hero-album-art">
           {/* Outer vinyl ring */}
           <div
-            className={`absolute -inset-3 rounded-full border-2 border-[#FF6B00]/20 ${isPlaying ? "vinyl-spin" : ""}`}
+            className={`absolute -inset-3 rounded-full border-2 border-[#FF5F1F]/20 ${isPlaying ? "vinyl-spin" : ""}`}
             style={{
-              background: "radial-gradient(circle at center, transparent 45%, rgba(255,107,0,0.08) 60%, transparent 75%)",
-              boxShadow: isPlaying ? "0 0 60px rgba(255,107,0,0.25), 0 0 120px rgba(57,255,20,0.1)" : "0 0 40px rgba(0,0,0,0.5)",
+              background: "radial-gradient(circle at center, transparent 45%, rgba(255,95,31,0.08) 60%, transparent 75%)",
+              boxShadow: isPlaying ? "0 0 60px rgba(255,95,31,0.25), 0 0 120px rgba(57,255,20,0.1)" : "0 0 40px rgba(0,0,0,0.5)",
             }}
           />
           {/* Album cover */}
@@ -74,7 +74,7 @@ export default function NowPlayingHero({
               <img src={nowPlaying.cover_url} alt={nowPlaying.title} className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full bg-[#12121A] flex items-center justify-center">
-                <Music2 className="w-20 h-20 text-[#FF6B00]/40" />
+                <Music2 className="w-20 h-20 text-[#FF5F1F]/40" />
               </div>
             )}
           </div>
@@ -103,8 +103,8 @@ export default function NowPlayingHero({
               className="absolute top-0 left-0 h-full rounded-full transition-[width] duration-100 linear"
               style={{
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #FF6B00 0%, #39FF14 100%)",
-                boxShadow: "0 0 12px rgba(255,107,0,0.5)",
+                background: "linear-gradient(90deg, #FF5F1F 0%, #39FF14 100%)",
+                boxShadow: "0 0 12px rgba(255,95,31,0.5)",
               }}
             />
             <div
@@ -114,7 +114,7 @@ export default function NowPlayingHero({
           </div>
           <div className="flex items-center justify-between mt-1.5">
             <span className="text-[10px] font-mono text-[#A0A0B0]" data-testid="hero-time-elapsed">{formatTime(elapsedSec)}</span>
-            <span className="text-[10px] uppercase tracking-wider text-[#FF6B00]/70 font-bold">30s Preview</span>
+            <span className="text-[10px] uppercase tracking-wider text-[#FF5F1F]/70 font-bold">30s Preview</span>
             <span className="text-[10px] font-mono text-[#A0A0B0]">{formatTime(totalSec)}</span>
           </div>
         </div>
@@ -124,8 +124,8 @@ export default function NowPlayingHero({
           <Button
             onClick={togglePlayPause}
             data-testid="hero-play-pause-btn"
-            className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF6B00] to-[#FF8533] hover:from-[#FF8533] hover:to-[#FF6B00] text-white transition-all hover:scale-105"
-            style={{ boxShadow: "0 0 32px rgba(255,107,0,0.6), 0 8px 24px rgba(0,0,0,0.4)" }}
+            className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FF5F1F] to-[#FF7A42] hover:from-[#FF7A42] hover:to-[#FF5F1F] text-white transition-all hover:scale-105"
+            style={{ boxShadow: "0 0 32px rgba(255,95,31,0.6), 0 8px 24px rgba(0,0,0,0.4)" }}
           >
             {isPlaying
               ? <Pause className="w-7 h-7" fill="white" />

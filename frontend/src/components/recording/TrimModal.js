@@ -14,7 +14,7 @@ export default function TrimModal({ duration, trimStart, trimEnd, setTrimStart, 
       <div className="relative w-full max-w-md mx-4 mb-4 sm:mb-0 rounded-2xl border border-white/10 bg-[#0F0F16] p-5 space-y-4 animate-slide-up" data-testid="trim-modal">
         <div className="flex items-center justify-between">
           <h3 className="font-['Outfit'] text-lg font-bold text-white flex items-center gap-2">
-            <Scissors className="w-4 h-4 text-[#FF6B00]" /> Trim & Share
+            <Scissors className="w-4 h-4 text-[#FF5F1F]" /> Trim & Share
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-[#5C5C6B] hover:text-white w-8 h-8" data-testid="trim-modal-close">
             <X className="w-4 h-4" />
@@ -27,7 +27,7 @@ export default function TrimModal({ duration, trimStart, trimEnd, setTrimStart, 
               const pct = (i / bars.length) * 100;
               const inRange = pct >= trimStart && pct <= trimEnd;
               return (
-                <div key={`bar-${i}`} className={`flex-1 rounded-full transition-colors ${inRange ? "bg-[#FF6B00]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
+                <div key={`bar-${i}`} className={`flex-1 rounded-full transition-colors ${inRange ? "bg-[#FF5F1F]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
               );
             })}
           </div>
@@ -39,12 +39,12 @@ export default function TrimModal({ duration, trimStart, trimEnd, setTrimStart, 
           <div className="flex items-center gap-3">
             <span className="text-xs text-[#A0A0B0] w-10">Start</span>
             <Slider data-testid="trim-modal-start" value={[trimStart]} onValueChange={([v]) => setTrimStart(Math.min(v, trimEnd - 5))} max={100} step={1} className="flex-1" />
-            <span className="text-xs text-[#FF6B00] w-12 text-right font-mono">{fmtDur(startSec)}</span>
+            <span className="text-xs text-[#FF5F1F] w-12 text-right font-mono">{fmtDur(startSec)}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-[#A0A0B0] w-10">End</span>
             <Slider data-testid="trim-modal-end" value={[trimEnd]} onValueChange={([v]) => setTrimEnd(Math.max(v, trimStart + 5))} max={100} step={1} className="flex-1" />
-            <span className="text-xs text-[#FF6B00] w-12 text-right font-mono">{fmtDur(endSec)}</span>
+            <span className="text-xs text-[#FF5F1F] w-12 text-right font-mono">{fmtDur(endSec)}</span>
           </div>
         </div>
 
@@ -54,7 +54,7 @@ export default function TrimModal({ duration, trimStart, trimEnd, setTrimStart, 
 
         <div className="flex gap-3">
           <Button onClick={onClose} variant="ghost" className="flex-1 h-11 rounded-xl border border-white/10 text-[#5C5C6B]" data-testid="trim-cancel-btn">Cancel</Button>
-          <Button onClick={onTrim} disabled={trimming} className="flex-1 h-11 rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-bold" style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }} data-testid="trim-confirm-btn">
+          <Button onClick={onTrim} disabled={trimming} className="flex-1 h-11 rounded-xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-bold" style={{ boxShadow: "0 0 20px rgba(255,95,31,0.3)" }} data-testid="trim-confirm-btn">
             {trimming ? "Trimming..." : <><Share2 className="w-4 h-4 mr-1.5" /> Trim & Share</>}
           </Button>
         </div>

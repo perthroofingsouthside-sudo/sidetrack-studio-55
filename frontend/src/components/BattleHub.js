@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { API } from "@/App";
 import axios from "axios";
 import BattleLiveStage from "@/components/BattleLiveStage";
+import StarRating from "@/components/StarRating";
 
 /**
  * BattleHub — Rap Battle Matchmaking inside the Connect tab.
@@ -61,6 +62,10 @@ export default function BattleHub({ onBack, userId, displayName }) {
   }, [snapshot, load]);
 
   const register = async () => {
+    if (localStorage.getItem("pp_age_mode") === "grommet") {
+      toast.error("Rap Battles are 18+ — level up with a guardian to unlock Creator mode.");
+      return;
+    }
     setBusy(true);
     try {
       const res = await axios.post(`${API}/rap-battles/register`, { user_id: userId, display_name: displayName });
@@ -73,7 +78,7 @@ export default function BattleHub({ onBack, userId, displayName }) {
       }
       load();
     } catch (err) {
-      toast.error("Couldn't register");
+      toast.error(err?.response?.data?.detail || "Couldn't register");
     } finally { setBusy(false); }
   };
 
@@ -130,18 +135,18 @@ export default function BattleHub({ onBack, userId, displayName }) {
     <div className="min-h-screen bg-[#05050A] pb-32" data-testid="battle-hub">
       {/* Header */}
       <div className="relative px-4 pt-6 pb-4 border-b border-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FF6B00]/8 via-[#05050A] to-[#05050A] z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF5F1F]/8 via-[#05050A] to-[#05050A] z-0" />
         <div className="relative z-10 flex items-center gap-3">
           <Button onClick={onBack} variant="ghost" size="icon" className="text-[#5C5C6B] hover:text-white" data-testid="battle-hub-back">
             <ArrowLeft className="w-5 h-5" />
           </Button>
           <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
-            style={{ background: "rgba(255,107,0,0.15)", boxShadow: "0 0 22px rgba(255,107,0,0.3)" }}>
-            <Swords className="w-5 h-5 text-[#FF6B00]" />
+            style={{ background: "rgba(255,95,31,0.15)", boxShadow: "0 0 22px rgba(255,95,31,0.3)" }}>
+            <Swords className="w-5 h-5 text-[#FF5F1F]" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="font-['Outfit'] text-xl sm:text-2xl font-black text-white">
-              <span className="text-[#FF6B00] glow-text-orange">Battle</span> Hub
+              <span className="text-[#FF5F1F] glow-text-orange">Battle</span> Hub
             </h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
               Auto-match · 45s each · Live voting
@@ -153,7 +158,7 @@ export default function BattleHub({ onBack, userId, displayName }) {
               <p className="text-sm font-black text-white">
                 <span className="text-[#39FF14]">{me.lifetime_wins || 0}W</span>
                 <span className="text-[#5C5C6B] mx-1">·</span>
-                <span className="text-[#FF6B00]">{me.lifetime_losses || 0}L</span>
+                <span className="text-[#FF5F1F]">{me.lifetime_losses || 0}L</span>
               </p>
             </div>
           )}
@@ -196,18 +201,18 @@ export default function BattleHub({ onBack, userId, displayName }) {
 function RegisterCard({ userId, busy, onRegister }) {
   return (
     <div
-      className="relative rounded-3xl border border-[#FF6B00]/30 overflow-hidden p-5"
+      className="relative rounded-3xl border border-[#FF5F1F]/30 overflow-hidden p-5"
       style={{
-        background: "linear-gradient(135deg, rgba(255,107,0,0.12), rgba(57,255,20,0.06))",
-        boxShadow: "0 0 32px rgba(255,107,0,0.18)",
+        background: "linear-gradient(135deg, rgba(255,95,31,0.12), rgba(57,255,20,0.06))",
+        boxShadow: "0 0 32px rgba(255,95,31,0.18)",
       }}
       data-testid="battle-register-card"
     >
-      <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#FF6B00]/15 blur-3xl" />
+      <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-[#FF5F1F]/15 blur-3xl" />
       <div className="relative z-10">
         <div className="flex items-center gap-2 mb-3">
-          <Mic2 className="w-4 h-4 text-[#FF6B00]" />
-          <span className="text-[10px] uppercase tracking-[0.3em] text-[#FF6B00] font-black">Step into the ring</span>
+          <Mic2 className="w-4 h-4 text-[#FF5F1F]" />
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#FF5F1F] font-black">Step into the ring</span>
         </div>
         <h2 className="font-['Outfit'] text-2xl font-black text-white mb-1">Register for a Rap Battle</h2>
         <p className="text-xs text-[#A0A0B0] mb-4">
@@ -220,8 +225,8 @@ function RegisterCard({ userId, busy, onRegister }) {
           onClick={onRegister}
           disabled={busy}
           data-testid="battle-register-btn"
-          className="w-full h-12 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm uppercase tracking-wider gap-2"
-          style={{ boxShadow: "0 0 22px rgba(255,107,0,0.45)" }}
+          className="w-full h-12 rounded-2xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-sm uppercase tracking-wider gap-2"
+          style={{ boxShadow: "0 0 22px rgba(255,95,31,0.45)" }}
         >
           <Swords className="w-4 h-4" />
           {busy ? "Joining…" : "Register Now"}
@@ -268,17 +273,17 @@ function ActiveBattleCard({ battle, userId, busy, onAgree, onGoLive }) {
 
   return (
     <div
-      className="relative rounded-3xl border border-[#FF6B00]/40 overflow-hidden"
+      className="relative rounded-3xl border border-[#FF5F1F]/40 overflow-hidden"
       style={{
-        background: "linear-gradient(135deg, rgba(255,107,0,0.10), rgba(57,255,20,0.06))",
-        boxShadow: "0 0 28px rgba(255,107,0,0.25)",
+        background: "linear-gradient(135deg, rgba(255,95,31,0.10), rgba(57,255,20,0.06))",
+        boxShadow: "0 0 28px rgba(255,95,31,0.25)",
       }}
       data-testid="battle-active-card"
     >
       <div className="px-4 py-2.5 border-b border-white/8 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#FF6B00] animate-pulse" />
-          <span className="text-[10px] uppercase tracking-[0.3em] text-[#FF6B00] font-black">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FF5F1F] animate-pulse" />
+          <span className="text-[10px] uppercase tracking-[0.3em] text-[#FF5F1F] font-black">
             {status === "pending_agreement" ? "Match Found" : status === "agreed" ? "Ready to Battle" : "Live"}
           </span>
         </div>
@@ -291,7 +296,7 @@ function ActiveBattleCard({ battle, userId, busy, onAgree, onGoLive }) {
       <div className="p-5">
         <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 mb-4">
           <RapperSlot profile={me} side="me" agreed={meAgreed} />
-          <div className="text-[#FF6B00] font-['Outfit'] text-2xl font-black opacity-70">VS</div>
+          <div className="text-[#FF5F1F] font-['Outfit'] text-2xl font-black opacity-70">VS</div>
           <RapperSlot profile={opp} side="opp" agreed={oppAgreed} />
         </div>
 
@@ -325,8 +330,8 @@ function ActiveBattleCard({ battle, userId, busy, onAgree, onGoLive }) {
               onClick={() => onGoLive(battle.id)}
               disabled={busy}
               data-testid="battle-go-live-btn"
-              className="w-full h-12 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm uppercase tracking-wider gap-2"
-              style={{ boxShadow: "0 0 22px rgba(255,107,0,0.5)" }}
+              className="w-full h-12 rounded-2xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-sm uppercase tracking-wider gap-2"
+              style={{ boxShadow: "0 0 22px rgba(255,95,31,0.5)" }}
             >
               <Radio className="w-4 h-4" />
               Enter Live Stream
@@ -339,7 +344,7 @@ function ActiveBattleCard({ battle, userId, busy, onAgree, onGoLive }) {
             onClick={() => onGoLive(battle.id)}
             disabled={busy}
             data-testid="battle-rejoin-live-btn"
-            className="w-full h-12 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm uppercase tracking-wider gap-2"
+            className="w-full h-12 rounded-2xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-sm uppercase tracking-wider gap-2"
           >
             <Radio className="w-4 h-4 animate-pulse" /> Re-enter Live Stream
           </Button>
@@ -350,7 +355,7 @@ function ActiveBattleCard({ battle, userId, busy, onAgree, onGoLive }) {
 }
 
 function RapperSlot({ profile, side, agreed }) {
-  const colour = side === "me" ? "#FF6B00" : "#39FF14";
+  const colour = side === "me" ? "#FF5F1F" : "#39FF14";
   return (
     <div
       className="flex flex-col items-center text-center"
@@ -359,7 +364,7 @@ function RapperSlot({ profile, side, agreed }) {
       <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center mb-1.5 border"
         style={{
-          background: `rgba(${side === "me" ? "255,107,0" : "57,255,20"}, 0.15)`,
+          background: `rgba(${side === "me" ? "255,95,31" : "57,255,20"}, 0.15)`,
           borderColor: `${colour}66`,
           boxShadow: `0 0 16px ${colour}33`,
         }}
@@ -415,19 +420,19 @@ function TournamentCard({ tournament }) {
   const daysLeft = Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
   return (
     <section data-testid="battle-tournament-card">
-      <h2 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
+      <h2 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF5F1F] mb-2 flex items-center gap-1.5">
         <Trophy className="w-3.5 h-3.5" /> Quarterly Global Contest
       </h2>
       <div
-        className="rounded-3xl border border-[#FF6B00]/25 p-4 overflow-hidden relative"
+        className="rounded-3xl border border-[#FF5F1F]/25 p-4 overflow-hidden relative"
         style={{
-          background: "linear-gradient(135deg, rgba(255,107,0,0.10), rgba(57,255,20,0.04))",
+          background: "linear-gradient(135deg, rgba(255,95,31,0.10), rgba(57,255,20,0.04))",
         }}
       >
         <div className="absolute -bottom-10 -right-10 w-32 h-32 rounded-full bg-[#39FF14]/10 blur-3xl" />
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#FF6B00]/15">
-            <PartyPopper className="w-5 h-5 text-[#FF6B00]" />
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-[#FF5F1F]/15">
+            <PartyPopper className="w-5 h-5 text-[#FF5F1F]" />
           </div>
           <div className="flex-1 min-w-0">
             <p className="font-['Outfit'] text-lg font-black text-white">
@@ -458,14 +463,14 @@ function LeaderboardSection({ leaders, userId }) {
               key={u.user_id}
               data-testid={`leader-row-${idx}`}
               className={`flex items-center gap-3 px-3 py-2 border-b border-white/5 last:border-0 ${
-                isMe ? "bg-[#FF6B00]/8" : ""
+                isMe ? "bg-[#FF5F1F]/8" : ""
               }`}
             >
               <span className="w-6 text-center text-[10px] font-black"
                 style={{ color: idx === 0 ? "#FFD700" : idx === 1 ? "#C0C0C0" : idx === 2 ? "#CD7F32" : "#5C5C6B" }}>
                 #{idx + 1}
               </span>
-              <span className={`flex-1 text-sm font-bold truncate ${isMe ? "text-[#FF6B00]" : "text-white"}`}>
+              <span className={`flex-1 text-sm font-bold truncate ${isMe ? "text-[#FF5F1F]" : "text-white"}`}>
                 {u.display_name}{isMe ? " (you)" : ""}
               </span>
               <span className="text-[10px] uppercase tracking-wider font-black text-[#39FF14]">{u.lifetime_wins}W</span>
@@ -479,6 +484,15 @@ function LeaderboardSection({ leaders, userId }) {
 }
 
 function ArchiveSection({ battles, userId, onChanged }) {
+  const [topRated, setTopRated] = useState([]);
+  useEffect(() => {
+    axios.get(`${API}/ratings/top`, { params: { item_type: "battle", limit: 5 } })
+      .then((res) => setTopRated(res.data?.top || []))
+      .catch(() => {});
+  }, [battles.length]);
+  const topIds = new Set(topRated.slice(0, 3).map((t) => t.item_id));
+  // Peer-rated battles surface first (discovery via community grading)
+  const ordered = [...battles].sort((a, b) => (topIds.has(b.id) ? 1 : 0) - (topIds.has(a.id) ? 1 : 0));
   return (
     <section data-testid="battle-archive">
       <h2 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#5C5C6B] mb-2 flex items-center gap-1.5">
@@ -491,8 +505,8 @@ function ArchiveSection({ battles, userId, onChanged }) {
         </div>
       ) : (
         <div className="space-y-2">
-          {battles.map((b) => (
-            <ArchiveRow key={b.id} battle={b} userId={userId} onChanged={onChanged} />
+          {ordered.map((b) => (
+            <ArchiveRow key={b.id} battle={b} userId={userId} onChanged={onChanged} isTopRated={topIds.has(b.id)} />
           ))}
         </div>
       )}
@@ -500,7 +514,7 @@ function ArchiveSection({ battles, userId, onChanged }) {
   );
 }
 
-function ArchiveRow({ battle, userId, onChanged }) {
+function ArchiveRow({ battle, userId, onChanged, isTopRated }) {
   const [voting, setVoting] = useState(false);
   const totalVotes = (battle.votes_a || 0) + (battle.votes_b || 0);
   const pctA = totalVotes ? Math.round(((battle.votes_a || 0) / totalVotes) * 100) : 50;
@@ -528,21 +542,32 @@ function ArchiveRow({ battle, userId, onChanged }) {
         <p className="text-sm font-bold text-white truncate">
           {battle.profile_a.display_name} <span className="text-[#5C5C6B]">vs</span> {battle.profile_b.display_name}
         </p>
-        {battle.winner && (
-          <span className="text-[9px] uppercase tracking-wider font-black text-[#39FF14] px-1.5 py-0.5 rounded-full border border-[#39FF14]/30 flex-shrink-0">
-            Winner: {battle.winner === battle.user_a ? battle.profile_a.display_name : battle.profile_b.display_name}
-          </span>
-        )}
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {isTopRated && (
+            <span className="text-[8px] uppercase tracking-wider font-black text-[#FF5F1F] px-1.5 py-0.5 rounded-full border border-[#FF5F1F]/40 bg-[#FF5F1F]/10" data-testid={`top-rated-${battle.id}`}>
+              ★ Top Rated
+            </span>
+          )}
+          {battle.winner && (
+            <span className="text-[9px] uppercase tracking-wider font-black text-[#39FF14] px-1.5 py-0.5 rounded-full border border-[#39FF14]/30">
+              Winner: {battle.winner === battle.user_a ? battle.profile_a.display_name : battle.profile_b.display_name}
+            </span>
+          )}
+        </div>
+      </div>
+      {/* Peer grading — 18+ community stars drive discovery */}
+      <div className="mb-2">
+        <StarRating itemId={battle.id} itemType="battle" />
       </div>
       {/* Vote bar */}
       <div className="h-2 rounded-full bg-white/5 overflow-hidden mb-1" data-testid="vote-bar">
         <div className="h-full flex">
-          <div style={{ width: `${pctA}%`, background: "#FF6B00", boxShadow: "0 0 12px rgba(255,107,0,0.4)" }} />
+          <div style={{ width: `${pctA}%`, background: "#FF5F1F", boxShadow: "0 0 12px rgba(255,95,31,0.4)" }} />
           <div style={{ width: `${100 - pctA}%`, background: "#39FF14", boxShadow: "0 0 12px rgba(57,255,20,0.4)" }} />
         </div>
       </div>
       <p className="text-[10px] text-[#5C5C6B] mb-2.5 flex items-center justify-between">
-        <span className="text-[#FF6B00]">{battle.votes_a || 0}</span>
+        <span className="text-[#FF5F1F]">{battle.votes_a || 0}</span>
         <span>{totalVotes} votes</span>
         <span className="text-[#39FF14]">{battle.votes_b || 0}</span>
       </p>
@@ -552,7 +577,7 @@ function ArchiveRow({ battle, userId, onChanged }) {
             onClick={() => vote("a")}
             disabled={voting}
             data-testid={`archive-vote-a-${battle.id}`}
-            className="flex-1 h-9 rounded-xl border border-[#FF6B00]/40 bg-[#FF6B00]/10 text-[#FF6B00] hover:bg-[#FF6B00]/20 text-[10px] font-black uppercase tracking-wider"
+            className="flex-1 h-9 rounded-xl border border-[#FF5F1F]/40 bg-[#FF5F1F]/10 text-[#FF5F1F] hover:bg-[#FF5F1F]/20 text-[10px] font-black uppercase tracking-wider"
           >
             <ThumbsUp className="w-3 h-3 mr-1" /> Vote {battle.profile_a.display_name}
           </Button>

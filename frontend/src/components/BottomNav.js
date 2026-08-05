@@ -1,4 +1,4 @@
-import { Home, Music2, Mic2, Swords, ListMusic, User, MessageSquare, Sparkles, Gamepad2, GraduationCap } from "lucide-react";
+import { Home, Music2, Mic2, Swords, ListMusic, User, MessageSquare, Sparkles, Gamepad2, GraduationCap, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // Creator-lane items — Original music creation. NO Battle / NO Star (those are Gamer-only)
@@ -20,7 +20,7 @@ const GAMER_ITEMS = [
   { key: "profile", icon: User, label: "Profile" },
 ];
 
-export default function BottomNav({ currentView, onNavigate, lane = "creator", onLaneChange }) {
+export default function BottomNav({ currentView, onNavigate, lane = "creator", onLaneChange, isGrommet = false }) {
   const items = lane === "gamer" ? GAMER_ITEMS : CREATOR_ITEMS;
 
   return (
@@ -33,9 +33,9 @@ export default function BottomNav({ currentView, onNavigate, lane = "creator", o
         <div className="inline-flex items-center gap-0.5 rounded-full p-0.5 border border-white/10" style={{ background: "rgba(15,15,22,0.85)" }} data-testid="lane-toggle">
           <button onClick={() => onLaneChange("creator")} data-testid="lane-toggle-creator"
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all ${
-              lane === "creator" ? "bg-[#FF6B00] text-[#05050A] shadow-[0_0_12px_rgba(255,107,0,0.4)]" : "text-[#5C5C6B]"
+              lane === "creator" ? "bg-[#FF5F1F] text-[#05050A] shadow-[0_0_12px_rgba(255,95,31,0.4)]" : "text-[#5C5C6B]"
             }`}>
-            <Music2 className="w-2.5 h-2.5" /> Creator
+            {isGrommet ? <Lock className="w-2.5 h-2.5" data-testid="creator-lane-lock" /> : <Music2 className="w-2.5 h-2.5" />} Creator
           </button>
           <button onClick={() => onLaneChange("gamer")} data-testid="lane-toggle-gamer"
             className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider transition-all ${
@@ -49,7 +49,7 @@ export default function BottomNav({ currentView, onNavigate, lane = "creator", o
       <div className="flex items-center justify-around max-w-2xl mx-auto h-14 px-1">
         {items.map((item) => {
           const isActive = currentView === item.key;
-          const accent = lane === "gamer" ? "#39FF14" : "#FF6B00";
+          const accent = lane === "gamer" ? "#39FF14" : "#FF5F1F";
           return (
             <Button
               key={item.key}

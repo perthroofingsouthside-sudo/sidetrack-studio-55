@@ -300,7 +300,7 @@ export default function BecomeAStar() {
           </Button>
           <div className="flex-1 min-w-0">
             <h2 className="font-['Outfit'] text-base font-bold truncate flex items-center gap-1.5">
-              <Star className="w-4 h-4 text-[#FF6B00]" />
+              <Star className="w-4 h-4 text-[#FF5F1F]" />
               Karaoke
             </h2>
             <p className="text-[10px] text-[#A0A0B0] truncate">{selectedSong.title} — {selectedSong.artist}</p>
@@ -319,7 +319,7 @@ export default function BecomeAStar() {
             <Button key={l.key} data-testid={`karaoke-layout-${l.key}`}
               onClick={() => { if (!isRecording) setKaraokeLayout(l.key); }}
               className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-                karaokeLayout === l.key ? "bg-[#FF6B00] text-black" : "bg-[#12121A] text-[#606070] border border-white/10"
+                karaokeLayout === l.key ? "bg-[#FF5F1F] text-black" : "bg-[#12121A] text-[#606070] border border-white/10"
               }`}>
               <l.icon className="w-3 h-3" />{l.label}
             </Button>
@@ -334,7 +334,7 @@ export default function BecomeAStar() {
               <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} />
               {!streamRef.current && !isRecording && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0A0A0F]">
-                  <Camera className="w-10 h-10 text-[#FF6B00]/30 mb-2" />
+                  <Camera className="w-10 h-10 text-[#FF5F1F]/30 mb-2" />
                   <p className="text-xs text-[#606070]">Camera activates when you sing</p>
                 </div>
               )}
@@ -354,17 +354,17 @@ export default function BecomeAStar() {
                   {lyrics?.lyrics ? lyrics.lyrics.map((line, i) => {
                     const lk = `${line.time}-${line.type}-${i}`;
                     if (line.type === "section") return (
-                      <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#FF6B00]" : "text-[#606070]"}`}>{line.text}</p>
+                      <p key={lk} className={`text-xs uppercase tracking-[0.15em] font-bold mt-3 ${i === activeLyricIdx ? "text-[#FF5F1F]" : "text-[#606070]"}`}>{line.text}</p>
                     );
                     if (line.type === "break") return <div key={lk} className="h-2" />;
                     return (
                       <p key={lk} className={`text-lg leading-relaxed transition-all duration-300 ${
-                        i === activeLyricIdx ? "text-[#FF6B00] font-bold scale-[1.02]" : i < activeLyricIdx ? "text-[#606070]/40" : "text-[#A0A0B0]"
+                        i === activeLyricIdx ? "text-[#FF5F1F] font-bold scale-[1.02]" : i < activeLyricIdx ? "text-[#606070]/40" : "text-[#A0A0B0]"
                       }`}>{line.text}</p>
                     );
                   }) : (
                     <div className="text-center py-8">
-                      <Star className="w-8 h-8 text-[#FF6B00]/20 mx-auto mb-3" />
+                      <Star className="w-8 h-8 text-[#FF5F1F]/20 mx-auto mb-3" />
                       <p className="text-sm text-[#606070]">Lyrics sync during recording</p>
                       <p className="text-xs text-[#606070]/60 mt-1">Sing your heart out!</p>
                     </div>
@@ -381,7 +381,7 @@ export default function BecomeAStar() {
           {currentChallenge && !isRecording && (
             <button data-testid="challenge-join-toggle" onClick={() => setJoinChallenge(!joinChallenge)}
               className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-medium mx-auto transition-all border ${
-                joinChallenge ? "bg-[#FF6B00]/10 border-[#FF6B00]/40 text-[#FF6B00]" : "bg-transparent border-white/10 text-[#606070]"
+                joinChallenge ? "bg-[#FF5F1F]/10 border-[#FF5F1F]/40 text-[#FF5F1F]" : "bg-transparent border-white/10 text-[#606070]"
               }`}>
               <Flame className="w-3 h-3" />
               {joinChallenge ? `Entering: ${currentChallenge.title}` : `Join this week: ${currentChallenge.title}`}
@@ -394,7 +394,7 @@ export default function BecomeAStar() {
             {!recordedBlob ? (
               <Button data-testid="karaoke-record-btn" onClick={isRecording ? stopKaraoke : startKaraoke}
                 className={`w-16 h-16 rounded-full transition-all ${
-                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-black"
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse" : "bg-[#FF5F1F] hover:bg-[#FF5F1F]/80 text-black"
                 }`}>
                 {isRecording ? <Square className="w-7 h-7 text-white" /> : <Mic className="w-7 h-7" />}
               </Button>
@@ -404,7 +404,7 @@ export default function BecomeAStar() {
                   Redo
                 </Button>
                 <Button data-testid="karaoke-submit-btn" onClick={submitPerformance}
-                  className="h-12 px-6 bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-black font-bold rounded-2xl gap-2">
+                  className="h-12 px-6 bg-[#FF5F1F] hover:bg-[#FF5F1F]/80 text-black font-bold rounded-2xl gap-2">
                   <Star className="w-4 h-4" /> {joinChallenge ? "Submit to Challenge!" : "Become a Star!"}
                 </Button>
               </div>
@@ -441,11 +441,11 @@ export default function BecomeAStar() {
           </Button>
           <div className="flex-1 min-w-0">
             <h2 className="font-['Outfit'] text-base font-bold truncate flex items-center gap-1.5">
-              <Flame className="w-4 h-4 text-[#FF6B00]" /> Weekly Challenge
+              <Flame className="w-4 h-4 text-[#FF5F1F]" /> Weekly Challenge
             </h2>
           </div>
           <Button data-testid="challenge-join-btn" onClick={() => { setJoinChallenge(true); setView("search"); }}
-            className="h-8 px-3 bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-white rounded-2xl text-xs font-bold gap-1">
+            className="h-8 px-3 bg-[#FF5F1F] hover:bg-[#FF5F1F]/80 text-white rounded-2xl text-xs font-bold gap-1">
             <Mic className="w-3 h-3" /> Enter
           </Button>
         </div>
@@ -454,7 +454,7 @@ export default function BecomeAStar() {
           <div className="px-4 py-4 space-y-5 pb-24">
             {/* Challenge Banner */}
             <div className="rounded-2xl p-5 relative overflow-hidden" data-testid="challenge-banner"
-              style={{ background: "linear-gradient(135deg, #FF6B00 0%, #39FF14 100%)" }}>
+              style={{ background: "linear-gradient(135deg, #FF5F1F 0%, #39FF14 100%)" }}>
               <div className="relative z-10">
                 <p className="text-xs uppercase tracking-[0.2em] font-bold text-white/70 mb-1">This Week's Challenge</p>
                 <h3 className="font-['Outfit'] text-2xl font-extrabold text-white">{currentChallenge.title}</h3>
@@ -469,16 +469,16 @@ export default function BecomeAStar() {
             {/* Star of the Week */}
             {currentChallenge.star_of_week && (
               <div className="surface-card p-4" data-testid="star-of-week">
-                <h4 className="font-['Outfit'] text-sm uppercase tracking-[0.15em] font-bold text-[#FF6B00] mb-3 flex items-center gap-2">
+                <h4 className="font-['Outfit'] text-sm uppercase tracking-[0.15em] font-bold text-[#FF5F1F] mb-3 flex items-center gap-2">
                   <Crown className="w-4 h-4" /> Star of the Week
                 </h4>
                 <div className="flex items-center gap-3">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF6B00] to-[#FF6B00] p-[2px]">
+                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF5F1F] to-[#FF5F1F] p-[2px]">
                     <div className="w-full h-full rounded-2xl overflow-hidden">
                       {currentChallenge.star_of_week.song_cover_url ? (
                         <img src={currentChallenge.star_of_week.song_cover_url} alt="" className="w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Crown className="w-6 h-6 text-[#FF6B00]" /></div>
+                        <div className="w-full h-full bg-[#12121A] flex items-center justify-center"><Crown className="w-6 h-6 text-[#FF5F1F]" /></div>
                       )}
                     </div>
                   </div>
@@ -487,8 +487,8 @@ export default function BecomeAStar() {
                     <p className="text-xs text-[#606070] truncate">{currentChallenge.star_of_week.song_title}</p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <Star className="w-4 h-4 text-[#FF6B00]" />
-                    <span className="text-lg font-bold text-[#FF6B00]">{currentChallenge.star_of_week.votes}</span>
+                    <Star className="w-4 h-4 text-[#FF5F1F]" />
+                    <span className="text-lg font-bold text-[#FF5F1F]">{currentChallenge.star_of_week.votes}</span>
                   </div>
                 </div>
               </div>
@@ -501,7 +501,7 @@ export default function BecomeAStar() {
               </h4>
               {challengeEntries.length === 0 && (
                 <div className="surface-card p-6 text-center">
-                  <Flame className="w-10 h-10 text-[#FF6B00]/20 mx-auto mb-2" />
+                  <Flame className="w-10 h-10 text-[#FF5F1F]/20 mx-auto mb-2" />
                   <p className="text-sm text-[#606070]">No entries yet — be the first!</p>
                 </div>
               )}
@@ -509,21 +509,21 @@ export default function BecomeAStar() {
                 {challengeEntries.map((perf, idx) => (
                   <div key={perf.id} className="surface-card p-3 flex items-center gap-3" data-testid={`challenge-entry-${idx}`}>
                     {idx === 0 && perf.votes > 0 && (
-                      <div className="w-6 flex-shrink-0"><Crown className="w-5 h-5 text-[#FF6B00]" /></div>
+                      <div className="w-6 flex-shrink-0"><Crown className="w-5 h-5 text-[#FF5F1F]" /></div>
                     )}
                     {(idx !== 0 || perf.votes === 0) && (
                       <div className="w-6 text-center flex-shrink-0"><span className="text-xs text-[#606070] font-bold">{idx + 1}</span></div>
                     )}
-                    <Button variant="ghost" size="icon" onClick={() => playPerformanceAudio(perf)} className="flex-shrink-0 text-[#FF6B00]">
-                      {playingId === perf.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="#FF6B00" />}
+                    <Button variant="ghost" size="icon" onClick={() => playPerformanceAudio(perf)} className="flex-shrink-0 text-[#FF5F1F]">
+                      {playingId === perf.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="#FF5F1F" />}
                     </Button>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white truncate">{perf.username}</p>
                       <p className="text-xs text-[#606070] truncate">{perf.song_title}</p>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
-                      <span className="text-sm font-bold text-[#FF6B00]">{perf.votes}</span>
-                      <Button onClick={() => votePerformance(perf.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#FF6B00] hover:bg-[#FF6B00]/10 rounded-full">
+                      <span className="text-sm font-bold text-[#FF5F1F]">{perf.votes}</span>
+                      <Button onClick={() => votePerformance(perf.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#FF5F1F] hover:bg-[#FF5F1F]/10 rounded-full">
                         <ThumbsUp className="w-4 h-4" />
                       </Button>
                     </div>
@@ -541,8 +541,8 @@ export default function BecomeAStar() {
                 <div className="space-y-2">
                   {challengeHistory.slice(1).map((ch, idx) => (
                     <div key={ch.id} className="surface-card p-3 flex items-center gap-3" data-testid={`past-challenge-${idx}`}>
-                      <div className="w-10 h-10 rounded-xl bg-[#FF6B00]/10 flex items-center justify-center flex-shrink-0">
-                        <Trophy className="w-4 h-4 text-[#FF6B00]" />
+                      <div className="w-10 h-10 rounded-xl bg-[#FF5F1F]/10 flex items-center justify-center flex-shrink-0">
+                        <Trophy className="w-4 h-4 text-[#FF5F1F]" />
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-white truncate">{ch.title}</p>
@@ -570,7 +570,7 @@ export default function BecomeAStar() {
             <ArrowLeft className="w-4 h-4" />
           </Button>
           <h2 className="font-['Outfit'] text-base font-bold flex items-center gap-1.5">
-            <Star className="w-4 h-4 text-[#FF6B00]" /> Pick Your Song
+            <Star className="w-4 h-4 text-[#FF5F1F]" /> Pick Your Song
           </h2>
         </div>
 
@@ -581,10 +581,10 @@ export default function BecomeAStar() {
               <Input data-testid="star-search-input" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 placeholder="Search songs to sing..."
-                className="pl-10 h-11 bg-[#12121A] border-white/10 text-white placeholder:text-[#606070] rounded-2xl focus:border-[#FF6B00]" />
+                className="pl-10 h-11 bg-[#12121A] border-white/10 text-white placeholder:text-[#606070] rounded-2xl focus:border-[#FF5F1F]" />
             </div>
             <Button data-testid="star-search-btn" onClick={handleSearch} disabled={searching}
-              className="h-11 px-5 bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-black font-bold rounded-2xl">
+              className="h-11 px-5 bg-[#FF5F1F] hover:bg-[#FF5F1F]/80 text-black font-bold rounded-2xl">
               {searching ? "..." : "Search"}
             </Button>
           </div>
@@ -594,13 +594,13 @@ export default function BecomeAStar() {
           <div className="px-4 space-y-1 pb-24">
             {searchResults.length === 0 && !searching && (
               <div className="text-center py-12">
-                <Mic className="w-10 h-10 text-[#FF6B00]/20 mx-auto mb-3" />
+                <Mic className="w-10 h-10 text-[#FF5F1F]/20 mx-auto mb-3" />
                 <p className="text-sm text-[#606070]">{searchQuery ? "No results" : "Search for a song to perform"}</p>
               </div>
             )}
             {searchResults.map((track, idx) => (
               <div key={track.id || idx} onClick={() => selectSong(track)}
-                className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF6B00]/5 cursor-pointer transition-all group" data-testid={`star-track-${idx}`}>
+                className="flex items-center gap-3 p-3 rounded-xl hover:bg-[#FF5F1F]/5 cursor-pointer transition-all group" data-testid={`star-track-${idx}`}>
                 <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
                   {track.cover_url ? (
                     <img src={track.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
@@ -609,10 +609,10 @@ export default function BecomeAStar() {
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF6B00]">{track.title}</p>
+                  <p className="text-sm font-medium text-white truncate group-hover:text-[#FF5F1F]">{track.title}</p>
                   <p className="text-xs text-[#606070] truncate">{track.artist}</p>
                 </div>
-                <Star className="w-4 h-4 text-[#FF6B00]/30 group-hover:text-[#FF6B00] flex-shrink-0" />
+                <Star className="w-4 h-4 text-[#FF5F1F]/30 group-hover:text-[#FF5F1F] flex-shrink-0" />
               </div>
             ))}
           </div>
@@ -628,15 +628,15 @@ export default function BecomeAStar() {
       <div className="px-4 pt-6 pb-2 flex items-center justify-between">
         <div>
           <h1 className="font-['Outfit'] text-2xl font-extrabold tracking-tight flex items-center gap-2">
-            <Star className="w-6 h-6 text-[#FF6B00]" />
+            <Star className="w-6 h-6 text-[#FF5F1F]" />
             <span className="text-white">Become a</span>
-            <span className="text-[#FF6B00]">Star</span>
+            <span className="text-[#FF5F1F]">Star</span>
           </h1>
           <p className="text-[#606070] text-xs mt-1">Sing karaoke. Get votes. Rise to fame.</p>
         </div>
         <Button data-testid="sing-now-btn" onClick={() => setView("search")}
-          className="h-10 px-4 bg-[#FF6B00] hover:bg-[#FF6B00]/80 text-black rounded-2xl text-sm font-bold gap-1.5"
-          style={{ boxShadow: "0 0 20px rgba(255,107,0,0.3)" }}>
+          className="h-10 px-4 bg-[#FF5F1F] hover:bg-[#FF5F1F]/80 text-black rounded-2xl text-sm font-bold gap-1.5"
+          style={{ boxShadow: "0 0 20px rgba(255,95,31,0.3)" }}>
           <Mic className="w-4 h-4" /> Sing Now
         </Button>
       </div>
@@ -648,7 +648,7 @@ export default function BecomeAStar() {
             <section data-testid="challenge-card">
               <button onClick={() => openChallenge(currentChallenge)}
                 className="w-full rounded-2xl p-4 relative overflow-hidden text-left transition-all hover:scale-[1.01]"
-                style={{ background: "linear-gradient(135deg, #FF6B00 0%, #39FF14 100%)" }}>
+                style={{ background: "linear-gradient(135deg, #FF5F1F 0%, #39FF14 100%)" }}>
                 <div className="relative z-10 flex items-center gap-3">
                   <div className="flex-1 min-w-0">
                     <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/60">Weekly Challenge</p>
@@ -657,7 +657,7 @@ export default function BecomeAStar() {
                     <div className="flex items-center gap-3 mt-2">
                       <span className="text-[10px] text-white/50">{currentChallenge.entry_count || 0} entries</span>
                       {currentChallenge.star_of_week && (
-                        <span className="text-[10px] text-[#FF6B00] flex items-center gap-1"><Crown className="w-2.5 h-2.5" />{currentChallenge.star_of_week.username}</span>
+                        <span className="text-[10px] text-[#FF5F1F] flex items-center gap-1"><Crown className="w-2.5 h-2.5" />{currentChallenge.star_of_week.username}</span>
                       )}
                     </div>
                   </div>
@@ -671,18 +671,18 @@ export default function BecomeAStar() {
           {leaderboard.length > 0 && (
             <section data-testid="star-leaderboard">
               <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-                <Trophy className="w-4 h-4 text-[#FF6B00]" /> Rising Stars
+                <Trophy className="w-4 h-4 text-[#FF5F1F]" /> Rising Stars
               </h3>
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
                 {leaderboard.slice(0, 5).map((perf, idx) => (
-                  <div key={perf.id} className="flex-shrink-0 w-40 surface-card p-3 relative cursor-pointer hover:border-[#FF6B00]/30 transition-all" onClick={() => playPerformanceAudio(perf)} data-testid={`star-leader-${idx}`}>
-                    {idx === 0 && <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF6B00] rounded-full flex items-center justify-center"><Trophy className="w-3 h-3 text-black" /></div>}
+                  <div key={perf.id} className="flex-shrink-0 w-40 surface-card p-3 relative cursor-pointer hover:border-[#FF5F1F]/30 transition-all" onClick={() => playPerformanceAudio(perf)} data-testid={`star-leader-${idx}`}>
+                    {idx === 0 && <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#FF5F1F] rounded-full flex items-center justify-center"><Trophy className="w-3 h-3 text-black" /></div>}
                     {perf.song_cover_url && <img src={perf.song_cover_url} alt="" className="w-full h-24 rounded-lg object-cover mb-2" />}
                     <p className="text-xs font-medium text-white truncate">{perf.username}</p>
                     <p className="text-[10px] text-[#606070] truncate">{perf.song_title}</p>
                     <div className="flex items-center gap-1 mt-1">
-                      <Star className="w-3 h-3 text-[#FF6B00]" />
-                      <span className="text-xs font-bold text-[#FF6B00]">{perf.votes}</span>
+                      <Star className="w-3 h-3 text-[#FF5F1F]" />
+                      <span className="text-xs font-bold text-[#FF5F1F]">{perf.votes}</span>
                     </div>
                   </div>
                 ))}
@@ -693,20 +693,20 @@ export default function BecomeAStar() {
           {/* Feed */}
           <section data-testid="star-feed">
             <h3 className="font-['Outfit'] text-sm uppercase tracking-[0.2em] font-bold text-[#A0A0B0] mb-3 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[#FF6B00]" /> Latest Performances
+              <TrendingUp className="w-4 h-4 text-[#FF5F1F]" /> Latest Performances
             </h3>
             {feed.length === 0 && (
               <div className="surface-card p-8 text-center">
-                <Star className="w-12 h-12 text-[#FF6B00]/15 mx-auto mb-3" />
+                <Star className="w-12 h-12 text-[#FF5F1F]/15 mx-auto mb-3" />
                 <p className="text-sm text-[#606070] mb-2">No performances yet</p>
-                <p className="text-xs text-[#FF6B00]/60">Be the first star! Tap "Sing Now" to get started.</p>
+                <p className="text-xs text-[#FF5F1F]/60">Be the first star! Tap "Sing Now" to get started.</p>
               </div>
             )}
             <div className="space-y-2">
               {feed.map((perf, idx) => (
                 <div key={perf.id} className="surface-card p-3 flex items-center gap-3" data-testid={`star-perf-${idx}`}>
-                  <Button data-testid={`star-play-${idx}`} variant="ghost" size="icon" onClick={() => playPerformanceAudio(perf)} className="flex-shrink-0 text-[#FF6B00]">
-                    {playingId === perf.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="#FF6B00" />}
+                  <Button data-testid={`star-play-${idx}`} variant="ghost" size="icon" onClick={() => playPerformanceAudio(perf)} className="flex-shrink-0 text-[#FF5F1F]">
+                    {playingId === perf.id ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" fill="#FF5F1F" />}
                   </Button>
                   {perf.song_cover_url && (
                     <img src={perf.song_cover_url} alt="" className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
@@ -716,8 +716,8 @@ export default function BecomeAStar() {
                     <p className="text-xs text-[#606070] truncate">by {perf.username} &bull; {perf.song_title}</p>
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
-                    <span className="text-sm font-bold text-[#FF6B00]">{perf.votes}</span>
-                    <Button data-testid={`star-vote-${idx}`} onClick={() => votePerformance(perf.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#FF6B00] hover:bg-[#FF6B00]/10 rounded-full">
+                    <span className="text-sm font-bold text-[#FF5F1F]">{perf.votes}</span>
+                    <Button data-testid={`star-vote-${idx}`} onClick={() => votePerformance(perf.id)} variant="ghost" size="icon" className="text-[#A0A0B0] hover:text-[#FF5F1F] hover:bg-[#FF5F1F]/10 rounded-full">
                       <ThumbsUp className="w-4 h-4" />
                     </Button>
                   </div>

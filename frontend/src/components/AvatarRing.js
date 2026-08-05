@@ -95,9 +95,9 @@ export default function AvatarRing({
         {imageUrl ? (
           <img src={imageUrl} alt={name} className="w-full h-full object-cover" />
         ) : IconComponent ? (
-          <IconComponent className={`${iconSize[size]} ${isActive ? "text-[#39FF14]" : "text-[#FF6B00]/40"} transition-colors duration-200`} />
+          <IconComponent className={`${iconSize[size]} ${isActive ? "text-[#39FF14]" : "text-[#FF5F1F]/40"} transition-colors duration-200`} />
         ) : (
-          <span className={`${textSize[size]} font-bold ${isActive ? "text-[#39FF14]" : "text-[#FF6B00]"} transition-colors duration-200`}>
+          <span className={`${textSize[size]} font-bold ${isActive ? "text-[#39FF14]" : "text-[#FF5F1F]"} transition-colors duration-200`}>
             {name[0]?.toUpperCase() || "?"}
           </span>
         )}

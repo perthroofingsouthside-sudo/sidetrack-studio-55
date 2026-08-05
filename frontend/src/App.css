@@ -18,13 +18,13 @@
   background: #39FF14 !important;
 }
 .slider-guitar [data-orientation="vertical"] > span:first-child {
-  background: #FF6B00 !important;
+  background: #FF5F1F !important;
 }
 .slider-bass [data-orientation="vertical"] > span:first-child {
   background: #FF3B30 !important;
 }
 .slider-drums [data-orientation="vertical"] > span:first-child {
-  background: #FF6B00 !important;
+  background: #FF5F1F !important;
 }
 
 /* Waveform bars */

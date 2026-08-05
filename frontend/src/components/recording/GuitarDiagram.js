@@ -12,7 +12,7 @@ export default function GuitarDiagram({ chord }) {
         <div key={`string-${i}`} className="flex flex-col items-center gap-1">
           <span className="text-[8px] text-[#5C5C6B]">{f === -1 ? "x" : f === 0 ? "o" : ""}</span>
           {[1, 2, 3, 4].map((pos) => (
-            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF6B00] border-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.5)]" : "border-white/10"}`} />
+            <div key={pos} className={`w-4 h-4 rounded-full border ${f === pos ? "bg-[#FF5F1F] border-[#FF5F1F] shadow-[0_0_8px_rgba(255,95,31,0.5)]" : "border-white/10"}`} />
           ))}
         </div>
       ))}

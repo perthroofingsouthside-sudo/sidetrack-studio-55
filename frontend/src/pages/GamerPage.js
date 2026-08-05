@@ -139,7 +139,7 @@ export default function GamerPage({ onPickedTrack, onOpenBackstage }) {
       {/* Footer hint */}
       <div className="px-4 mt-6">
         <p className="text-[10px] text-[#5C5C6B] text-center">
-          <Sparkles className="inline w-3 h-3 mr-1 text-[#FF6B00]" />
+          <Sparkles className="inline w-3 h-3 mr-1 text-[#FF5F1F]" />
           Every track, every mode — <span className="text-[#39FF14] font-bold">100% free</span>.
         </p>
       </div>

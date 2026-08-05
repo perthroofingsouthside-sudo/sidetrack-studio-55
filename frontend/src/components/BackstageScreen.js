@@ -68,7 +68,7 @@ export default function BackstageScreen({ song, userId, onProceed, onBack }) {
         <div className="text-center mb-8">
           <p className="text-[10px] uppercase tracking-[0.35em] text-[#39FF14] font-bold mb-2" data-testid="backstage-label">Backstage · 2 min to show</p>
           <h1 className="font-['Outfit'] text-3xl sm:text-4xl font-black text-white">
-            <span className="text-[#FF6B00]">{song?.title || "Your Track"}</span>
+            <span className="text-[#FF5F1F]">{song?.title || "Your Track"}</span>
           </h1>
           {song?.artist && <p className="text-sm text-[#5C5C6B] mt-1">{song.artist}</p>}
         </div>
@@ -107,7 +107,7 @@ export default function BackstageScreen({ song, userId, onProceed, onBack }) {
                   style={{ textShadow: "0 0 24px rgba(57,255,20,0.6), 0 0 48px rgba(57,255,20,0.2)" }}>
                   &ldquo;{line.text}&rdquo;
                 </p>
-                <p className="text-[10px] uppercase tracking-[0.2em] text-[#FF6B00] mt-2 font-bold">
+                <p className="text-[10px] uppercase tracking-[0.2em] text-[#FF5F1F] mt-2 font-bold">
                   — {line.performer} {line.is_ai && <span className="text-[#5C5C6B]/60 ml-1">(AI)</span>}
                 </p>
               </div>
@@ -121,7 +121,7 @@ export default function BackstageScreen({ song, userId, onProceed, onBack }) {
             Back
           </Button>
           <Button onClick={onProceed} disabled={visible < 1} data-testid="backstage-take-stage-btn"
-            className="h-11 px-6 rounded-xl text-sm font-black text-[#05050A] bg-gradient-to-r from-[#FF6B00] to-[#39FF14] hover:opacity-90"
+            className="h-11 px-6 rounded-xl text-sm font-black text-[#05050A] bg-gradient-to-r from-[#FF5F1F] to-[#39FF14] hover:opacity-90"
             style={{ boxShadow: "0 0 28px rgba(57,255,20,0.45)" }}>
             <Volume2 className="w-4 h-4 mr-1.5" /> Take The Stage <ArrowRight className="w-4 h-4 ml-1.5" />
           </Button>

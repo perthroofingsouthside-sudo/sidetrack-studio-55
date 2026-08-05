@@ -147,7 +147,7 @@ export default function HomePage({
       <div className="min-h-screen relative overflow-hidden px-4 pt-0 pb-[88px]" data-testid="home-page">
           {/* Ambient background */}
           <div className="absolute inset-0 z-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#FF6B00]/6 blur-[140px]" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-[#FF5F1F]/6 blur-[140px]" />
             <div className="absolute bottom-0 right-0 w-[420px] h-[420px] rounded-full bg-[#39FF14]/5 blur-[120px]" />
           </div>
 
@@ -158,12 +158,12 @@ export default function HomePage({
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-5" data-testid="discover-header">
                   <div className="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(255,107,0,0.12)", boxShadow: "0 0 22px rgba(255,107,0,0.25)" }}>
-                    <Search className="w-5 h-5 text-[#FF6B00]" />
+                    style={{ background: "rgba(255,95,31,0.12)", boxShadow: "0 0 22px rgba(255,95,31,0.25)" }}>
+                    <Search className="w-5 h-5 text-[#FF5F1F]" />
                   </div>
                   <div>
                     <h1 className="font-['Outfit'] text-2xl sm:text-3xl font-black text-white tracking-tight">
-                      <span className="text-[#FF6B00] glow-text-orange">Discover</span>
+                      <span className="text-[#FF5F1F] glow-text-orange">Discover</span>
                     </h1>
                     <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
                       Search · Listen · Save
@@ -182,7 +182,7 @@ export default function HomePage({
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={(e) => e.key === "Enter" && doSearch()}
                         placeholder="Search the catalog…  songs, artists"
-                        className="pl-10 pr-9 h-12 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF6B00]/50 text-sm rounded-2xl"
+                        className="pl-10 pr-9 h-12 bg-[#0F0F16]/80 border-white/10 focus-visible:ring-[#FF5F1F]/50 text-sm rounded-2xl"
                       />
                       {query && (
                         <button
@@ -199,8 +199,8 @@ export default function HomePage({
                       onClick={doSearch}
                       disabled={searching || !query.trim()}
                       data-testid="discover-search-btn"
-                      className="h-12 px-5 rounded-2xl bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-sm disabled:opacity-40"
-                      style={{ boxShadow: "0 0 18px rgba(255,107,0,0.35)" }}
+                      className="h-12 px-5 rounded-2xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-sm disabled:opacity-40"
+                      style={{ boxShadow: "0 0 18px rgba(255,95,31,0.35)" }}
                     >
                       {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
                     </Button>
@@ -281,22 +281,22 @@ function ResultRow({
       data-testid={`discover-result-${idx}`}
       className={`flex items-center gap-3 p-2.5 rounded-2xl border transition-all ${
         isCurrent
-          ? "border-[#FF6B00]/50 bg-[#FF6B00]/8"
-          : "border-white/5 hover:border-[#FF6B00]/30 hover:bg-[#FF6B00]/5"
+          ? "border-[#FF5F1F]/50 bg-[#FF5F1F]/8"
+          : "border-white/5 hover:border-[#FF5F1F]/30 hover:bg-[#FF5F1F]/5"
       }`}
     >
       <button
         onClick={onPick}
         data-testid={`discover-result-play-${idx}`}
         className={`relative w-11 h-11 rounded-xl overflow-hidden border flex-shrink-0 group ${
-          isCurrent ? "border-[#FF6B00]/60" : "border-white/5"
+          isCurrent ? "border-[#FF5F1F]/60" : "border-white/5"
         }`}
         aria-label={`Play ${track.title}`}
       >
         {track.cover_url ? (
           <img src={track.cover_url} alt={track.title} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF6B00] text-sm font-bold">
+          <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF5F1F] text-sm font-bold">
             {track.title?.[0] || "?"}
           </div>
         )}
@@ -314,7 +314,7 @@ function ResultRow({
         className="min-w-0 flex-1 text-left"
         data-testid={`discover-result-info-${idx}`}
       >
-        <p className={`text-sm font-bold truncate ${isCurrent ? "text-[#FF6B00]" : "text-white"}`}>
+        <p className={`text-sm font-bold truncate ${isCurrent ? "text-[#FF5F1F]" : "text-white"}`}>
           {track.title}
         </p>
         <p className="text-[11px] text-[#5C5C6B] truncate">
@@ -402,7 +402,7 @@ function CoverMosaic({ tracks, onPick }) {
             key={`${t.track_id || t.id || "x"}-${t.year ?? "_"}-${t.rank ?? idx}`}
             onClick={() => onPick(t)}
             data-testid={`discover-mosaic-${idx}`}
-            className="group relative aspect-square rounded-2xl overflow-hidden border border-white/5 hover:border-[#FF6B00]/50 transition-all"
+            className="group relative aspect-square rounded-2xl overflow-hidden border border-white/5 hover:border-[#FF5F1F]/50 transition-all"
             style={{ boxShadow: "0 6px 22px rgba(0,0,0,0.45)" }}
           >
             {t.cover_url ? (
@@ -412,8 +412,8 @@ function CoverMosaic({ tracks, onPick }) {
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#05050A] via-[#05050A]/40 to-transparent opacity-90" />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <div className="w-10 h-10 rounded-full bg-[#FF6B00] flex items-center justify-center"
-                   style={{ boxShadow: "0 0 22px rgba(255,107,0,0.55)" }}>
+              <div className="w-10 h-10 rounded-full bg-[#FF5F1F] flex items-center justify-center"
+                   style={{ boxShadow: "0 0 22px rgba(255,95,31,0.55)" }}>
                 <Play className="w-4 h-4 text-white ml-0.5" />
               </div>
             </div>
@@ -490,15 +490,15 @@ function ClassicLanding({
       <div className="w-full max-w-2xl px-1" data-testid="discover-search">
         <div className="flex gap-2">
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FF6B00]" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#FF5F1F]" />
             <Input
               data-testid="discover-search-input"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && doSearch()}
               placeholder="Search the catalog…  songs, artists"
-              className="pl-11 pr-9 h-12 bg-[#0F0F16]/90 border border-[#FF6B00]/25 focus-visible:ring-[#FF6B00]/60 text-sm rounded-full"
-              style={{ boxShadow: "0 0 22px rgba(255,107,0,0.15), inset 0 0 12px rgba(255,107,0,0.05)" }}
+              className="pl-11 pr-9 h-12 bg-[#0F0F16]/90 border border-[#FF5F1F]/25 focus-visible:ring-[#FF5F1F]/60 text-sm rounded-full"
+              style={{ boxShadow: "0 0 22px rgba(255,95,31,0.15), inset 0 0 12px rgba(255,95,31,0.05)" }}
             />
             {query && (
               <button
@@ -515,8 +515,8 @@ function ClassicLanding({
             onClick={doSearch}
             disabled={searching || !query.trim()}
             data-testid="discover-search-btn"
-            className="h-12 px-5 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white font-black text-xs disabled:opacity-40 uppercase tracking-wider"
-            style={{ boxShadow: "0 0 22px rgba(255,107,0,0.45)" }}
+            className="h-12 px-5 rounded-full bg-[#FF5F1F] hover:bg-[#FF7A42] text-white font-black text-xs disabled:opacity-40 uppercase tracking-wider"
+            style={{ boxShadow: "0 0 22px rgba(255,95,31,0.45)" }}
           >
             {searching ? <Loader2 className="w-4 h-4 animate-spin" /> : "Search"}
           </Button>
@@ -560,10 +560,10 @@ function CompactEmblem() {
           width: "clamp(76px, 9vw, 108px)",
           height: "clamp(76px, 9vw, 108px)",
           background:
-            "linear-gradient(135deg, rgba(255,107,0,0.10) 0%, rgba(15,15,22,0.85) 45%, rgba(57,255,20,0.10) 100%)",
-          border: "1.5px solid rgba(255,107,0,0.45)",
+            "linear-gradient(135deg, rgba(255,95,31,0.10) 0%, rgba(15,15,22,0.85) 45%, rgba(57,255,20,0.10) 100%)",
+          border: "1.5px solid rgba(255,95,31,0.45)",
           boxShadow:
-            "0 0 18px rgba(255,107,0,0.35), inset 0 0 22px rgba(57,255,20,0.06)",
+            "0 0 18px rgba(255,95,31,0.35), inset 0 0 22px rgba(57,255,20,0.06)",
         }}
         aria-label="Pocket Products"
         data-testid="pp-emblem-badge"
@@ -586,9 +586,9 @@ function CompactEmblem() {
         >
           <span
             style={{
-              color: "#FF6B00",
+              color: "#FF5F1F",
               textShadow:
-                "0 0 8px rgba(255,107,0,0.85), 0 0 18px rgba(255,107,0,0.5)",
+                "0 0 8px rgba(255,95,31,0.85), 0 0 18px rgba(255,95,31,0.5)",
             }}
           >
             P
@@ -637,7 +637,7 @@ function DiscoverCircle({ onClick }) {
         className="absolute inset-0 rounded-full"
         style={{
           background:
-            "radial-gradient(circle at center, rgba(255,107,0,0.35) 0%, rgba(255,107,0,0) 60%)",
+            "radial-gradient(circle at center, rgba(255,95,31,0.35) 0%, rgba(255,95,31,0) 60%)",
           filter: "blur(4px)",
         }}
       />
@@ -647,10 +647,10 @@ function DiscoverCircle({ onClick }) {
         className="absolute inset-2 rounded-full"
         style={{
           background:
-            "radial-gradient(circle at 30% 30%, rgba(255,107,0,0.18) 0%, rgba(15,15,22,0.9) 60%, rgba(5,5,10,0.95) 100%)",
-          border: "2px solid #FF6B00",
+            "radial-gradient(circle at 30% 30%, rgba(255,95,31,0.18) 0%, rgba(15,15,22,0.9) 60%, rgba(5,5,10,0.95) 100%)",
+          border: "2px solid #FF5F1F",
           boxShadow:
-            "0 0 30px rgba(255,107,0,0.55), inset 0 0 25px rgba(255,107,0,0.25), 0 0 90px rgba(57,255,20,0.12)",
+            "0 0 30px rgba(255,95,31,0.55), inset 0 0 25px rgba(255,95,31,0.25), 0 0 90px rgba(57,255,20,0.12)",
         }}
       />
       {/* Rotating green accent ring */}
@@ -667,15 +667,15 @@ function DiscoverCircle({ onClick }) {
       />
       {/* Label */}
       <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 pointer-events-none">
-        <Search className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF6B00]"
-                style={{ filter: "drop-shadow(0 0 8px rgba(255,107,0,0.7))" }} />
+        <Search className="w-6 h-6 sm:w-7 sm:h-7 text-[#FF5F1F]"
+                style={{ filter: "drop-shadow(0 0 8px rgba(255,95,31,0.7))" }} />
         <span
           className="text-white font-black uppercase"
           style={{
             fontFamily: '"Outfit", system-ui, sans-serif',
             fontSize: "clamp(16px, 2.4vw, 24px)",
             letterSpacing: "0.15em",
-            textShadow: "0 0 12px rgba(255,107,0,0.55)",
+            textShadow: "0 0 12px rgba(255,95,31,0.55)",
           }}
           data-testid="discover-circle-label"
         >
@@ -694,7 +694,7 @@ function DiscoverCircle({ onClick }) {
 function MosaicTile({ track, idx, side, onPick }) {
   const isPlaceholder = track?.__placeholder;
   const glow = side === "left"
-    ? "hover:border-[#FF6B00]/60 hover:shadow-[0_0_22px_rgba(255,107,0,0.35)]"
+    ? "hover:border-[#FF5F1F]/60 hover:shadow-[0_0_22px_rgba(255,95,31,0.35)]"
     : "hover:border-[#39FF14]/55 hover:shadow-[0_0_22px_rgba(57,255,20,0.28)]";
   return (
     <button
@@ -724,11 +724,11 @@ function MosaicTile({ track, idx, side, onPick }) {
         <>
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <div className={`w-9 h-9 rounded-full flex items-center justify-center ${
-              side === "left" ? "bg-[#FF6B00]" : "bg-[#39FF14]"
+              side === "left" ? "bg-[#FF5F1F]" : "bg-[#39FF14]"
             }`}
                  style={{
                    boxShadow: side === "left"
-                     ? "0 0 22px rgba(255,107,0,0.55)"
+                     ? "0 0 22px rgba(255,95,31,0.55)"
                      : "0 0 22px rgba(57,255,20,0.55)",
                  }}>
               <Play className={`w-3.5 h-3.5 ml-0.5 ${side === "left" ? "text-white" : "text-[#05050A]"}`} />
@@ -808,7 +808,7 @@ function PlaylistsRow({ playlists, onOpenPlaylists, compact = false }) {
               data-testid={`discover-playlist-${idx}`}
               className="flex-shrink-0 w-24 rounded-2xl border border-white/5 hover:border-[#39FF14]/40 hover:bg-[#39FF14]/5 transition-all text-left p-2 group"
             >
-              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF6B00]/10 flex items-center justify-center">
+              <div className="w-full aspect-square rounded-xl overflow-hidden mb-1.5 border border-white/5 bg-gradient-to-br from-[#39FF14]/15 via-[#0F0F16] to-[#FF5F1F]/10 flex items-center justify-center">
                 {pl.cover_url ? (
                   <img src={pl.cover_url} alt={pl.name} className="w-full h-full object-cover" />
                 ) : (

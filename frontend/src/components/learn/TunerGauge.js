@@ -14,7 +14,7 @@ export default function TunerGauge({ pitch, micOn, isMatch }) {
       </div>
       <div className="w-14 text-center flex-shrink-0">
         <p className="font-['Outfit'] font-black text-xl leading-none"
-          style={{ color: isMatch ? "#39FF14" : pitch ? "#FF6B00" : "#5C5C6B", textShadow: isMatch ? "0 0 12px #39FF14" : "none" }}
+          style={{ color: isMatch ? "#39FF14" : pitch ? "#FF5F1F" : "#5C5C6B", textShadow: isMatch ? "0 0 12px #39FF14" : "none" }}
           data-testid="tuner-detected-note">
           {pitch ? noteName(pitch.midi) : "--"}
         </p>
@@ -29,8 +29,8 @@ export default function TunerGauge({ pitch, micOn, isMatch }) {
         <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-3 h-3 rounded-full transition-[left] duration-100"
           style={{
             left: `${needlePct}%`,
-            background: pitch ? (Math.abs(cents) < 15 ? "#39FF14" : "#FF6B00") : "#2A2A34",
-            boxShadow: pitch ? `0 0 10px ${Math.abs(cents) < 15 ? "#39FF14" : "#FF6B00"}` : "none",
+            background: pitch ? (Math.abs(cents) < 15 ? "#39FF14" : "#FF5F1F") : "#2A2A34",
+            boxShadow: pitch ? `0 0 10px ${Math.abs(cents) < 15 ? "#39FF14" : "#FF5F1F"}` : "none",
           }} />
         <span className="absolute left-0 -bottom-1.5 text-[7px] text-[#5C5C6B] font-bold">-50¢</span>
         <span className="absolute right-0 -bottom-1.5 text-[7px] text-[#5C5C6B] font-bold">+50¢</span>

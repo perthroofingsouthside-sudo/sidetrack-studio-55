@@ -99,15 +99,15 @@ export default function LiveChat({ trackTitle }) {
           {connected ? (
             <Wifi className="w-3 h-3 text-[#39FF14]" data-testid="ws-connected" />
           ) : (
-            <WifiOff className="w-3 h-3 text-[#FF6B00] animate-pulse" data-testid="ws-disconnected" />
+            <WifiOff className="w-3 h-3 text-[#FF5F1F] animate-pulse" data-testid="ws-disconnected" />
           )}
           <span className="text-[9px] text-[#5C5C6B] uppercase tracking-wider font-bold">
             {connected ? "Live" : "Connecting..."}
           </span>
         </div>
         <div className="flex items-center gap-1" data-testid="viewer-count">
-          <Users className="w-3 h-3 text-[#FF6B00]" />
-          <span className="text-[9px] text-[#FF6B00] font-bold">{viewers}</span>
+          <Users className="w-3 h-3 text-[#FF5F1F]" />
+          <span className="text-[9px] text-[#FF5F1F] font-bold">{viewers}</span>
         </div>
       </div>
 
@@ -150,8 +150,8 @@ export default function LiveChat({ trackTitle }) {
             {comments.map((c) => (
               <div key={c.id} className="bg-white/5 rounded-lg p-3" data-testid="comment-message">
                 <div className="flex items-center gap-2 mb-1">
-                  <div className="w-5 h-5 rounded-full bg-[#FF6B00]/20 flex items-center justify-center">
-                    <span className="text-[8px] font-bold text-[#FF6B00]">{c.user[0]}</span>
+                  <div className="w-5 h-5 rounded-full bg-[#FF5F1F]/20 flex items-center justify-center">
+                    <span className="text-[8px] font-bold text-[#FF5F1F]">{c.user[0]}</span>
                   </div>
                   <span className="text-xs font-bold text-white">{c.user}</span>
                   <span className="text-[10px] text-[#5C5C6B] flex items-center gap-0.5"><Clock className="w-2.5 h-2.5" />{fmtTime(c.ts)}</span>
@@ -169,9 +169,9 @@ export default function LiveChat({ trackTitle }) {
           <Input data-testid="chat-input" value={input} onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && sendMessage()}
             placeholder={mode === "live" ? "Say something..." : "Leave a comment..."}
-            className="h-9 bg-transparent border-white/20 text-white placeholder:text-[#5C5C6B] rounded-lg text-sm focus:border-[#FF6B00]" />
+            className="h-9 bg-transparent border-white/20 text-white placeholder:text-[#5C5C6B] rounded-lg text-sm focus:border-[#FF5F1F]" />
           <Button data-testid="chat-send-btn" onClick={sendMessage} size="icon"
-            className="h-9 w-9 bg-[#FF6B00] hover:bg-[#FF8533] hover:shadow-[0_0_20px_rgba(255,107,0,0.6)] rounded-lg flex-shrink-0">
+            className="h-9 w-9 bg-[#FF5F1F] hover:bg-[#FF7A42] hover:shadow-[0_0_20px_rgba(255,95,31,0.6)] rounded-lg flex-shrink-0">
             <Send className="w-3.5 h-3.5 text-white" />
           </Button>
         </div>

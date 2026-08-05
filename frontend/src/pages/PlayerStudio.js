@@ -244,13 +244,13 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
     <div className="min-h-screen bg-[#05050A] pb-4" data-testid="player-studio">
       {/* Song Header */}
       <div className="relative">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#FF6B00]/10 to-[#05050A] z-0" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF5F1F]/10 to-[#05050A] z-0" />
         <div className="relative z-10 px-4 pt-6 pb-4 flex items-center gap-4">
           <div className="w-20 h-20 rounded-2xl overflow-hidden border border-white/10 flex-shrink-0">
             {song.cover_url ? (
               <img src={song.cover_url} alt={song.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF6B00] text-2xl font-bold">
+              <div className="w-full h-full bg-[#12121A] flex items-center justify-center text-[#FF5F1F] text-2xl font-bold">
                 {song.title?.[0] || "?"}
               </div>
             )}
@@ -259,7 +259,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
             <h2 className="font-['Outfit'] text-xl font-bold truncate" data-testid="song-title">{song.title}</h2>
             <p className="text-[#A0A0B0] text-sm truncate" data-testid="song-artist">{song.artist}</p>
             {song.genre && (
-              <span className="text-xs text-[#FF6B00] uppercase tracking-[0.2em] font-bold mt-1 inline-block">{song.genre}</span>
+              <span className="text-xs text-[#FF5F1F] uppercase tracking-[0.2em] font-bold mt-1 inline-block">{song.genre}</span>
             )}
             {lyrics?.source && (
               <span className="text-[10px] text-[#39FF14]/60 uppercase tracking-wider ml-2">
@@ -293,7 +293,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
             <SkipBack className="w-5 h-5" />
           </Button>
           <Button data-testid="play-pause-btn" onClick={togglePlay}
-            className="w-14 h-14 rounded-full bg-[#FF6B00] hover:bg-[#FF8533] text-white glow-orange transition-all">
+            className="w-14 h-14 rounded-full bg-[#FF5F1F] hover:bg-[#FF7A42] text-white glow-orange transition-all">
             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-1" />}
           </Button>
           <Button data-testid="record-btn" variant="ghost" size="icon" onClick={onRecord} className="text-[#A0A0B0] hover:text-[#39FF14]">
@@ -326,7 +326,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
               onClick={() => setShowChords(!showChords)}
               className={`h-7 px-3 rounded-full text-[10px] font-bold uppercase tracking-wider gap-1 border transition-all ${
                 showChords
-                  ? "border-[#FF6B00]/40 text-[#FF6B00] bg-[#FF6B00]/10"
+                  ? "border-[#FF5F1F]/40 text-[#FF5F1F] bg-[#FF5F1F]/10"
                   : "border-white/10 text-[#5C5C6B] hover:border-white/20"
               }`}
             >
@@ -337,14 +337,14 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
 
         {/* Chords strip — visible when toggled on */}
         {showChords && currentChord && (
-          <div className="mb-3 rounded-xl border border-[#FF6B00]/20 p-3 flex items-center gap-4" style={{ background: "rgba(255,107,0,0.05)" }} data-testid="chords-strip">
+          <div className="mb-3 rounded-xl border border-[#FF5F1F]/20 p-3 flex items-center gap-4" style={{ background: "rgba(255,95,31,0.05)" }} data-testid="chords-strip">
             <div className="text-center">
-              <div className="text-3xl font-['Outfit'] font-black text-[#FF6B00] glow-text-orange">{currentChord.chord}</div>
+              <div className="text-3xl font-['Outfit'] font-black text-[#FF5F1F] glow-text-orange">{currentChord.chord}</div>
               <ChordDots chord={currentChord.chord} />
             </div>
             <div className="flex gap-2 flex-wrap">
               {nextChords.map((c, i) => (
-                <span key={`${c.time}-${i}`} className="text-sm font-['Outfit'] font-bold px-2.5 py-1 rounded-lg bg-[#FF6B00]/10 text-[#FF6B00]/60">{c.chord}</span>
+                <span key={`${c.time}-${i}`} className="text-sm font-['Outfit'] font-bold px-2.5 py-1 rounded-lg bg-[#FF5F1F]/10 text-[#FF5F1F]/60">{c.chord}</span>
               ))}
             </div>
           </div>
@@ -365,7 +365,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
                       key={lineKey}
                       data-lyric-idx={i}
                       className={`text-[10px] uppercase tracking-[0.2em] font-bold pt-3 pb-1 transition-colors duration-300 ${
-                        i === activeLyricIdx ? "text-[#FF6B00]" : "text-[#5C5C6B]"
+                        i === activeLyricIdx ? "text-[#FF5F1F]" : "text-[#5C5C6B]"
                       }`}
                     >
                       {line.text}
@@ -399,7 +399,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
               })
             ) : (
               <div className="py-10 text-center">
-                <AlignLeft className="w-8 h-8 text-[#FF6B00]/15 mx-auto mb-2" />
+                <AlignLeft className="w-8 h-8 text-[#FF5F1F]/15 mx-auto mb-2" />
                 <p className="text-sm text-[#5C5C6B]">Loading lyrics...</p>
               </div>
             )}
@@ -415,7 +415,7 @@ export default function PlayerStudio({ song, onRecord, onSongSelect }) {
             <div>
               <input ref={fileInputRef} type="file" accept="audio/*" className="hidden" onChange={handleUploadForSeparation} data-testid="stem-upload-input" />
               <Button data-testid="upload-for-separation-btn" onClick={() => fileInputRef.current?.click()} disabled={separating}
-                className="h-8 px-3 text-xs rounded-xl bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1.5 transition-all">
+                className="h-8 px-3 text-xs rounded-xl bg-[#FF5F1F] hover:bg-[#FF7A42] text-white gap-1.5 transition-all">
                 {separating ? <><Loader2 className="w-3 h-3 animate-spin" /> Separating...</> : <><Upload className="w-3 h-3" /> Upload Song</>}
               </Button>
             </div>

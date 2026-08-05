@@ -7,7 +7,7 @@ import axios from "axios";
 import BackstageCinema from "@/components/BackstageCinema";
 
 const TABS = [
-  { key: "pending_review", label: "Pending", accent: "#FF6B00" },
+  { key: "pending_review", label: "Pending", accent: "#FF5F1F" },
   { key: "kept", label: "Kept", accent: "#39FF14" },
   { key: "discarded", label: "Discarded", accent: "#5C5C6B" },
 ];
@@ -116,7 +116,7 @@ export default function BackstagePage() {
             >
               {t.label}
               {tab === t.key && pendingCount !== undefined && t.key === "pending_review" && pendingCount > 0 && (
-                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[8px] bg-[#05050A] text-[#FF6B00] font-bold">{pendingCount}</span>
+                <span className="ml-0.5 px-1.5 py-0.5 rounded-full text-[8px] bg-[#05050A] text-[#FF5F1F] font-bold">{pendingCount}</span>
               )}
             </button>
           ))}
@@ -159,8 +159,8 @@ export default function BackstagePage() {
                   likes: 0,
                 })}
                 data-testid="backstage-demo-cinema"
-                className="mt-4 h-9 px-4 rounded-full text-[10px] font-black bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1.5 uppercase tracking-wider"
-                style={{ boxShadow: "0 0 14px rgba(255,107,0,0.45)" }}
+                className="mt-4 h-9 px-4 rounded-full text-[10px] font-black bg-[#FF5F1F] hover:bg-[#FF7A42] text-white gap-1.5 uppercase tracking-wider"
+                style={{ boxShadow: "0 0 14px rgba(255,95,31,0.45)" }}
               >
                 <Film className="w-3 h-3" /> Preview Cinematic Intro
               </Button>
@@ -180,9 +180,9 @@ export default function BackstagePage() {
                     <button onClick={() => togglePlay(r)}
                       data-testid={`backstage-play-${r.id}`}
                       className={`w-11 h-11 rounded-full flex items-center justify-center flex-shrink-0 transition-all ${
-                        isPlaying ? "bg-[#FF6B00]" : "bg-[#39FF14]/15 hover:bg-[#39FF14]/25"
+                        isPlaying ? "bg-[#FF5F1F]" : "bg-[#39FF14]/15 hover:bg-[#39FF14]/25"
                       }`}
-                      style={isPlaying ? { boxShadow: "0 0 16px rgba(255,107,0,0.45)" } : undefined}>
+                      style={isPlaying ? { boxShadow: "0 0 16px rgba(255,95,31,0.45)" } : undefined}>
                       {isPlaying
                         ? <Pause className="w-4 h-4 text-white" />
                         : <Play className="w-4 h-4 text-[#39FF14] ml-0.5" />}
@@ -215,8 +215,8 @@ export default function BackstagePage() {
                       <Button
                         onClick={() => setCinemaRec(r)}
                         data-testid={`backstage-watch-${r.id}`}
-                        className="h-8 px-3 rounded-lg text-[10px] font-black bg-[#FF6B00] hover:bg-[#FF8533] text-white gap-1 uppercase tracking-wider flex-shrink-0"
-                        style={{ boxShadow: "0 0 12px rgba(255,107,0,0.45)" }}
+                        className="h-8 px-3 rounded-lg text-[10px] font-black bg-[#FF5F1F] hover:bg-[#FF7A42] text-white gap-1 uppercase tracking-wider flex-shrink-0"
+                        style={{ boxShadow: "0 0 12px rgba(255,95,31,0.45)" }}
                       >
                         <Film className="w-3 h-3" /> Watch
                       </Button>

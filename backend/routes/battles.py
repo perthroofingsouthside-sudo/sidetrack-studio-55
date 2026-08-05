@@ -199,6 +199,11 @@ async def register(req: RegisterReq):
 
     await _get_or_create_user(req.user_id, req.display_name)
 
+    # ── Grommet safety: under-18 accounts can't enter Rap Battles ──
+    from routes.safety import is_grommet, GROMMET_BLOCK_MESSAGE
+    if await is_grommet(req.user_id):
+        raise HTTPException(403, f"Rap Battles are 18+ only. {GROMMET_BLOCK_MESSAGE}")
+
     # Don't double-queue. If user is already in an active battle, refuse.
     active = await db.battles.find_one(
         {"$and": [

@@ -34,7 +34,7 @@ export default function BattleSubmitView({
           <div className={`w-32 h-32 rounded-full flex items-center justify-center border transition-all ${
             isRecording ? "bg-red-500/20 border-red-500/50 animate-rec-pulse" : "bg-[#12121A] border-white/10"
           }`}>
-            <Mic className={`w-12 h-12 ${isRecording ? "text-red-400" : "text-[#FF6B00]"}`} />
+            <Mic className={`w-12 h-12 ${isRecording ? "text-red-400" : "text-[#FF5F1F]"}`} />
           </div>
           {isRecording && <div className="absolute inset-0 w-32 h-32 rounded-full border border-red-500/30 animate-pulse-ring" />}
         </div>
@@ -52,7 +52,7 @@ export default function BattleSubmitView({
           data-testid="rec-toggle-btn"
           onClick={isRecording ? onStopRec : onStartRec}
           className={`w-20 h-20 rounded-full ${
-            isRecording ? "bg-red-500 hover:bg-red-600" : "bg-[#FF6B00] hover:bg-[#FF8533] glow-orange"
+            isRecording ? "bg-red-500 hover:bg-red-600" : "bg-[#FF5F1F] hover:bg-[#FF7A42] glow-orange"
           }`}
         >
           {isRecording ? <Square className="w-8 h-8 text-white" /> : <Mic className="w-8 h-8 text-white" />}

@@ -18,14 +18,14 @@ export const TOP_STYLES = [
   { key: "jacket", name: "Jacket" },
   { key: "vest",   name: "Vest" },
 ];
-export const TOP_COLORS = ["#FF6B00", "#39FF14", "#1A1A1A", "#FFFFFF", "#B57BFF", "#FF4FB1"];
+export const TOP_COLORS = ["#FF5F1F", "#39FF14", "#1A1A1A", "#FFFFFF", "#B57BFF", "#FF4FB1"];
 
 export const CAPS = [
   { key: "none", name: "None" },
   { key: "cap",  name: "Cap" },
   { key: "beanie", name: "Beanie" },
 ];
-export const CAP_COLORS = ["#FF6B00", "#39FF14", "#1A1A1A", "#FFFFFF"];
+export const CAP_COLORS = ["#FF5F1F", "#39FF14", "#1A1A1A", "#FFFFFF"];
 
 export const INSTRUMENTS = [
   { key: "guitar", name: "Guitar" },
@@ -44,9 +44,9 @@ export const DEFAULT_GAMER_AVATAR = {
   hairColor: "#1A1A1A",
   face: "cool",
   cap: "cap",
-  capColor: "#FF6B00",
+  capColor: "#FF5F1F",
   top: "hoodie",
-  topColor: "#FF6B00",
+  topColor: "#FF5F1F",
   instrument: "guitar",
   // Legacy fields for back-compat with old icon+palette avatars
   icon: undefined,
@@ -100,7 +100,7 @@ function FaceCool({ skin }) {
       <rect x="122" y="116" width="34" height="14" rx="6" fill="#0A0A0F" />
       <rect x="115" y="121" width="10" height="3" fill="#0A0A0F" />
       <rect x="86" y="118" width="6" height="3" fill="#39FF14" opacity="0.7" />
-      <rect x="124" y="118" width="6" height="3" fill="#FF6B00" opacity="0.7" />
+      <rect x="124" y="118" width="6" height="3" fill="#FF5F1F" opacity="0.7" />
       {/* Mouth — slight smirk */}
       <path d="M108 152 Q120 158 132 152" stroke={skin.shade} strokeWidth="3" fill="none" strokeLinecap="round" />
     </g>
@@ -207,7 +207,7 @@ const TOP_MAP = { hoodie: TopHoodie, tee: TopTee, jacket: TopJacket, vest: TopVe
 function InstGuitar() {
   return (
     <g transform="translate(160, 232) rotate(-25)">
-      <ellipse cx="0" cy="40" rx="22" ry="28" fill="#FF6B00" />
+      <ellipse cx="0" cy="40" rx="22" ry="28" fill="#FF5F1F" />
       <ellipse cx="0" cy="40" rx="22" ry="28" fill="none" stroke="#0A0A0F" strokeWidth="1.5" />
       <circle cx="0" cy="38" r="6" fill="#0A0A0F" />
       <rect x="-3" y="-30" width="6" height="40" fill="#3E2415" />
@@ -231,7 +231,7 @@ function InstMic() {
       <rect x="-4" y="0" width="8" height="40" rx="2" fill="#1A1A1A" />
       <circle cx="0" cy="-2" r="10" fill="#C0C0C0" stroke="#0A0A0F" strokeWidth="1.5" />
       <path d="M-7 -2 Q0 -10 7 -2" stroke="#0A0A0F" strokeWidth="1" fill="none" />
-      <circle cx="0" cy="-2" r="3" fill="#FF6B00" />
+      <circle cx="0" cy="-2" r="3" fill="#FF5F1F" />
     </g>
   );
 }
@@ -239,7 +239,7 @@ function InstDrums() {
   return (
     <g transform="translate(165, 236)">
       <ellipse cx="0" cy="20" rx="18" ry="6" fill="#0A0A0F" />
-      <rect x="-18" y="0" width="36" height="22" fill="#FF6B00" />
+      <rect x="-18" y="0" width="36" height="22" fill="#FF5F1F" />
       <ellipse cx="0" cy="0" rx="18" ry="6" fill="#39FF14" />
       <ellipse cx="0" cy="0" rx="18" ry="6" fill="none" stroke="#0A0A0F" strokeWidth="1.5" />
     </g>
@@ -259,7 +259,7 @@ function InstDJ() {
   return (
     <g transform="translate(158, 240)">
       <circle cx="0" cy="0" r="20" fill="#1A1A1A" stroke="#39FF14" strokeWidth="2" />
-      <circle cx="0" cy="0" r="6" fill="#FF6B00" />
+      <circle cx="0" cy="0" r="6" fill="#FF5F1F" />
       <circle cx="0" cy="0" r="2" fill="#0A0A0F" />
     </g>
   );
@@ -270,7 +270,7 @@ const INST_MAP = { guitar: InstGuitar, bass: InstBass, mic: InstMic, drums: Inst
  * The avatar character itself. `size` controls overall scale.
  * `glowColor` paints the radial background halo.
  */
-export default function GamerAvatar({ avatar, size = 200, glowColor = "#FF6B00", showInstrument = true }) {
+export default function GamerAvatar({ avatar, size = 200, glowColor = "#FF5F1F", showInstrument = true }) {
   const a = { ...DEFAULT_GAMER_AVATAR, ...(avatar || {}) };
   const skin = skinByKey(a.skin);
   const HairC = HAIR_MAP[a.hair] || HairShort;
@@ -293,7 +293,7 @@ export default function GamerAvatar({ avatar, size = 200, glowColor = "#FF6B00",
       <rect x="0" y="0" width="240" height="320" fill="url(#glow)" />
 
       {/* TOP first (so head sits on shoulders) */}
-      <TopC color={a.topColor || "#FF6B00"} />
+      <TopC color={a.topColor || "#FF5F1F"} />
 
       {/* Neck */}
       <rect x="110" y="174" width="20" height="20" fill={skin.fill} />
@@ -310,7 +310,7 @@ export default function GamerAvatar({ avatar, size = 200, glowColor = "#FF6B00",
 
       {/* Hair (if no cap) OR Cap */}
       {a.cap !== "none" && CapC
-        ? <CapC color={a.capColor || "#FF6B00"} />
+        ? <CapC color={a.capColor || "#FF5F1F"} />
         : <HairC color={a.hairColor || "#1A1A1A"} />}
 
       {/* Hair peeking under cap (only for non-hidden hair when a cap is on) */}
