@@ -131,6 +131,8 @@ function PracticeSession({ instrument, lesson, onExit }) {
   const [misses, setMisses] = useState(0);
   const [aiGrade, setAiGrade] = useState(null);
   const startRef = useRef(performance.now());
+  const missesRef = useRef(0);
+  const gradedRef = useRef(false);
 
   const notes = lesson.notes;
   const targetMidi = notes[currentIdx];
@@ -153,20 +155,6 @@ function PracticeSession({ instrument, lesson, onExit }) {
       const total = score + 100 + streak * 10;
       const best = Number(localStorage.getItem(`pp_learn_best_${lesson.id}`) || 0);
       if (total > best) localStorage.setItem(`pp_learn_best_${lesson.id}`, String(total));
-      // ── AI grading: objective Pitch + Timing only (Grommet-safe) ──
-      setMisses((m) => {
-        const pitchAcc = Math.round((notes.length / (notes.length + m)) * 100);
-        const avgSec = (performance.now() - startRef.current) / 1000 / notes.length;
-        const timingAcc = Math.round(Math.max(0, Math.min(100, 100 - Math.max(0, avgSec - 2) * 12)));
-        axios.post(`${API}/gamer/grade`, {
-          user_id: localStorage.getItem("sidetrack_voter_id") || "anon",
-          context: "learn",
-          song_title: lesson.title,
-          pitch_accuracy: pitchAcc,
-          timing_accuracy: timingAcc,
-        }).then((res) => setAiGrade(res.data)).catch(() => {});
-        return m;
-      });
     } else {
       setCurrentIdx(next);
     }
@@ -214,15 +202,35 @@ function PracticeSession({ instrument, lesson, onExit }) {
     } else {
       setStreak(0);
       setMisses((m) => m + 1);
+      missesRef.current += 1;
       toast.error(`That was ${noteName(midi)} — aim for ${noteName(notes[currentIdxRef.current])}`, { duration: 1500 });
     }
   }, [notes, registerHit]);
 
   const hearNote = () => engineRef.current.playTone(targetMidi, 1);
 
+  // ── AI grading: objective Pitch + Timing only (Grommet-safe), fires once ──
+  useEffect(() => {
+    if (!done || gradedRef.current) return;
+    gradedRef.current = true;
+    const m = missesRef.current;
+    const pitchAcc = Math.round((notes.length / (notes.length + m)) * 100);
+    const avgSec = (performance.now() - startRef.current) / 1000 / notes.length;
+    const timingAcc = Math.round(Math.max(0, Math.min(100, 100 - Math.max(0, avgSec - 2) * 12)));
+    axios.post(`${API}/gamer/grade`, {
+      user_id: localStorage.getItem("sidetrack_voter_id") || "anon",
+      context: "learn",
+      song_title: lesson.title,
+      pitch_accuracy: pitchAcc,
+      timing_accuracy: timingAcc,
+    }).then((res) => setAiGrade(res.data)).catch(() => {});
+  }, [done, notes.length, lesson.title]);
+
   const restart = () => {
     setCurrentIdx(0); setScore(0); setStreak(0); setMisses(0); setDone(false); setAiGrade(null);
     startRef.current = performance.now();
+    missesRef.current = 0;
+    gradedRef.current = false;
     matchFramesRef.current = 0;
   };
 

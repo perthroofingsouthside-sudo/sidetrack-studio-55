@@ -13,7 +13,14 @@ export default function GraduationModal({ open, onClose, onGraduated }) {
   const [guardianCode, setGuardianCode] = useState("");
   const [pinInput, setPinInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const userId = useRef(localStorage.getItem("sidetrack_voter_id") || "anon");
+  const userId = useRef((() => {
+    let id = localStorage.getItem("sidetrack_voter_id");
+    if (!id) {
+      id = (crypto.randomUUID && crypto.randomUUID()) || `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem("sidetrack_voter_id", id);
+    }
+    return id;
+  })());
 
   if (!open) return null;
 

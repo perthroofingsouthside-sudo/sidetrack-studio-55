@@ -37,7 +37,11 @@ function App() {
   const selectAgeMode = useCallback(async (mode) => {
     localStorage.setItem("pp_age_mode", mode);
     setAgeMode(mode);
-    const uid = localStorage.getItem("sidetrack_voter_id") || "anon";
+    let uid = localStorage.getItem("sidetrack_voter_id");
+    if (!uid) {
+      uid = (crypto.randomUUID && crypto.randomUUID()) || `u_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem("sidetrack_voter_id", uid);
+    }
     axios.post(`${API}/safety/age-mode`, { user_id: uid, mode }).catch(() => {});
     if (mode === "grommet") {
       localStorage.setItem("pp_lane", "gamer");
