@@ -306,7 +306,7 @@ export default function ConnectPage() {
                 <Trophy className="w-3 h-3 text-[#39FF14]" />
               </div>
               <p className="text-[10px] text-[#A0A0B0] truncate">
-                Register · auto-match · 60s beat · live voting · Top 200 quarterly
+                Register · auto-match · 45s each · live voting · Top 200 quarterly
               </p>
             </div>
             <span className="relative z-10 text-[10px] text-[#FF6B00] font-black uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">

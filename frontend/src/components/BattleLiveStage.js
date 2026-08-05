@@ -6,14 +6,17 @@ import { API } from "@/App";
 import axios from "axios";
 
 /**
- * BattleLiveStage — Live stream view for a 60-second rap battle.
- *
- *  - Plays the server-generated 60s beat (data: WAV).
- *  - Shows a synced countdown.
+ * BattleLiveStage — Live stream view for a rap battle: 45 seconds per rapper
+ * over a 90-second server-generated beat (data: WAV).
+ *  - First mover raps 0:00–0:45, opponent takes 0:45–1:30.
+ *  - Shows a synced countdown + live "On the Mic" turn indicator.
  *  - Renders live vote tally (polls every 2s).
  *  - Lets viewers vote once.
  *  - Auto-finishes the battle when the beat ends (sets winner + archives 7 days).
  */
+const TURN_SEC = 45;
+const TOTAL_SEC = 90;
+
 export default function BattleLiveStage({ battleId, userId, onExit }) {
   const [battle, setBattle] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -162,15 +165,27 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
       </div>
 
       <div className="relative z-10 px-4 py-5 max-w-2xl mx-auto space-y-5">
-        {/* Versus + first mover banner */}
+        {/* Versus + turn banner */}
         <div className="text-center">
-          <p className="text-[9px] uppercase tracking-[0.3em] text-[#5C5C6B] font-black mb-1.5">First Mover</p>
-          <p className="font-['Outfit'] text-base font-black text-[#39FF14]">{firstMoverProfile.display_name}</p>
+          {isLive && audioStarted ? (
+            <>
+              <p className="text-[9px] uppercase tracking-[0.3em] text-[#5C5C6B] font-black mb-1.5">On the Mic · {turnRemaining}s left</p>
+              <p className="font-['Outfit'] text-base font-black text-[#39FF14]" data-testid="battle-on-mic">
+                <span className="inline-block w-2 h-2 rounded-full bg-[#39FF14] animate-pulse mr-1.5 align-middle" />
+                {onMicProfile.display_name}
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-[9px] uppercase tracking-[0.3em] text-[#5C5C6B] font-black mb-1.5">First Mover · 45s Each</p>
+              <p className="font-['Outfit'] text-base font-black text-[#39FF14]">{firstMoverProfile.display_name}</p>
+            </>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3" data-testid="battle-versus">
-          <RapperStage profile={battle.profile_a} side="a" votes={battle.votes_a || 0} pct={pctA} isFirst={battle.first_mover === "a"} />
-          <RapperStage profile={battle.profile_b} side="b" votes={battle.votes_b || 0} pct={100 - pctA} isFirst={battle.first_mover === "b"} />
+          <RapperStage profile={battle.profile_a} side="a" votes={battle.votes_a || 0} pct={pctA} isFirst={battle.first_mover === "a"} isActive={isLive && audioStarted && activeSide === "a"} />
+          <RapperStage profile={battle.profile_b} side="b" votes={battle.votes_b || 0} pct={100 - pctA} isFirst={battle.first_mover === "b"} isActive={isLive && audioStarted && activeSide === "b"} />
         </div>
 
         {/* Beat progress */}
@@ -178,19 +193,21 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
               <Mic className="w-3.5 h-3.5 text-[#FF6B00]" />
-              <span className="text-[10px] uppercase tracking-[0.25em] text-[#FF6B00] font-black">60-Second Beat</span>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-[#FF6B00] font-black">45s Each · 90s Beat</span>
             </div>
-            <span className="text-[10px] font-mono text-[#5C5C6B]">{Math.floor(elapsed)}s / 60s</span>
+            <span className="text-[10px] font-mono text-[#5C5C6B]">{Math.floor(elapsed)}s / {TOTAL_SEC}s</span>
           </div>
-          <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
+          <div className="relative h-1.5 rounded-full bg-white/5 overflow-hidden">
             <div
               className="h-full transition-[width] duration-200 linear"
               style={{
-                width: `${Math.min(100, (elapsed / 60) * 100)}%`,
+                width: `${Math.min(100, (elapsed / TOTAL_SEC) * 100)}%`,
                 background: "linear-gradient(90deg, #FF6B00, #39FF14)",
                 boxShadow: "0 0 12px rgba(255,107,0,0.4)",
               }}
             />
+            {/* Turn-switch marker at 45s */}
+            <div className="absolute top-0 bottom-0 left-1/2 w-0.5 bg-white/40" data-testid="battle-turn-marker" />
           </div>
           {!audioStarted && isLive && (
             <Button
@@ -252,7 +269,7 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
         )}
 
         {/* Manual finish (in case audio.onended doesn't fire — e.g. tab muted) */}
-        {isLive && elapsed >= 60 && (
+        {isLive && elapsed >= TOTAL_SEC && (
           <Button
             onClick={finishBattle}
             disabled={finishing}
@@ -271,18 +288,27 @@ export default function BattleLiveStage({ battleId, userId, onExit }) {
   );
 }
 
-function RapperStage({ profile, side, votes, pct, isFirst }) {
+function RapperStage({ profile, side, votes, pct, isFirst, isActive }) {
   const colour = side === "a" ? "#FF6B00" : "#39FF14";
   return (
     <div
-      className="relative rounded-3xl border p-4 overflow-hidden"
+      className="relative rounded-3xl border p-4 overflow-hidden transition-shadow duration-500"
       style={{
         background: `linear-gradient(180deg, rgba(${side === "a" ? "255,107,0" : "57,255,20"}, 0.10), rgba(15,15,22,0.6))`,
-        borderColor: `${colour}55`,
-        boxShadow: `0 0 22px ${colour}22`,
+        borderColor: isActive ? colour : `${colour}55`,
+        boxShadow: isActive ? `0 0 34px ${colour}66` : `0 0 22px ${colour}22`,
       }}
       data-testid={`battle-stage-${side}`}
     >
+      {isActive && (
+        <span
+          className="absolute top-2 left-2 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full animate-pulse"
+          style={{ color: "#05050A", background: colour }}
+          data-testid={`battle-active-${side}`}
+        >
+          On Mic
+        </span>
+      )}
       {isFirst && (
         <span
           className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded-full border"
@@ -312,3 +338,4 @@ function RapperStage({ profile, side, votes, pct, isFirst }) {
     </div>
   );
 }
+

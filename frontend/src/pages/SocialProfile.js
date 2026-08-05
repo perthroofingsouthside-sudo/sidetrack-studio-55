@@ -277,7 +277,7 @@ export default function SocialProfile({ onNavigate }) {
           {/* PERSONAL PLAYLISTS — curated from Discover */}
           <PlaylistsSection playlists={playlists} onNavigate={onNavigate} />
 
-          {/* MY RAPS — 60-second raps the user has kept */}
+          {/* MY RAPS — battle raps the user has kept */}
           <MyRapsSection raps={raps} playingId={playingRap} onToggle={togglePlayRap} />
 
           {/* Share Profile */}
@@ -454,7 +454,7 @@ function MyRapsSection({ raps, playingId, onToggle }) {
   return (
     <section data-testid="profile-my-raps">
       <h3 className="font-['Outfit'] text-xs uppercase tracking-[0.25em] font-black text-[#FF6B00] mb-2 flex items-center gap-1.5">
-        <Mic2 className="w-3.5 h-3.5" /> My Raps · 60s
+        <Mic2 className="w-3.5 h-3.5" /> My Raps
       </h3>
       {raps.length === 0 ? (
         <div className="rounded-2xl border border-dashed border-white/10 p-5 text-center" data-testid="profile-my-raps-empty">

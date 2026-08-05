@@ -144,7 +144,7 @@ export default function BattleHub({ onBack, userId, displayName }) {
               <span className="text-[#FF6B00] glow-text-orange">Battle</span> Hub
             </h1>
             <p className="text-[10px] uppercase tracking-[0.25em] text-[#5C5C6B] font-bold">
-              Auto-match · 60s beat · Live voting
+              Auto-match · 45s each · Live voting
             </p>
           </div>
           {me && (
@@ -211,7 +211,7 @@ function RegisterCard({ userId, busy, onRegister }) {
         </div>
         <h2 className="font-['Outfit'] text-2xl font-black text-white mb-1">Register for a Rap Battle</h2>
         <p className="text-xs text-[#A0A0B0] mb-4">
-          You&rsquo;ll be auto-matched with an opponent. Once matched, both rappers must agree via the Connect tab — then it&rsquo;s a 60-second beat with live voting.
+          You&rsquo;ll be auto-matched with an opponent. Once matched, both rappers must agree via the Connect tab — then each rapper gets 45 seconds on a fresh 90-second beat with live voting.
         </p>
         <div className="text-[10px] uppercase tracking-wider text-[#5C5C6B] mb-3 font-bold">
           Your ID: <span className="text-white">{userId}</span>

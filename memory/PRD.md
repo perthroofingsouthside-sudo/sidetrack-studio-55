@@ -294,3 +294,10 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
   - `GamerPage.js`: pickTrack ownership gate removed; footer → "Every track, every mode — 100% free."
   - `LiveChat.js`: VIP/PRO badge logic fully removed.
 - Deployment health check passed earlier (Jun 10); re-verify before deploy after pivot.
+
+## Aug 5, 2026 — RAP BATTLES: 45 SECONDS PER RAPPER (self-tested e2e)
+- Battle format changed from single 60s beat → **90s beat, 45s per rapper** (first mover raps 0:00–0:45, opponent 0:45–1:30).
+- Backend (`battles.py`): BEAT_DURATION_SEC=90, TURN_DURATION_SEC=45; `_generate_battle_beat()` (renamed) renders 33 pattern reps ≈ 91s WAV; battle doc now stores `beat_duration_sec` + `turn_duration_sec` on agree.
+- Frontend (`BattleLiveStage.js`): TURN_SEC/TOTAL_SEC constants; live "On the Mic · Xs left" turn banner that flips at 45s; active rapper card gets glow + "On Mic" badge (battle-active-a/b testids); progress bar /90 with midpoint turn marker; finish trigger at 90s. Also repaired a corrupted duplicate tail in RapperStage.
+- Copy updates: BattleHub ("Auto-match · 45s each"), ConnectPage, SocialProfile ("My Raps"), PITCH_DECK.md.
+- Verified via curl e2e: register×2 → matched → agree×2 → beat_dur 90/turn_dur 45 → go-live → served WAV decoded at 91.0s. UI copy verified via screenshot. Test battle data cleaned from DB.

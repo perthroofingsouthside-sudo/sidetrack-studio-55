@@ -20,7 +20,7 @@ Music platforms today are split:
 Pocket Products fuses karaoke, sampling, and competitive matchmaking into one
 neon-orange and electric-green stadium. Within sixty seconds of opening the app,
 any user — beginner or pro — can be matched against a stranger, agree to terms,
-and battle live over a freshly-synthesised 60-second hip-hop beat while the
+and battle live over a freshly-synthesised 90-second hip-hop beat (45 seconds per rapper) while the
 internet votes on the winner.
 
 ---
@@ -79,26 +79,26 @@ two-tap commit ceremony:
 [ pending_agreement ]   ←  matchmaker hands the battle off
         ↓ (each user taps AGREE)
 [ agreed_a + agreed_b ]
-        ↓ (server picks first_mover, synthesises 60s beat)
+        ↓ (server picks first_mover, synthesises 90s beat — 45s per rapper)
 [ agreed ]              ←  battle locked in, beat ready
         ↓ (either rapper taps GO LIVE)
 [ live ]                ←  beat begins, votes open worldwide
 ```
 
 This single state guarantees nobody is "surprise battled," nobody loses for
-not showing up, and the **first 60 seconds of every recorded battle are
+not showing up, and the **first 90 seconds of every recorded battle are
 intentional**. No drive-by ambushes, no ghost matches.
 
-### 2.4 The 60-Second Live-Streamed Beat
+### 2.4 The Live-Streamed Beat — 45 Seconds Each
 
-The instant **both rappers agree**, the server synthesises a fresh 60-second
+The instant **both rappers agree**, the server synthesises a fresh 90-second
 hip-hop beat **on the same request thread** using a pure-NumPy DSP engine
 (`services/beat_synth.py`): kick / snare / hi-hat / sub-bass voices, 88 BPM
 in the key of A, rendered as a `data:audio/wav;base64` URL embedded directly
 in the battle document.
 
 - **Zero CDN.** Zero infrastructure dependency.
-- **Zero pre-recorded loops.** Every battle gets a unique 60-second beat.
+- **Zero pre-recorded loops.** Every battle gets a unique 90-second beat (two 45-second verses).
 - **Deterministic regeneration.** If we ever want identical beats for finals,
   we can lock the seed.
 
@@ -193,7 +193,7 @@ What we want next:
    Match-time drops, leaderboard volatility rises, the quarterly tournament
    gets real teeth.
 3. **A beat-design partner** — to graduate from DSP synthesis to a curated
-   library of producer-submitted 60-second loops (the matchmaker doesn't
+   library of producer-submitted 90-second loops (the matchmaker doesn't
    care where the beat comes from — only that there is one).
 
 ---

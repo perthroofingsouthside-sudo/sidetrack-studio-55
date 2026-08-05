@@ -29,7 +29,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 ARCHIVE_TTL_DAYS = 7
-BEAT_DURATION_SEC = 60
+BEAT_DURATION_SEC = 90   # 45 seconds per rapper × 2 turns
+TURN_DURATION_SEC = 45
 
 
 # ────────────────────────────────────────────────────────────────────────────
@@ -172,16 +173,16 @@ def _quarter_window(now: Optional[datetime] = None) -> tuple[int, int, datetime,
     return q, now.year, start, end
 
 
-def _generate_60s_beat() -> str:
-    """Render a ~60-second hip-hop pattern as data:audio/wav;base64,..."""
-    # 16-step base pattern × 22 = 352 steps; at 88 BPM that's ≈60s.
+def _generate_battle_beat() -> str:
+    """Render a ~90-second hip-hop pattern (45s per rapper) as data:audio/wav;base64,..."""
+    # 16-step base pattern × 33 = 528 steps; at 88 BPM that's ≈90s.
     base = {
         "kick":  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         "snare": [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
         "hihat": [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
         "bass":  [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
     }
-    reps = 22
+    reps = 33
     pattern = {k: v * reps for k, v in base.items()}
     return synthesize_beat_data_url(pattern, bpm=88, key="A")
 
@@ -336,7 +337,7 @@ async def agree(battle_id: str, req: AgreeReq):
         else:
             coin = True
             first = random.choice(["a", "b"])
-        beat = _generate_60s_beat()
+        beat = _generate_battle_beat()
         await db.battles.update_one(
             {"id": battle_id},
             {"$set": {
@@ -344,6 +345,8 @@ async def agree(battle_id: str, req: AgreeReq):
                 "first_mover": first,
                 "coin_flip": coin,
                 "beat_data_url": beat,
+                "beat_duration_sec": BEAT_DURATION_SEC,
+                "turn_duration_sec": TURN_DURATION_SEC,
             }},
         )
         b = await db.battles.find_one({"id": battle_id}, {"_id": 0, "beat_data_url": 0})
