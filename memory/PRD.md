@@ -301,3 +301,20 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 - Frontend (`BattleLiveStage.js`): TURN_SEC/TOTAL_SEC constants; live "On the Mic · Xs left" turn banner that flips at 45s; active rapper card gets glow + "On Mic" badge (battle-active-a/b testids); progress bar /90 with midpoint turn marker; finish trigger at 90s. Also repaired a corrupted duplicate tail in RapperStage.
 - Copy updates: BattleHub ("Auto-match · 45s each"), ConnectPage, SocialProfile ("My Raps"), PITCH_DECK.md.
 - Verified via curl e2e: register×2 → matched → agree×2 → beat_dur 90/turn_dur 45 → go-live → served WAV decoded at 91.0s. UI copy verified via screenshot. Test battle data cleaned from DB.
+
+## Aug 5, 2026 — GROMMET SAFETY + SKEUOMORPHIC UI + PEER GRADING (iteration_36 backend 100%, all flows verified)
+### 1. Grommet Safety (under-18)
+- NEW `backend/routes/safety.py`: `/safety/age-mode` (set/get grommet|adult), guardian graduation (`/safety/graduation/request` → 4-digit PIN, `/approve` with 5-attempt limit → mode=adult), `/gamer/grade` (AI grade = 60% pitch + 40% timing, letters S/A/B/C/D, no LLM — objective only), `/ratings` peer stars (grommet raters 403).
+- Grommet guard on `POST /rap-battles/register` (403 + guardian message).
+- Frontend: `AgeGate.js` first-launch modal (localStorage `pp_age_mode`); grommets force-locked to Gamer lane (App.js setLane guard + mount effect); Creator toggle shows Lock icon → opens `GraduationModal.js` (PIN flow, voter id auto-generated — no 'anon' collision); `grommet-identity-banner` + avatar-only identity on Profile.
+- Learn lesson completion posts AI grade → `ai-grade-card` (letter + pitch/timing %). Fires exactly once (useEffect + gradedRef guard, StrictMode-safe).
+### 2. Skeuomorphic UI
+- Brand orange changed **#FF6B00 → #FF5F1F** everywhere (443 refs; testing agent also fixed 1 stray in sonner.jsx).
+- `index.css` hardware skin: brushed-metal `.skeu-panel`/`.surface-card`/`.glass-heavy` overrides, `.skeu-btn` (+`-lit`/`-lit-green`), `.skeu-knob` (--knob-angle), `.skeu-screen` LCD inset, `.skeu-screw`, `.skeu-led`, hardware range-input faders, tactile button:active, brand focus ring (killed cyan browser outline). KoalaStudio panels+pads re-skinned.
+- 3D avatar foundation: `components/avatar3d/Avatar3D.js` — 4 cinematic Pixar-style presets (vocalist/rapper/guitarist/dj) generated + stored at `public/avatars/*.jpg`; picker persists to `pp_avatar3d`; section on Profile (gamer lane / grommet).
+### 3. Creator Peer Grading (18+)
+- `components/StarRating.js` 1–5★ widget (upsert per rater, grommet-blocked with friendly toast); wired into Battle Hub archive rows; `/ratings/top` drives "★ Top Rated" chips + top-rated-first ordering in the archive (discovery).
+- Verified in-UI: rating posts, avg updates (4.5·2), Top Rated chip renders. Seeded demo archived battle `battle_demo1` (MC Ember vs Verse Volt).
+### Ops
+- Fixed testing-agent action items (double grade POST, anon voter id, archive seed). Cleaned QA test users from battle leaderboard. Deployment agent: **PASS** — ready to deploy.
+- Backend test suite: `backend/tests/test_safety_grommet.py` (16/16).
