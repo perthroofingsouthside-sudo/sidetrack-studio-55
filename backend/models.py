@@ -53,6 +53,7 @@ class BattleCreate(BaseModel):
     song_title: str
     song_artist: str = ""
     song_cover_url: str = ""
+    song_preview_url: str = ""
     challenge_text: str = ""
 
 
@@ -62,6 +63,7 @@ class Battle(BaseModel):
     song_title: str
     song_artist: str = ""
     song_cover_url: str = ""
+    song_preview_url: str = ""
     challenge_text: str = ""
     status: str = "active"
     cover_count: int = 0

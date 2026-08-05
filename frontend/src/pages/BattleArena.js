@@ -94,6 +94,7 @@ export default function BattleArena({ currentSong, pendingBattleSong, onPendingB
         song_title: songToUse.title,
         song_artist: songToUse.artist,
         song_cover_url: songToUse.cover_url || "",
+        song_preview_url: songToUse.preview_url || "",
         challenge_text: `Cover "${songToUse.title}" by ${songToUse.artist}!`,
       });
       if (res.data.success) {

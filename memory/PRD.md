@@ -318,3 +318,9 @@ Only the 4 whitelisted genres are exposed in Beat Maker + Battle of the Bands. B
 ### Ops
 - Fixed testing-agent action items (double grade POST, anon voter id, archive seed). Cleaned QA test users from battle leaderboard. Deployment agent: **PASS** — ready to deploy.
 - Backend test suite: `backend/tests/test_safety_grommet.py` (16/16).
+
+## Aug 5, 2026 — GAMER STAGE FIX: REAL SONG NOTES + REAL LYRICS (self-tested)
+Bug: stage notes were random at fixed 128 BPM; lyrics were a hardcoded DEMO array.
+- **Real lyrics**: GamerStage now fetches `/api/lyrics/fetch?track&artist` (LRCLIB) — verified in-UI ("Lose Yourself" shows actual verses). Timestamp-sync when synced lyrics + full-length audio (>100s); otherwise karaoke pacing (3.5s/line) since 30s iTunes previews start mid-song. Mock-source responses fall back to demo lines. LyricsRail now windows ±2..+5 lines around active.
+- **Song-derived notes**: NEW `services/BeatMap.js` — fetch + decodeAudioData → 50ms-window energy-flux onset detection, lanes by zero-crossing brightness (bass→0, bright→3), BPM estimated from median onset gap. `FallingNotesHighway` renders in song-synced mode (notes reach strike line exactly on onsets via audio.currentTime); deterministic seeded pattern fallback when decode/CORS fails. Algorithm validated with synthetic 120BPM click track (19/20 onsets at exact times). NOTE: headless Chromium lacks AAC decode so preview env falls back — real browsers decode m4a fine (iTunes CORS confirmed OK, 998KB fetched in-page).
+- **Preview URL plumbing**: `BattleCreate`/`Battle` models + BattleArena now store `song_preview_url` on battle creation; GamerStage backfills missing preview URLs for old battles via `/api/music/search` (iTunes).

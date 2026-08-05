@@ -5,6 +5,9 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Mic, Guitar, Headphones, X, VolumeX, Volume2, Flame, Heart, Music } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import axios from "axios";
+import { API } from "@/App";
+import { buildBeatMap } from "@/services/BeatMap";
 import GamerAvatar, { DEFAULT_GAMER_AVATAR } from "@/components/GamerAvatar";
 
 const PERFORMANCE_MODES = [
@@ -63,12 +66,16 @@ function LightTrails() {
   );
 }
 
-// Falling-notes canvas — 4-lane fretboard highway with vanishing-point perspective
-function FallingNotesHighway({ active, bpm = 128 }) {
+// Falling-notes canvas — 4-lane fretboard highway with vanishing-point perspective.
+// When a song-derived beatMap is available, notes are scheduled so they reach the
+// strike line exactly on the track's detected onsets (synced via audioRef).
+// Without a beatMap it falls back to a deterministic BPM pattern seeded by the song.
+function FallingNotesHighway({ active, bpm = 128, beatMap = null, audioRef = null, seed = 0 }) {
   const ref = useRef(null);
   const rafRef = useRef(null);
-  const notesRef = useRef([]);   // { lane, t (0..1 from spawn to strike) }
+  const notesRef = useRef([]);   // fallback mode: { lane, spawn }
   const lastSpawnRef = useRef(0);
+  const spawnCountRef = useRef(0);
 
   useEffect(() => {
     const canvas = ref.current;
@@ -121,36 +128,25 @@ function FallingNotesHighway({ active, bpm = 128 }) {
       ctx.fillStyle = "rgba(255,95,31,0.55)";
       ctx.fillRect(VP_X - NEAR_LANE_W / 2, STRIKE_Y - 2, NEAR_LANE_W, 4);
 
-      // Spawn notes synced to BPM (one note every 1/2 beat)
-      const interval = 60000 / bpm / 2;
-      if (active && now - lastSpawnRef.current > interval) {
-        lastSpawnRef.current = now;
-        const lane = Math.floor(Math.random() * 4);
-        notesRef.current.push({ lane, spawn: now });
-      }
-
-      // Animate notes
       const NOTE_TRAVEL_MS = 2400; // top-to-strike duration
-      notesRef.current = notesRef.current.filter((n) => {
-        const elapsed = now - n.spawn;
-        const t = elapsed / NOTE_TRAVEL_MS;  // 0 → 1
-        if (t > 1.05) return false;
+      const TRAVEL_S = NOTE_TRAVEL_MS / 1000;
 
-        // Lane center perspective interpolation
-        const laneOffset = (n.lane - 1.5);    // -1.5 .. +1.5
+      // Shared note renderer (t: 0 at spawn → 1 at strike line)
+      const renderNote = (lane, t) => {
+        const laneOffset = (lane - 1.5);    // -1.5 .. +1.5
         const farX = VP_X + (FAR_LANE_W / 4) * laneOffset * 0.5;
         const nearX = VP_X + (NEAR_LANE_W / 4) * laneOffset;
         const px = farX + (nearX - farX) * Math.pow(t, 2.2);
         const py = VP_Y + (STRIKE_Y - VP_Y) * Math.pow(t, 2.2);
         const radius = 4 + 18 * Math.pow(t, 2.2);
-        const color = LANE_COLORS[n.lane];
+        const color = LANE_COLORS[lane];
 
         // Trailing streak (Bezier-curve glow back to spawn)
         ctx.beginPath();
         ctx.moveTo(px, py);
         const cpX = (px + VP_X) / 2;
         const cpY = py - 60;
-        ctx.quadraticCurveTo(cpX, cpY, VP_X + (n.lane - 1.5) * (FAR_LANE_W / 4), VP_Y + 4);
+        ctx.quadraticCurveTo(cpX, cpY, VP_X + laneOffset * (FAR_LANE_W / 4), VP_Y + 4);
         const trailGrad = ctx.createLinearGradient(px, py, VP_X, VP_Y);
         trailGrad.addColorStop(0, color);
         trailGrad.addColorStop(1, "rgba(0,0,0,0)");
@@ -171,22 +167,41 @@ function FallingNotesHighway({ active, bpm = 128 }) {
         ctx.fillStyle = "rgba(255,255,255,0.85)";
         ctx.beginPath(); ctx.arc(px - radius * 0.25, py - radius * 0.25, radius * 0.35, 0, Math.PI * 2); ctx.fill();
 
-        return true;
-      });
-
-      // Hit-line burst when a note crosses
-      notesRef.current.forEach((n) => {
-        const elapsed = now - n.spawn;
-        const t = elapsed / NOTE_TRAVEL_MS;
+        // Hit-line burst when the note crosses the strike line
         if (t > 0.95 && t < 1.05) {
-          const laneOffset = (n.lane - 1.5);
-          const nearX = VP_X + (NEAR_LANE_W / 4) * laneOffset;
-          ctx.fillStyle = LANE_COLORS[n.lane];
+          ctx.fillStyle = color;
           ctx.globalAlpha = 1 - Math.abs(t - 1) * 20;
           ctx.beginPath(); ctx.arc(nearX, STRIKE_Y, 30, 0, Math.PI * 2); ctx.fill();
           ctx.globalAlpha = 1;
         }
-      });
+      };
+
+      if (beatMap && beatMap.notes.length && audioRef?.current) {
+        // ── SONG-SYNCED MODE: notes land on the track's detected onsets ──
+        const audioTime = audioRef.current.currentTime || 0;
+        if (active) {
+          for (const n of beatMap.notes) {
+            const dt = n.time - audioTime;      // seconds until this onset
+            if (dt > TRAVEL_S || dt < -0.12) continue;
+            renderNote(n.lane, 1 - dt / TRAVEL_S);
+          }
+        }
+      } else {
+        // ── FALLBACK: deterministic BPM pattern seeded by the song ──
+        const interval = 60000 / bpm / 2;
+        if (active && now - lastSpawnRef.current > interval) {
+          lastSpawnRef.current = now;
+          spawnCountRef.current += 1;
+          const lane = (seed + spawnCountRef.current * 7) % 4;
+          notesRef.current.push({ lane, spawn: now });
+        }
+        notesRef.current = notesRef.current.filter((n) => {
+          const t = (now - n.spawn) / NOTE_TRAVEL_MS;
+          if (t > 1.05) return false;
+          renderNote(n.lane, t);
+          return true;
+        });
+      }
 
       // Continue
       rafRef.current = requestAnimationFrame(draw);
@@ -196,16 +211,19 @@ function FallingNotesHighway({ active, bpm = 128 }) {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
-  }, [active, bpm]);
+  }, [active, bpm, beatMap, audioRef, seed]);
 
   return <canvas ref={ref} className="absolute inset-0 w-full h-full" data-testid="falling-notes-canvas" />;
 }
 
-// Synced lyrics rail — neon-green calligraphy style
+// Synced lyrics rail — neon-green calligraphy style (windowed around the active line)
 function LyricsRail({ lines, currentIdx }) {
+  const start = Math.max(0, currentIdx - 2);
+  const visible = lines.slice(start, start + 8);
   return (
     <div className="space-y-3 px-3 py-2" data-testid="lyrics-rail">
-      {lines.map((l, i) => {
+      {visible.map((l, vi) => {
+        const i = start + vi;
         const dist = Math.abs(i - currentIdx);
         const isActive = i === currentIdx;
         const opacity = isActive ? 1 : Math.max(0.2, 1 - dist * 0.25);
@@ -263,7 +281,20 @@ export default function GamerStage({ battle, onExit }) {
   // Backing-track audio: play the battle's song preview (or the seeded beat)
   // through a hidden <audio> element. "Drop Vocals" mutes this element so the
   // toggle is an actual observable audio change — not just visual state.
-  const previewUrl = battle?.song_preview_url || battle?.preview_url || battle?.beat_data_url;
+  const [previewUrl, setPreviewUrl] = useState(
+    battle?.song_preview_url || battle?.preview_url || battle?.beat_data_url || ""
+  );
+  // Backfill: older battles stored no preview URL — resolve the actual song via iTunes
+  useEffect(() => {
+    if (previewUrl || !battle?.song_title) return;
+    axios.get(`${API}/music/search`, { params: { q: `${battle.song_title} ${battle.song_artist || ""}`.trim(), limit: 1 } })
+      .then((res) => {
+        const t = res.data?.tracks?.[0];
+        if (t?.preview_url) setPreviewUrl(t.preview_url);
+      })
+      .catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => {
     if (!previewUrl) return;
     const a = new Audio(previewUrl);
@@ -292,6 +323,40 @@ export default function GamerStage({ battle, onExit }) {
   const [fireCount, setFireCount] = useState(0);
   const [heartCount, setHeartCount] = useState(0);
 
+  // ── REAL LYRICS for the selected song (LRCLIB via backend) ──
+  const [lyricLines, setLyricLines] = useState(null);   // null = loading, [] = fallback
+  const [lyricsSynced, setLyricsSynced] = useState(false);
+  useEffect(() => {
+    const track = battle?.song_title || "";
+    const artist = battle?.song_artist || "";
+    if (!track) { setLyricLines([]); return; }
+    let alive = true;
+    axios.get(`${API}/lyrics/fetch`, { params: { track, artist } })
+      .then((res) => {
+        if (!alive) return;
+        const lines = (res.data?.lyrics || []).filter((l) => l.type !== "break" && l.text);
+        if (res.data?.source !== "mock" && lines.length) {
+          setLyricLines(lines);
+          setLyricsSynced(!!res.data.synced);
+        } else {
+          setLyricLines([]);
+        }
+      })
+      .catch(() => alive && setLyricLines([]));
+    return () => { alive = false; };
+  }, [battle?.song_title, battle?.song_artist]);
+
+  // ── SONG-DERIVED BEAT MAP so highway notes match the track ──
+  const [beatMap, setBeatMap] = useState(null);
+  useEffect(() => {
+    if (!previewUrl) return;
+    let alive = true;
+    buildBeatMap(previewUrl)
+      .then((bm) => { if (alive && bm.notes.length > 4) setBeatMap(bm); })
+      .catch(() => { /* CORS/decode failure → deterministic fallback pattern */ });
+    return () => { alive = false; };
+  }, [previewUrl]);
+
   // Avatar-with-instrument override per mode
   const stageAvatar = useMemo(() => ({ ...avatar, instrument: mode.inst, face: mode.face }), [avatar, mode]);
 
@@ -304,20 +369,43 @@ export default function GamerStage({ battle, onExit }) {
     return () => clearInterval(id);
   }, [isLive]);
 
-  // Lyrics auto-advance every ~4s while live
-  useEffect(() => {
-    if (!isLive) return;
-    const id = setInterval(() => {
-      setCurrentLyric((i) => (i + 1) % DEMO_LYRICS.length);
-    }, 4000);
-    return () => clearInterval(id);
-  }, [isLive]);
+  const lyrics = useMemo(() => {
+    if (lyricLines && lyricLines.length) return lyricLines.map((l, i) => ({ id: `l-${i}`, text: l.text, time: l.time }));
+    return DEMO_LYRICS.map((text, i) => ({ id: `l-${i}`, text }));
+  }, [lyricLines]);
 
-  const lyrics = DEMO_LYRICS.map((text, i) => ({ id: `l-${i}`, text }));
+  // Lyric advance: true timestamp sync when we have synced lyrics AND a full-length
+  // track; otherwise sequential karaoke pacing through the real lines (~3.5s each,
+  // since 30s previews start mid-song and LRC timestamps wouldn't line up).
+  useEffect(() => {
+    if (!isLive || !lyrics.length) return;
+    const a = audioRef.current;
+    const canTimeSync = lyricsSynced && a && a.duration > 100;
+    if (canTimeSync) {
+      const id = setInterval(() => {
+        const t = a.currentTime;
+        let idx = 0;
+        for (let i = 0; i < lyrics.length; i++) {
+          if ((lyrics[i].time ?? 0) <= t) idx = i; else break;
+        }
+        setCurrentLyric(idx);
+      }, 300);
+      return () => clearInterval(id);
+    }
+    const id = setInterval(() => {
+      setCurrentLyric((i) => (i + 1) % lyrics.length);
+    }, 3500);
+    return () => clearInterval(id);
+  }, [isLive, lyrics, lyricsSynced]);
 
   const songTitle = (battle?.song_title || "Fire Inside").toUpperCase();
   const songArtist = battle?.song_artist || "Pocket Products";
-  const bpm = 128;
+  const bpm = beatMap?.bpm || 128;
+  const laneSeed = useMemo(() => {
+    let h = 0;
+    for (const ch of songTitle) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+    return h % 4;
+  }, [songTitle]);
   const keyName = "E MIN";
   const totalSec = 220;
   const elapsedSec = (progress / 100) * totalSec;
@@ -436,7 +524,7 @@ export default function GamerStage({ battle, onExit }) {
             <p className="text-[9px] uppercase tracking-[0.2em] text-[#5C5C6B] font-bold">{bpm} BPM</p>
           </div>
           <div className="absolute inset-0 top-9">
-            <FallingNotesHighway active={isLive} bpm={bpm} />
+            <FallingNotesHighway active={isLive} bpm={bpm} beatMap={beatMap} audioRef={audioRef} seed={laneSeed} />
           </div>
         </aside>
       </div>
