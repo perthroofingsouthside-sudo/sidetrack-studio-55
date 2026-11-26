@@ -271,3 +271,52 @@ h1, h2, h3, h4, h5, h6 {
     display: contents !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Frontend Polish Plan — Priority 2 & 5: global foundations          */
+/* Added 2026-11-26. All rules above are unchanged.                   */
+/* Design system: #05050A bg, #FF6B00 orange CTA, #00E5FF cyan,       */
+/* #39FF14 lime, Outfit headings / Manrope body.                      */
+/* ------------------------------------------------------------------ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+::selection {
+  background: #8A2BE2;
+  color: #FFFFFF;
+}
+
+/* Focus states — design_guidelines.json: focus:ring-2, cyan, offset #05050A */
+:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 2px;
+}
+
+/* Smooth 300ms ease transitions on interactive elements (Priority 5) */
+button, a, input, select, textarea, [role="button"] {
+  transition: color 300ms ease, background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease, opacity 300ms ease;
+}
+
+/* Mobile viewport safety: bottom nav / safe-area (Priority 5) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Respect prefers-reduced-motion (design_guidelines.json accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
