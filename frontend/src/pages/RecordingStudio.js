@@ -151,15 +151,18 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
       <div className="flex-1 flex min-h-0 overflow-hidden">
         {/* Stage content */}
         <div className={`flex-1 flex flex-col min-w-0 ${showChat ? "lg:mr-0" : ""}`}>
-          {/* Layout Selector */}
-          <div className="px-3 py-2 flex gap-2 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
+          {/* Layout Selector — Priority 1: spacing, hover states, disabled-while-recording clarity */}
+          <div className="px-3 py-2 flex gap-2.5 overflow-x-auto flex-shrink-0 scrollbar-hide" data-testid="layout-selector">
             {LAYOUTS.map((l) => (
               <Button key={l.key} data-testid={`layout-${l.key}`}
                 onClick={() => { if (!isRecording) setLayout(l.key); }}
-                className={`flex-shrink-0 h-8 px-3 rounded-full text-[10px] gap-1 transition-all ${
-                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.5)]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15"
+                title={l.desc}
+                aria-pressed={layout === l.key}
+                disabled={isRecording}
+                className={`flex-shrink-0 h-9 px-3.5 rounded-full text-[10px] gap-1.5 transition-all duration-300 hover:-translate-y-0.5 ${
+                  layout === l.key ? "bg-[#FF6B00] text-white shadow-[0_0_16px_rgba(255,107,0,0.5)] hover:bg-[#FF8533]" : "bg-[#0F0F16] text-[#5C5C6B] border border-white/5 hover:border-white/15 hover:text-white hover:shadow-[0_4px_16px_rgba(0,0,0,0.4)]"
                 }`}>
-                <l.icon className="w-3 h-3" />{l.label}
+                <l.icon className="w-3.5 h-3.5" />{l.label}
               </Button>
             ))}
           </div>
@@ -168,7 +171,7 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
             {/* Camera / Video */}
             {showCamera && (
-              <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl mx-3 mt-1 neon-ambient-glow border border-white/5`} data-testid="camera-section">
+              <div className={`relative ${layout === "camera" ? "flex-1" : "h-[45%]"} bg-[#0A0A0F] flex-shrink-0 overflow-hidden rounded-xl mx-3 mt-1 neon-ambient-glow border transition-all duration-300 ${isRecording ? "border-red-500/50 ring-1 ring-red-500/40 shadow-[0_0_40px_rgba(239,68,68,0.2)]" : "border-white/5"}`} data-testid="camera-section">
                 <video ref={videoRef} autoPlay muted playsInline className="w-full h-full object-cover" style={{ transform: "scaleX(-1)" }} data-testid="video-preview" />
                 {!streamRef.current && !isRecording && (
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -241,36 +244,41 @@ export default function RecordingStudio({ song, onSongSelect, onRecordingComplet
           </div>
 
           {/* Floating controls - crystal glass pill */}
-          <div className="px-3 py-2 flex flex-col gap-2 flex-shrink-0">
-            {/* Social links */}
-            <div className="flex items-center justify-center gap-2" data-testid="social-links">
+          <div className="px-3 py-2 pb-[env(safe-area-inset-bottom,0px)] flex flex-col gap-2.5 flex-shrink-0">
+            {/* Social links — Priority 1: clearer hierarchy, larger touch targets */}
+            <div className="flex flex-col items-center gap-1.5" data-testid="social-links">
+              <span className="text-[9px] uppercase tracking-[0.2em] font-bold text-[#5C5C6B]">Share live on</span>
+              <div className="flex items-center justify-center gap-2 flex-wrap">
               {SOCIAL_LINKS.map((s) => (
                 <a key={s.key} href={s.url} target="_blank" rel="noopener noreferrer"
                   data-testid={`social-${s.key}`}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium border border-white/5 hover:border-white/20 transition-all"
+                  aria-label={`Share live on ${s.label}`}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-medium bg-white/[0.03] border border-white/5 hover:border-white/20 hover:-translate-y-0.5 hover:shadow-[0_0_16px_rgba(255,255,255,0.1)] transition-all duration-300"
                   style={{ color: s.color }}>
                   <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={s.icon} /></svg>
                   {s.label}
                   <ExternalLink className="w-2.5 h-2.5 opacity-50" />
                 </a>
               ))}
+              </div>
             </div>
 
             {/* Controls row - crystal glass pill */}
-            <div className="crystal-glass rounded-full px-6 py-3 flex items-center justify-center gap-5 mx-auto" data-testid="stage-controls">
+            <div className={`crystal-glass rounded-full px-4 sm:px-6 py-3 flex items-center justify-center gap-3 sm:gap-5 mx-auto transition-all duration-300 shadow-[0_8px_32px_rgba(0,0,0,0.5)] ${isRecording ? "ring-1 ring-red-500/40 shadow-[0_0_30px_rgba(239,68,68,0.25)]" : ""}`} data-testid="stage-controls">
               <Button data-testid="toggle-mode-btn" variant="ghost" onClick={() => { if (!isRecording) setMode(mode === "audio" ? "video" : "audio"); }}
                 className={`h-9 px-3 rounded-full text-xs gap-1 ${mode === "video" ? "text-[#39FF14]" : "text-[#8F8F9D]"}`}>
                 <Video className="w-3.5 h-3.5" />{mode === "video" ? "Video" : "Audio"}
               </Button>
 
               <Button data-testid="record-start-stop-btn" onClick={isRecording ? stopRecording : startRecording}
-                className={`w-14 h-14 rounded-full transition-all ${
-                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(255,107,0,0.5)]"
+                aria-label={isRecording ? "Stop recording" : "Start recording"}
+                className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full transition-all duration-300 hover:scale-105 active:scale-95 ${
+                  isRecording ? "bg-red-500 hover:bg-red-600 animate-pulse shadow-[0_0_30px_rgba(239,68,68,0.4)]" : "bg-[#FF6B00] hover:bg-[#FF8533] shadow-[0_0_30px_rgba(255,107,0,0.5)] glow-orange"
                 }`}>
                 {isRecording ? <Square className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
               </Button>
 
-              <span className="text-sm font-mono text-[#5C5C6B] w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
+              <span className="text-sm font-mono text-[#5C5C6B] w-12 sm:w-14 text-center" data-testid="duration-display">{fmtDur(duration)}</span>
             </div>
 
             {/* Trim & Share button — only when not recording */}
@@ -349,20 +357,24 @@ function TrimModal({ duration, trimStart, trimEnd, setTrimStart, setTrimEnd, tri
           </Button>
         </div>
 
-        {/* Waveform */}
-        <div className="relative h-16 bg-[#05050A] rounded-xl overflow-hidden px-2">
-          <div className="flex items-end h-full gap-[1px] py-2">
+        {/* Waveform — Priority 1: selected range is now highlighted, with trim handles */}
+        <div className="relative h-20 bg-[#05050A] rounded-xl overflow-hidden px-2 border border-white/5">
+          <div className="absolute top-0 bottom-0 bg-[#FF6B00]/10 border-x border-[#FF6B00]/40" style={{ left: `${trimStart}%`, width: `${Math.max(trimEnd - trimStart, 1)}%` }} />
+          <div className="relative flex items-end h-full gap-[1px] py-2">
             {bars.map((h, i) => {
               const pct = (i / bars.length) * 100;
               const inRange = pct >= trimStart && pct <= trimEnd;
               return (
-                <div key={i} className={`flex-1 rounded-full transition-colors ${inRange ? "bg-[#FF6B00]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
+                <div key={i} className={`flex-1 rounded-full transition-all duration-300 ${inRange ? "bg-[#FF6B00] shadow-[0_0_8px_rgba(255,107,0,0.4)]" : "bg-white/10"}`} style={{ height: `${h}%` }} />
               );
             })}
           </div>
           <div className="absolute top-0 left-0 h-full bg-[#05050A]/60" style={{ width: `${trimStart}%` }} />
           <div className="absolute top-0 right-0 h-full bg-[#05050A]/60" style={{ width: `${100 - trimEnd}%` }} />
+          <div className="absolute top-0 bottom-0 w-0.5 bg-white/80" style={{ left: `${trimStart}%` }} />
+          <div className="absolute top-0 bottom-0 w-0.5 bg-white/80" style={{ left: `${trimEnd}%` }} />
         </div>
+        <p className="text-[10px] text-[#5C5C6B] text-center -mt-2">Orange bars are the selected clip — drag the sliders below to trim</p>
 
         {/* Sliders */}
         <div className="space-y-3">
